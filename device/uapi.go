@@ -16,6 +16,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/ipc"
 )
@@ -33,6 +34,7 @@ func (s IPCError) ErrorCode() int64 {
 }
 
 func (device *Device) IpcGetOperation(socket *bufio.Writer) error {
+
 	lines := make([]string, 0, 100)
 	send := func(line string) {
 		lines = append(lines, line)
@@ -123,6 +125,8 @@ func (device *Device) IpcSetOperation(socket *bufio.Reader) error {
 		// parse line
 
 		line := scanner.Text()
+		spew.Dump(line)
+
 		if line == "" {
 			return nil
 		}
