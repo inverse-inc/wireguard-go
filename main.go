@@ -11,15 +11,17 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io"
+	"log"
 	"net"
 	"os"
 	"os/signal"
 	"runtime"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"golang.zx2c4.com/wireguard/device"
 	"golang.zx2c4.com/wireguard/ipc"
 	"golang.zx2c4.com/wireguard/tun"
@@ -36,6 +38,9 @@ const (
 	ENV_WG_UAPI_FD            = "WG_UAPI_FD"
 	ENV_WG_PROCESS_FOREGROUND = "WG_PROCESS_FOREGROUND"
 )
+
+var privKey = sharedutils.EnvOrDefault("PRIV_KEY", "")
+var peerPubKey = sharedutils.EnvOrDefault("PEER_PUB_KEY", "")
 
 func printUsage() {
 	fmt.Printf("usage:\n")
@@ -253,9 +258,12 @@ func main() {
 		}
 	}()
 
+	setConfig(device, "listen_port", "6969")
+	setConfig(device, "private_key", privKey)
+
 	logger.Info.Println("UAPI listener started")
 
-	startStun()
+	go startStun(device)
 
 	// wait for program to terminate
 
@@ -276,133 +284,184 @@ func main() {
 	logger.Info.Println("Shutting down")
 }
 
-func demultiplex(conn *net.UDPConn, stunConn io.Writer, wgServer *net.UDPConn) {
-	buf := make([]byte, 1024)
-	for {
-		n, raddr, err := conn.ReadFrom(buf)
-		if err != nil {
-			panic(err)
-		}
-		// De-multiplexing incoming packets.
-		if stun.IsMessage(buf[:n]) {
-			// If buf looks like STUN message, send it to STUN client connection.
-			if _, err = stunConn.Write(buf[:n]); err != nil {
-				panic(err)
-			}
-		} else {
-			// If not, it is application data.
-			fmt.Printf("demultiplex: [%s]: %s\n", raddr, buf[:n])
-			// Send the packet to the WG server
-			wgServer.Write(buf[:n])
-			// Read the WG server response back
-			n, _, err := wgServer.ReadFrom(buf)
-			if err != nil {
-				panic(err)
-			}
-			// Give it back to the original address
-			conn.WriteTo(buf[:n], raddr)
-		}
-	}
-}
+func startStun(device *device.Device) {
+	const udp = "udp"
+	const pingMsg = "ping"
 
-func multiplex(conn *net.UDPConn, stunAddr net.Addr, stunConn io.Reader) {
-	// Sending all data from stun client to stun server.
-	buf := make([]byte, 1024)
-	for {
-		n, err := stunConn.Read(buf)
-		if err != nil {
-			panic(err)
-		}
-		if _, err = conn.WriteTo(buf[:n], stunAddr); err != nil {
-			panic(err)
-		}
-	}
-}
-
-func keepAlive(c *stun.Client) {
-	// Keep-alive for NAT binding.
-	t := time.NewTicker(time.Second * 5)
-	for range t.C {
-		if err := c.Do(stun.MustBuild(stun.TransactionID, stun.BindingRequest), func(res stun.Event) {
-			if res.Error != nil {
-				panic(res.Error)
-			}
-		}); err != nil {
-			panic(err)
-		}
-	}
-}
-
-func copyAddr(dst *stun.XORMappedAddress, src stun.XORMappedAddress) {
-	dst.IP = append(dst.IP, src.IP...)
-	dst.Port = src.Port
-}
-
-func setConfig(device *device.Device, key string, value string) {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s=%s", key, value))
-	device.IpcSetOperation(bufio.NewReader(&buf))
-}
-
-func startStun() {
-	// Connection to the WG server that will receive the data
 	wgConn, err := net.DialUDP("udp4", nil, &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: 6969})
 	if err != nil {
 		panic(err)
 	}
 
-	// Allocating local UDP socket that will be used both for STUN and
-	// our application data.
-	addr, err := net.ResolveUDPAddr("udp4", "0.0.0.0:0")
-	if err != nil {
-		panic(err)
-	}
-	conn, err := net.ListenUDP("udp4", addr)
+	srvAddr, err := net.ResolveUDPAddr(udp, "srv.semaan.ca:3478")
 	if err != nil {
 		panic(err)
 	}
 
-	stunAddr, err := net.ResolveUDPAddr("udp4", "stun.l.google.com:19302")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("local addr:", conn.LocalAddr(), "stun server addr:", stunAddr)
-
-	stunL, stunR := net.Pipe()
-	c, err := stun.NewClient(stunR)
+	conn, err := net.ListenUDP(udp, nil)
 	if err != nil {
 		panic(err)
 	}
 
-	// Starting multiplexing (writing back STUN messages) with de-multiplexing
-	// (passing STUN messages to STUN client and processing application
-	// data separately).
-	//
-	// stunL and stunR are virtual connections, see net.Pipe for reference.
-	go demultiplex(conn, stunL, wgConn)
-	go multiplex(conn, stunAddr, stunL)
+	defer conn.Close()
 
-	// Getting our "real" IP address from STUN Server.
-	// This will create a NAT binding on your provider/router NAT Server,
-	// and the STUN server will return allocated public IP for that binding.
-	//
-	// This can fail if your NAT Server is strict and will use separate ports
-	// for application data and STUN
-	var gotAddr stun.XORMappedAddress
-	if err = c.Do(stun.MustBuild(stun.TransactionID, stun.BindingRequest), func(res stun.Event) {
-		if res.Error != nil {
-			panic(res.Error)
+	log.Printf("Listening on %s\n", conn.LocalAddr())
+
+	var publicAddr stun.XORMappedAddress
+	var peerAddr *net.UDPAddr
+
+	messageChan := make(chan *pkt)
+	listen(conn, messageChan)
+	listen(wgConn, messageChan)
+	var peerAddrChan <-chan string
+
+	keepalive := time.Tick(500 * time.Millisecond)
+	keepaliveMsg := pingMsg
+
+	a := strings.Split(conn.LocalAddr().String(), ":")
+	var localPeerAddr = "127.0.0.1:" + a[len(a)-1]
+
+	for {
+		select {
+		case message, ok := <-messageChan:
+			if !ok {
+				return
+			}
+
+			switch {
+			case stun.IsMessage(message.message):
+				m := new(stun.Message)
+				m.Raw = message.message
+				decErr := m.Decode()
+				if decErr != nil {
+					log.Println("decode:", decErr)
+					break
+				}
+				var xorAddr stun.XORMappedAddress
+				if getErr := xorAddr.GetFrom(m); getErr != nil {
+					log.Println("getFrom:", getErr)
+					break
+				}
+
+				if publicAddr.String() != xorAddr.String() {
+					log.Printf("My public address: %s\n", xorAddr)
+					publicAddr = xorAddr
+
+					peerAddrChan = getPeerAddr()
+				}
+				//TODO: this is very inneficient, change this
+			case string(message.message) == pingMsg:
+				fmt.Println("Received ping")
+
+			default:
+				if message.raddr.String() == "127.0.0.1:6969" {
+					n := len(message.message)
+					fmt.Printf("send to WG server: [%s]: %d bytes\n", peerAddr, n)
+					send(message.message, conn, peerAddr)
+				} else {
+					n := len(message.message)
+					fmt.Printf("send to WG server: [%s]: %d bytes\n", wgConn.RemoteAddr(), n)
+					wgConn.Write(message.message)
+				}
+
+			}
+
+		case peerStr := <-peerAddrChan:
+			peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
+			if err != nil {
+				log.Fatalln("resolve peeraddr:", err)
+			}
+			conf := `replace_peers=true
+`
+			conf += fmt.Sprintf("public_key=%s\n", peerPubKey)
+			conf += fmt.Sprintf("endpoint=%s", localPeerAddr)
+			conf += `
+replace_allowed_ips=true
+allowed_ip=0.0.0.0/0`
+
+			fmt.Println(conf)
+
+			setConfigMulti(device, conf)
+
+		case <-keepalive:
+			// Keep NAT binding alive using STUN server or the peer once it's known
+			if peerAddr == nil {
+				err = sendBindingRequest(conn, srvAddr)
+			} else {
+				err = sendStr(keepaliveMsg, conn, peerAddr)
+			}
+
+			if err != nil {
+				log.Fatalln("keepalive:", err)
+			}
+
 		}
-		var xorAddr stun.XORMappedAddress
-		if getErr := xorAddr.GetFrom(res.Message); getErr != nil {
-			panic(getErr)
-		}
-		copyAddr(&gotAddr, xorAddr)
-	}); err != nil {
-		panic(err)
 	}
-	fmt.Println("public addr:", gotAddr)
+}
 
-	//go keepAlive(c)
+type pkt struct {
+	raddr   *net.UDPAddr
+	message []byte
+}
 
+func listen(conn *net.UDPConn, messages chan *pkt) {
+	go func() {
+		for {
+			buf := make([]byte, 1024)
+
+			n, raddr, err := conn.ReadFromUDP(buf)
+			if err != nil {
+				close(messages)
+				return
+			}
+			buf = buf[:n]
+
+			messages <- &pkt{raddr: raddr, message: buf}
+		}
+	}()
+}
+
+func sendBindingRequest(conn *net.UDPConn, addr *net.UDPAddr) error {
+	m := stun.MustBuild(stun.TransactionID, stun.BindingRequest)
+
+	err := send(m.Raw, conn, addr)
+	if err != nil {
+		return fmt.Errorf("binding: %v", err)
+	}
+
+	return nil
+}
+
+func send(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {
+	_, err := conn.WriteToUDP(msg, addr)
+	if err != nil {
+		return fmt.Errorf("send: %v", err)
+	}
+
+	return nil
+}
+
+func sendStr(msg string, conn *net.UDPConn, addr *net.UDPAddr) error {
+	return send([]byte(msg), conn, addr)
+}
+
+func getPeerAddr() <-chan string {
+	result := make(chan string)
+
+	go func() {
+		reader := bufio.NewReader(os.Stdin)
+		log.Println("Enter remote peer address:")
+		peer, _ := reader.ReadString('\n')
+		result <- strings.Trim(peer, " \r\n")
+	}()
+
+	return result
+}
+
+func setConfig(device *device.Device, k, v string) {
+	device.IpcSetOperation(bufio.NewReader(bytes.NewBufferString(fmt.Sprintf("%s=%s", k, v))))
+}
+
+func setConfigMulti(device *device.Device, conf string) {
+	device.IpcSetOperation(bufio.NewReader(bytes.NewBufferString(conf)))
 }
