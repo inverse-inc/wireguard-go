@@ -293,7 +293,7 @@ func startStun(device *device.Device) {
 		panic(err)
 	}
 
-	srvAddr, err := net.ResolveUDPAddr(udp, "srv.semaan.ca:3478")
+	srvAddr, err := net.ResolveUDPAddr(udp, "stun.l.google.com:19302")
 	if err != nil {
 		panic(err)
 	}
