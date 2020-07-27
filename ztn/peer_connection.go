@@ -176,8 +176,6 @@ func (pc *PeerConnection) run() {
 			conf += "replace_allowed_ips=true\n"
 			conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
 
-			fmt.Println(conf)
-
 			SetConfigMulti(pc.device, conf)
 
 			pc.started = true

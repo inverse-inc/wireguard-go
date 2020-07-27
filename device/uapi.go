@@ -16,7 +16,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/ipc"
 )
@@ -125,7 +124,7 @@ func (device *Device) IpcSetOperation(socket *bufio.Reader) error {
 		// parse line
 
 		line := scanner.Text()
-		spew.Dump(line)
+		device.log.Info.Println("Configuring via UAPI:", line)
 
 		if line == "" {
 			return nil
