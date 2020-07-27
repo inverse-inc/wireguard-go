@@ -10,11 +10,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"runtime"
 	"strconv"
 	"syscall"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"golang.zx2c4.com/wireguard/device"
 	"golang.zx2c4.com/wireguard/ipc"
@@ -32,7 +34,7 @@ const (
 	ENV_WG_PROCESS_FOREGROUND = "WG_PROCESS_FOREGROUND"
 )
 
-var privKey = keyToHex(sharedutils.EnvOrDefault("PRIV_KEY", ""))
+var ENV_ID = sharedutils.EnvOrDefault("ID", "")
 
 var logger *device.Logger
 
@@ -252,12 +254,24 @@ func main() {
 		}
 	}()
 
+	profile := getProfile(ENV_ID)
+
+	err = exec.Command("ip", "address", "add", "dev", "wg0", fmt.Sprintf("%s/%d", profile.WireguardIP, profile.WireguardNetmask)).Run()
+	sharedutils.CheckError(err)
+	err = exec.Command("ip", "link", "set", "wg0", "up").Run()
+	sharedutils.CheckError(err)
+
+	spew.Dump("PROFILE", profile)
+
 	setConfig(device, "listen_port", "6969")
-	setConfig(device, "private_key", privKey)
+	setConfig(device, "private_key", keyToHex(profile.PrivateKey))
 
 	logger.Info.Println("UAPI listener started")
 
-	go startStun(device)
+	for _, peerID := range profile.AllowedPeers {
+		peerProfile := getPeer(peerID)
+		go startStun(device, profile, peerProfile)
+	}
 
 	// wait for program to terminate
 

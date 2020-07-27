@@ -1,16 +1,60 @@
 package main
 
 import (
-	"bufio"
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
-	"os"
+	"net/http"
+	"net/url"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/jcuga/golongpoll/go-client/glpclient"
+	"golang.zx2c4.com/wireguard/device"
+	"gortc.io/stun"
 )
 
-func startStun(device *device.Device) {
+const server = "http://srv.semaan.ca:6969"
+
+type Peer struct {
+	WireguardIP net.IP `json:"wireguard_ip"`
+	PublicKey   string `json:"public_key"`
+}
+
+type Profile struct {
+	WireguardIP      net.IP   `json:"wireguard_ip"`
+	WireguardNetmask int      `json:"wireguard_netmask"`
+	PublicKey        string   `json:"public_key"`
+	PrivateKey       string   `json:"private_key"`
+	AllowedPeers     []string `json:"allowed_peers"`
+}
+
+type Event struct {
+	Type string `json:"type"`
+	Data gin.H  `json:"data"`
+}
+
+func glpPublish(category string, e Event) error {
+	d, err := json.Marshal(e)
+	if err != nil {
+		return err
+	}
+	_, err = http.Post(server+`/events/`+category, "application/json", bytes.NewReader(d))
+	return err
+}
+
+func glpClient(category string) *glpclient.Client {
+	u, _ := url.Parse(server + `/events`)
+	c := glpclient.NewClient(u, category)
+	return c
+}
+
+func startStun(device *device.Device, profile Profile, peer Peer) {
 	const udp = "udp"
 	const pingMsg = "ping"
 
@@ -40,7 +84,6 @@ func startStun(device *device.Device) {
 	listen(conn, messageChan)
 	listen(wgConn, messageChan)
 	var peerAddrChan <-chan string
-	var peerPubKey string
 
 	keepalive := time.Tick(500 * time.Millisecond)
 	keepaliveMsg := pingMsg
@@ -74,7 +117,14 @@ func startStun(device *device.Device) {
 					log.Printf("My public address: %s\n", xorAddr)
 					publicAddr = xorAddr
 
-					peerAddrChan = getPeerAddr()
+					go func() {
+						for {
+							glpPublish(buildP2PKey(profile.PublicKey, peer.PublicKey), Event{Type: "public_endpoint", Data: gin.H{"id": profile.PublicKey, "public_endpoint": publicAddr.String()}})
+							time.Sleep(10 * time.Second)
+						}
+					}()
+
+					peerAddrChan = getPeerAddr(profile.PublicKey, peer.PublicKey)
 				}
 			case string(message.message) == pingMsg:
 				logger.Debug.Println("Received ping from", peerAddr)
@@ -93,32 +143,19 @@ func startStun(device *device.Device) {
 			}
 
 		case peerStr := <-peerAddrChan:
-			reader := bufio.NewReader(os.Stdin)
-			log.Println("Enter remote peer public key:")
-			peer, _ := reader.ReadString('\n')
-			peerPubKey = keyToHex(strings.Trim(peer, " \r\n"))
-
-			reader = bufio.NewReader(os.Stdin)
-			log.Println("Enter remote peer wireguard IP:")
-			peerIP, _ := reader.ReadString('\n')
-			peerIP = strings.Trim(peerIP, " \r\n")
-
 			peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
 			if err != nil {
 				log.Fatalln("resolve peeraddr:", err)
 			}
 			conf := ""
-			conf += fmt.Sprintf("public_key=%s\n", peerPubKey)
+			conf += fmt.Sprintf("public_key=%s\n", keyToHex(peer.PublicKey))
 			conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
 			conf += "replace_allowed_ips=true\n"
-			conf += fmt.Sprintf("allowed_ip=%s/32\n", peerIP)
+			conf += fmt.Sprintf("allowed_ip=%s/32\n", peer.WireguardIP.String())
 
 			fmt.Println(conf)
 
 			setConfigMulti(device, conf)
-
-			// Ready to read another peer
-			go startStun(device)
 
 		case <-keepalive:
 			// Keep NAT binding alive using STUN server or the peer once it's known
@@ -182,15 +219,63 @@ func sendStr(msg string, conn *net.UDPConn, addr *net.UDPAddr) error {
 	return send([]byte(msg), conn, addr)
 }
 
-func getPeerAddr() <-chan string {
+func getPeerAddr(myID string, peerID string) <-chan string {
 	result := make(chan string)
 
+	p2pk := buildP2PKey(myID, peerID)
+
 	go func() {
-		reader := bufio.NewReader(os.Stdin)
-		log.Println("Enter remote peer address:")
-		peer, _ := reader.ReadString('\n')
-		result <- strings.Trim(peer, " \r\n")
+		c := glpClient(p2pk)
+		c.Start()
+		for {
+			select {
+			case e := <-c.EventsChan:
+				event := Event{}
+				err := json.Unmarshal(e.Data, &event)
+				sharedutils.CheckError(err)
+				if event.Type == "public_endpoint" && event.Data["id"].(string) != myID {
+					result <- event.Data["public_endpoint"].(string)
+					return
+				}
+			}
+		}
 	}()
 
 	return result
+}
+
+func buildP2PKey(key1, key2 string) string {
+	if key2 < key1 {
+		key1bak := key1
+		key1 = key2
+		key2 = key1bak
+	}
+
+	key1dec, err := base64.StdEncoding.DecodeString(key1)
+	sharedutils.CheckError(err)
+	key2dec, err := base64.StdEncoding.DecodeString(key2)
+	sharedutils.CheckError(err)
+
+	combined := append(key1dec, key2dec...)
+	return base64.URLEncoding.EncodeToString(combined)
+}
+
+func getProfile(myID string) Profile {
+	res, err := http.Get(server + "/profile/" + myID)
+	sharedutils.CheckError(err)
+	var p Profile
+	defer res.Body.Close()
+	err = json.NewDecoder(res.Body).Decode(&p)
+	sharedutils.CheckError(err)
+	return p
+}
+
+func getPeer(peerID string) Peer {
+	res, err := http.Get(server + "/peer/" + peerID)
+	sharedutils.CheckError(err)
+	var p Peer
+	defer res.Body.Close()
+	err = json.NewDecoder(res.Body).Decode(&p)
+	sharedutils.CheckError(err)
+	return p
 }

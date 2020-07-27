@@ -7,7 +7,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/fingerbank/processor/sharedutils"
+	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"golang.zx2c4.com/wireguard/device"
 )
 
 func setConfig(device *device.Device, k, v string) {
