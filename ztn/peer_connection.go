@@ -114,12 +114,12 @@ func (pc *PeerConnection) run() {
 				m.Raw = message.message
 				decErr := m.Decode()
 				if decErr != nil {
-					log.Println("decode:", decErr)
+					pc.logger.Error.Println("decode:", decErr)
 					break
 				}
 				var xorAddr stun.XORMappedAddress
 				if getErr := xorAddr.GetFrom(m); getErr != nil {
-					log.Println("getFrom:", getErr)
+					pc.logger.Error.Println("getFrom:", getErr)
 					break
 				}
 
