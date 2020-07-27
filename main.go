@@ -10,6 +10,8 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
@@ -39,8 +41,9 @@ const (
 	ENV_WG_PROCESS_FOREGROUND = "WG_PROCESS_FOREGROUND"
 )
 
-var privKey = sharedutils.EnvOrDefault("PRIV_KEY", "")
-var peerPubKey = sharedutils.EnvOrDefault("PEER_PUB_KEY", "")
+var privKey = keyToHex(sharedutils.EnvOrDefault("PRIV_KEY", ""))
+
+var logger *device.Logger
 
 func printUsage() {
 	fmt.Printf("usage:\n")
@@ -149,7 +152,7 @@ func main() {
 		}
 	}
 
-	logger := device.NewLogger(
+	logger = device.NewLogger(
 		logLevel,
 		fmt.Sprintf("(%s) ", interfaceName),
 	)
@@ -314,6 +317,7 @@ func startStun(device *device.Device) {
 	listen(conn, messageChan)
 	listen(wgConn, messageChan)
 	var peerAddrChan <-chan string
+	var peerPubKey string
 
 	keepalive := time.Tick(500 * time.Millisecond)
 	keepaliveMsg := pingMsg
@@ -349,39 +353,49 @@ func startStun(device *device.Device) {
 
 					peerAddrChan = getPeerAddr()
 				}
-				//TODO: this is very inneficient, change this
 			case string(message.message) == pingMsg:
-				fmt.Println("Received ping")
+				logger.Debug.Println("Received ping from", peerAddr)
 
 			default:
 				if message.raddr.String() == "127.0.0.1:6969" {
 					n := len(message.message)
-					fmt.Printf("send to WG server: [%s]: %d bytes\n", peerAddr, n)
+					logger.Debug.Println("send to WG server: [%s]: %d bytes\n", peerAddr, n)
 					send(message.message, conn, peerAddr)
 				} else {
 					n := len(message.message)
-					fmt.Printf("send to WG server: [%s]: %d bytes\n", wgConn.RemoteAddr(), n)
+					logger.Debug.Println("send to WG server: [%s]: %d bytes\n", wgConn.RemoteAddr(), n)
 					wgConn.Write(message.message)
 				}
 
 			}
 
 		case peerStr := <-peerAddrChan:
+			reader := bufio.NewReader(os.Stdin)
+			log.Println("Enter remote peer public key:")
+			peer, _ := reader.ReadString('\n')
+			peerPubKey = keyToHex(strings.Trim(peer, " \r\n"))
+
+			reader = bufio.NewReader(os.Stdin)
+			log.Println("Enter remote peer wireguard IP:")
+			peerIP, _ := reader.ReadString('\n')
+			peerIP = strings.Trim(peerIP, " \r\n")
+
 			peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
 			if err != nil {
 				log.Fatalln("resolve peeraddr:", err)
 			}
-			conf := `replace_peers=true
-`
+			conf := ""
 			conf += fmt.Sprintf("public_key=%s\n", peerPubKey)
-			conf += fmt.Sprintf("endpoint=%s", localPeerAddr)
-			conf += `
-replace_allowed_ips=true
-allowed_ip=0.0.0.0/0`
+			conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
+			conf += "replace_allowed_ips=true\n"
+			conf += fmt.Sprintf("allowed_ip=%s/32\n", peerIP)
 
 			fmt.Println(conf)
 
 			setConfigMulti(device, conf)
+
+			// Ready to read another peer
+			go startStun(device)
 
 		case <-keepalive:
 			// Keep NAT binding alive using STUN server or the peer once it's known
@@ -464,4 +478,10 @@ func setConfig(device *device.Device, k, v string) {
 
 func setConfigMulti(device *device.Device, conf string) {
 	device.IpcSetOperation(bufio.NewReader(bytes.NewBufferString(conf)))
+}
+
+func keyToHex(b64 string) string {
+	data, err := base64.StdEncoding.DecodeString(b64)
+	sharedutils.CheckError(err)
+	return hex.EncodeToString(data)
 }
