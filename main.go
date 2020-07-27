@@ -10,17 +10,16 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
 	"runtime"
 	"strconv"
 	"syscall"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"golang.zx2c4.com/wireguard/device"
 	"golang.zx2c4.com/wireguard/ipc"
 	"golang.zx2c4.com/wireguard/tun"
+	"golang.zx2c4.com/wireguard/ztn"
 )
 
 const (
@@ -254,23 +253,20 @@ func main() {
 		}
 	}()
 
-	profile := getProfile(ENV_ID)
-
-	err = exec.Command("ip", "address", "add", "dev", "wg0", fmt.Sprintf("%s/%d", profile.WireguardIP, profile.WireguardNetmask)).Run()
-	sharedutils.CheckError(err)
-	err = exec.Command("ip", "link", "set", "wg0", "up").Run()
-	sharedutils.CheckError(err)
-
-	spew.Dump("PROFILE", profile)
-
-	setConfig(device, "listen_port", "6969")
-	setConfig(device, "private_key", keyToHex(profile.PrivateKey))
-
 	logger.Info.Println("UAPI listener started")
 
+	profile, err := ztn.GetProfile(ENV_ID)
+	sharedutils.CheckError(err)
+	profile.SetupWireguard(device)
+
 	for _, peerID := range profile.AllowedPeers {
-		peerProfile := getPeer(peerID)
-		go startStun(device, profile, peerProfile)
+		peerProfile, err := ztn.GetPeerProfile(peerID)
+		if err != nil {
+			logger.Error.Println("Unable to fetch profile for peer", peerID, ". Error:", err)
+		} else {
+			pc := ztn.NewPeerConnection(device, logger, profile, peerProfile)
+			go pc.Start()
+		}
 	}
 
 	// wait for program to terminate
