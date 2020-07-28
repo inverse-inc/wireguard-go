@@ -264,8 +264,19 @@ func main() {
 		if err != nil {
 			logger.Error.Println("Unable to fetch profile for peer", peerID, ". Error:", err)
 		} else {
-			pc := ztn.NewPeerConnection(device, logger, profile, peerProfile)
-			go pc.Start()
+			go func(peerID string, peerProfile ztn.PeerProfile) {
+				for {
+					func() {
+						defer func() {
+							if r := recover(); r != nil {
+								logger.Error.Println("Recovered error", r, "while handling peer", peerProfile.PublicKey, ". Will attempt to connect to it again.")
+							}
+						}()
+						pc := ztn.NewPeerConnection(device, logger, profile, peerProfile)
+						pc.Start()
+					}()
+				}
+			}(peerID, peerProfile)
 		}
 	}
 
