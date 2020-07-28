@@ -42,6 +42,8 @@ type PeerConnection struct {
 
 	started       bool
 	lastKeepalive time.Time
+
+	triedPrivate bool
 }
 
 func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profile, peerProfile PeerProfile) *PeerConnection {
@@ -134,7 +136,7 @@ func (pc *PeerConnection) run() {
 							select {
 							case <-time.After(1 * time.Second):
 								pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
-								glpPublish(pc.buildP2PKey(), pc.buildPublicEndpointEvent())
+								glpPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
 							case <-foundPeer:
 								pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
 								return
@@ -163,8 +165,12 @@ func (pc *PeerConnection) run() {
 			}
 
 		case peerStr := <-peerAddrChan:
+			if !pc.triedPrivate {
+				pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
+			}
+
 			pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
-			glpPublish(pc.buildP2PKey(), pc.buildPublicEndpointEvent())
+			glpPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
 
 			pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
 			if err != nil {
@@ -179,6 +185,7 @@ func (pc *PeerConnection) run() {
 			SetConfigMulti(pc.device, conf)
 
 			pc.started = true
+			pc.triedPrivate = true
 			foundPeer <- true
 			pc.lastKeepalive = time.Now()
 
@@ -237,8 +244,25 @@ func (pc *PeerConnection) buildP2PKey() string {
 	return base64.URLEncoding.EncodeToString(combined)
 }
 
-func (pc *PeerConnection) buildPublicEndpointEvent() Event {
-	return Event{Type: "public_endpoint", Data: gin.H{"id": pc.MyProfile.PublicKey, "public_endpoint": pc.myAddr.String()}}
+func (pc *PeerConnection) getPrivateAddr() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	a := strings.Split(pc.localPeerConn.LocalAddr().String(), ":")
+	return localAddr.IP.String() + ":" + a[len(a)-1]
+}
+
+func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
+	return Event{Type: "network_endpoint", Data: gin.H{
+		"id":               pc.MyProfile.PublicKey,
+		"public_endpoint":  pc.myAddr.String(),
+		"private_endpoint": pc.getPrivateAddr(),
+	}}
 }
 
 func (pc *PeerConnection) getPeerAddr() <-chan string {
@@ -256,9 +280,14 @@ func (pc *PeerConnection) getPeerAddr() <-chan string {
 				event := Event{}
 				err := json.Unmarshal(e.Data, &event)
 				sharedutils.CheckError(err)
-				if event.Type == "public_endpoint" && event.Data["id"].(string) != myID {
-					result <- event.Data["public_endpoint"].(string)
-					return
+				if event.Type == "network_endpoint" && event.Data["id"].(string) != myID {
+					if !pc.triedPrivate {
+						result <- event.Data["private_endpoint"].(string)
+						return
+					} else {
+						result <- event.Data["public_endpoint"].(string)
+						return
+					}
 				}
 			}
 		}
