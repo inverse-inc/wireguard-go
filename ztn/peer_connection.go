@@ -245,7 +245,7 @@ func (pc *PeerConnection) buildP2PKey() string {
 }
 
 func (pc *PeerConnection) getPrivateAddr() string {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+	conn, err := net.Dial("udp", stunServer)
 	if err != nil {
 		log.Fatal(err)
 	}
