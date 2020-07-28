@@ -133,7 +133,7 @@ func (pc *PeerConnection) run() {
 						for {
 							select {
 							case <-time.After(1 * time.Second):
-								pc.logger.Info.Println("Publishing IP for discovery with peer", pc.peerID)
+								pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
 								glpPublish(pc.buildP2PKey(), pc.buildPublicEndpointEvent())
 							case <-foundPeer:
 								pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
@@ -163,7 +163,7 @@ func (pc *PeerConnection) run() {
 			}
 
 		case peerStr := <-peerAddrChan:
-			pc.logger.Info.Println("Publishing for peer join", pc.peerID)
+			pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
 			glpPublish(pc.buildP2PKey(), pc.buildPublicEndpointEvent())
 
 			pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
