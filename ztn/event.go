@@ -2,6 +2,7 @@ package ztn
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -14,6 +15,10 @@ import (
 type Event struct {
 	Type string `json:"type"`
 	Data gin.H  `json:"data"`
+}
+
+func init() {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 }
 
 func glpPublish(category string, e Event) error {

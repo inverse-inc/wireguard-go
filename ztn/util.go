@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"gortc.io/stun"
 )
@@ -38,4 +39,10 @@ func sendBindingRequest(conn *net.UDPConn, addr *net.UDPAddr) error {
 	}
 
 	return nil
+}
+
+func b64keyToURLb64(k string) string {
+	b, err := remoteclients.B64KeyToBytes(k)
+	sharedutils.CheckError(err)
+	return base64.URLEncoding.EncodeToString(b[:])
 }
