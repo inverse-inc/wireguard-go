@@ -135,7 +135,7 @@ func (pc *PeerConnection) run() {
 							select {
 							case <-time.After(1 * time.Second):
 								pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
-								glpPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+								GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
 							case <-foundPeer:
 								pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
 								return
@@ -169,7 +169,7 @@ func (pc *PeerConnection) run() {
 			}
 
 			pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
-			glpPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+			GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
 
 			pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
 			if err != nil {
@@ -271,7 +271,7 @@ func (pc *PeerConnection) getPeerAddr() <-chan string {
 	p2pk := pc.buildP2PKey()
 
 	go func() {
-		c := glpClient(p2pk)
+		c := GLPClient(p2pk)
 		c.Start()
 		for {
 			select {

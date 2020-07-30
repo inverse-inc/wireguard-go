@@ -20,7 +20,7 @@ type ServerChallenge struct {
 }
 
 func DoServerChallenge(profile *Profile) string {
-	sc, err := getServerChallenge(profile)
+	sc, err := GetServerChallenge(profile)
 	sharedutils.CheckError(err)
 
 	privateKey, err := remoteclients.B64KeyToBytes(profile.PrivateKey)
@@ -40,7 +40,7 @@ func DoServerChallenge(profile *Profile) string {
 	return base64.URLEncoding.EncodeToString(challengeEncrypted)
 }
 
-func getServerChallenge(profile *Profile) (ServerChallenge, error) {
+func GetServerChallenge(profile *Profile) (ServerChallenge, error) {
 	sc := ServerChallenge{}
 	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/server_challenge?public_key="+url.QueryEscape(b64keyToURLb64(profile.PublicKey)), &sc)
 	if err != nil {

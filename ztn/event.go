@@ -19,14 +19,22 @@ func init() {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 }
 
-func glpPublish(category string, e Event) error {
+func GLPPublish(category string, e Event) error {
 	err := GetAPIClient().CallWithBody(APIClientCtx, "POST", "/api/v1/remote_clients/events/"+category, e, &unifiedapiclient.DummyReply{})
 	return err
 }
 
-func glpClient(category string) *glpclient.Client {
+func GLPClient(category string) *glpclient.Client {
 	apiClient := GetAPIClient()
 	c := glpclient.NewClient(apiClient, "/api/v1/remote_clients/events", category)
 	c.LoggingEnabled = sharedutils.EnvOrDefault("LOG_LEVEL", "") == "debug"
+	return c
+}
+
+func GLPPrivateClient(priv, pub, serverPub [32]byte) *glpclient.Client {
+	apiClient := GetAPIClient()
+	c := glpclient.NewClient(apiClient, "/api/v1/remote_clients/my_events", "")
+	c.LoggingEnabled = sharedutils.EnvOrDefault("LOG_LEVEL", "") == "debug"
+	c.SetPrivateMode(priv, pub, serverPub)
 	return c
 }
