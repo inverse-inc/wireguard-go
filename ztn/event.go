@@ -1,15 +1,13 @@
 package ztn
 
 import (
-	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"net/http"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
-	"github.com/jcuga/golongpoll/go-client/glpclient"
+	"github.com/inverse-inc/packetfence/go/unifiedapiclient"
+	"github.com/inverse-inc/packetfence/go/unifiedapiclient/glpclient"
 )
 
 type Event struct {
@@ -22,17 +20,13 @@ func init() {
 }
 
 func glpPublish(category string, e Event) error {
-	d, err := json.Marshal(e)
-	if err != nil {
-		return err
-	}
-	_, err = http.Post(orchestrationServer+`/events/`+category, "application/json", bytes.NewReader(d))
+	err := GetAPIClient().CallWithBody(APIClientCtx, "POST", "/api/v1/remote_clients/events/"+category, e, &unifiedapiclient.DummyReply{})
 	return err
 }
 
 func glpClient(category string) *glpclient.Client {
-	u, _ := url.Parse(orchestrationServer + `/events`)
-	c := glpclient.NewClient(u, category)
+	apiClient := GetAPIClient()
+	c := glpclient.NewClient(apiClient, "/api/v1/remote_clients/events", category)
 	c.LoggingEnabled = sharedutils.EnvOrDefault("LOG_LEVEL", "") == "debug"
 	return c
 }

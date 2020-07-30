@@ -18,7 +18,6 @@ import (
 const udp = "udp"
 const pingMsg = "ping"
 
-const orchestrationServer = "https://vpn.inverse.ca:9999/api/v1/remote_clients"
 const stunServer = "stun.l.google.com:19302"
 
 type pkt struct {

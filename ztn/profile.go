@@ -2,11 +2,8 @@ package ztn
 
 import (
 	"encoding/base64"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
-	"net/http"
 	"net/url"
 	"os/exec"
 
@@ -45,17 +42,7 @@ func DoServerChallenge(profile *Profile) string {
 
 func getServerChallenge(profile *Profile) (ServerChallenge, error) {
 	sc := ServerChallenge{}
-	res, err := http.Get(orchestrationServer + "/server_challenge?public_key=" + url.QueryEscape(b64keyToURLb64(profile.PublicKey)))
-	if err != nil {
-		return sc, err
-	}
-
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		return sc, errors.New("Failed to get server challenge, got status: " + res.Status)
-	}
-
-	err = json.NewDecoder(res.Body).Decode(&sc)
+	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/server_challenge?public_key="+url.QueryEscape(b64keyToURLb64(profile.PublicKey)), &sc)
 	if err != nil {
 		return sc, err
 	}
@@ -66,8 +53,11 @@ func getServerChallenge(profile *Profile) (ServerChallenge, error) {
 	}
 
 	sc.BytesPublicKey, err = remoteclients.URLB64KeyToBytes(sc.PublicKey)
+	if err != nil {
+		return sc, err
+	}
 
-	return sc, err
+	return sc, nil
 }
 
 func (sc *ServerChallenge) Decrypt(privateKey [32]byte) ([]byte, error) {
@@ -101,16 +91,7 @@ func (p *Profile) SetupWireguard(device *device.Device) {
 func (p *Profile) FillProfileFromServer() {
 	auth := DoServerChallenge(p)
 
-	res, err := http.Get(orchestrationServer + "/profile?public_key=" + url.QueryEscape(b64keyToURLb64(p.PublicKey)) + "&auth=" + url.QueryEscape(auth))
-	sharedutils.CheckError(err)
-
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		panic(errors.New("Failed to get profile, got status: " + res.Status))
-	}
-
-	err = json.NewDecoder(res.Body).Decode(&p)
-
+	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(b64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth), &p)
 	sharedutils.CheckError(err)
 }
 
@@ -121,12 +102,7 @@ type PeerProfile struct {
 
 func GetPeerProfile(id string) (PeerProfile, error) {
 	var p PeerProfile
-	res, err := http.Get(orchestrationServer + "/peer/" + id)
-	if err != nil {
-		return p, err
-	}
-	defer res.Body.Close()
-	err = json.NewDecoder(res.Body).Decode(&p)
+	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &p)
 
 	pkey, err := base64.URLEncoding.DecodeString(p.PublicKey)
 	sharedutils.CheckError(err)
