@@ -6,7 +6,7 @@ import (
 
 var defaultBufferPool = NewBufferPool()
 
-const maxBufferPoolPktSize = 2000
+const maxBufferPoolPktSize = 1500
 
 type BufferPool struct {
 	sync.Pool
