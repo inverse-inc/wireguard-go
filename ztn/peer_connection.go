@@ -40,6 +40,7 @@ type PeerConnection struct {
 	peerAddr *net.UDPAddr
 
 	started       bool
+	connected     bool
 	lastKeepalive time.Time
 
 	triedPrivate bool
@@ -72,6 +73,12 @@ func (pc *PeerConnection) reset() {
 	pc.peerAddr = nil
 	pc.started = false
 	pc.lastKeepalive = time.Time{}
+
+	// Reset the triedPrivate flag if a connection attempt was already successful so that it retries from scratch next time
+	if pc.connected {
+		pc.triedPrivate = false
+	}
+	pc.connected = false
 }
 
 func (pc *PeerConnection) run() {
@@ -103,7 +110,7 @@ func (pc *PeerConnection) run() {
 	var localPeerAddr = fmt.Sprintf("%s:%s", localWGIP.String(), a[len(a)-1])
 
 	for {
-		func() {
+		res := func() bool {
 			var message *pkt
 			var ok bool
 
@@ -116,7 +123,7 @@ func (pc *PeerConnection) run() {
 			select {
 			case message, ok = <-messageChan:
 				if !ok {
-					return
+					return false
 				}
 
 				switch {
@@ -159,6 +166,7 @@ func (pc *PeerConnection) run() {
 				case string(message.message) == pingMsg:
 					pc.logger.Debug.Println("Received ping from", pc.peerAddr)
 					pc.lastKeepalive = time.Now()
+					pc.connected = true
 
 				default:
 					if message.raddr.String() == fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort) {
@@ -174,7 +182,7 @@ func (pc *PeerConnection) run() {
 				}
 
 			case peerStr := <-peerAddrChan:
-				if !pc.triedPrivate {
+				if pc.ShouldTryPrivate() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
 				}
 
@@ -212,10 +220,14 @@ func (pc *PeerConnection) run() {
 
 				if pc.started && pc.lastKeepalive.Before(time.Now().Add(-5*time.Second)) {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
-					return
+					return false
 				}
 			}
+			return true
 		}()
+		if !res {
+			return
+		}
 	}
 }
 
@@ -291,7 +303,7 @@ func (pc *PeerConnection) getPeerAddr() <-chan string {
 				err := json.Unmarshal(e.Data, &event)
 				sharedutils.CheckError(err)
 				if event.Type == "network_endpoint" && event.Data["id"].(string) != myID {
-					if !pc.triedPrivate {
+					if pc.ShouldTryPrivate() {
 						result <- event.Data["private_endpoint"].(string)
 						return
 					} else {
@@ -304,4 +316,8 @@ func (pc *PeerConnection) getPeerAddr() <-chan string {
 	}()
 
 	return result
+}
+
+func (pc *PeerConnection) ShouldTryPrivate() bool {
+	return !pc.triedPrivate
 }
