@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"golang.zx2c4.com/wireguard/device"
@@ -225,7 +224,6 @@ func (pc *PeerConnection) listen(conn *net.UDPConn, messages chan *pkt) {
 				return
 			}
 			buf = buf[:n]
-			spew.Dump(buf)
 
 			messages <- &pkt{raddr: raddr, message: buf}
 		}
