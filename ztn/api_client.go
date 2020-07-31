@@ -3,7 +3,9 @@ package ztn
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -41,6 +43,25 @@ func SetupAPIClient() {
 		fmt.Println("Using environment provided server port:", port)
 	}
 
+	verifySslStr := sharedutils.EnvOrDefault("WG_SERVER_VERIFY_TLS", "")
+	verifySsl := true
+	if verifySslStr == "" {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Verify TLS identity of server? (Y/n): ")
+		verifySslStr, _ = reader.ReadString('\n')
+		verifySslStr = strings.Trim(verifySslStr, "\r\n")
+	} else {
+		fmt.Println("Using environment provided server verify TLS:", verifySslStr)
+	}
+
+	if verifySslStr == "" {
+		verifySsl = true
+	} else {
+		verifySslStr = strings.TrimSpace(verifySslStr)
+		verifySslStr = strings.ToLower(verifySslStr)
+		verifySsl = (verifySslStr == "y" || verifySslStr == "yes")
+	}
+
 	username := sharedutils.EnvOrDefault("WG_USERNAME", "")
 	if username == "" {
 		reader := bufio.NewReader(os.Stdin)
@@ -54,6 +75,13 @@ func SetupAPIClient() {
 	fmt.Print("Enter Password for " + username + ": ")
 	bytePassword, _ := terminal.ReadPassword(0)
 	password := string(bytePassword)
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifySsl},
+		},
+	}
+	unifiedapiclient.SetHTTPClient(httpClient)
 
 	APIClientCtx = context.Background()
 	APIClient = unifiedapiclient.New(APIClientCtx, username, password, "https", server, port)
