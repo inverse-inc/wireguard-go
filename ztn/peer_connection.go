@@ -100,7 +100,7 @@ func (pc *PeerConnection) run() {
 	foundPeer := make(chan bool)
 
 	a := strings.Split(pc.localPeerConn.LocalAddr().String(), ":")
-	var localPeerAddr = "127.0.0.1:" + a[len(a)-1]
+	var localPeerAddr = fmt.Sprintf("%s:%s", localWGIP.String(), a[len(a)-1])
 
 	for {
 		var message *pkt
@@ -153,7 +153,7 @@ func (pc *PeerConnection) run() {
 				pc.lastKeepalive = time.Now()
 
 			default:
-				if message.raddr.String() == "127.0.0.1:6969" {
+				if message.raddr.String() == fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort) {
 					n := len(message.message)
 					pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.peerAddr, n)
 					udpSend(message.message, pc.localPeerConn, pc.peerAddr)

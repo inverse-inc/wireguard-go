@@ -84,7 +84,7 @@ func (p *Profile) SetupWireguard(device *device.Device) {
 	err = exec.Command("ip", "link", "set", "wg0", "up").Run()
 	sharedutils.CheckError(err)
 
-	SetConfig(device, "listen_port", "6969")
+	SetConfig(device, "listen_port", fmt.Sprintf("%d", localWGPort))
 	SetConfig(device, "private_key", keyToHex(p.PrivateKey))
 }
 
