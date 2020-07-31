@@ -108,6 +108,7 @@ func (pc *PeerConnection) run() {
 
 	a := strings.Split(pc.localPeerConn.LocalAddr().String(), ":")
 	var localPeerAddr = fmt.Sprintf("%s:%s", localWGIP.String(), a[len(a)-1])
+	var localWGAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort)
 
 	for {
 		res := func() bool {
@@ -169,7 +170,7 @@ func (pc *PeerConnection) run() {
 					pc.connected = true
 
 				default:
-					if message.raddr.String() == fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort) {
+					if message.raddr.String() == localWGAddr {
 						n := len(message.message)
 						pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.peerAddr, n)
 						udpSend(message.message, pc.localPeerConn, pc.peerAddr)

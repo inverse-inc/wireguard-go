@@ -11,6 +11,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -25,6 +26,9 @@ import (
 	"golang.zx2c4.com/wireguard/ipc"
 	"golang.zx2c4.com/wireguard/tun"
 	"golang.zx2c4.com/wireguard/ztn"
+
+	"net/http"
+	_ "net/http/pprof"
 )
 
 const (
@@ -275,6 +279,10 @@ func main() {
 	}
 
 	go listenEvents(device, profile)
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	// wait for program to terminate
 
