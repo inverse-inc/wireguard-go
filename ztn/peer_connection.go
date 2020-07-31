@@ -103,113 +103,119 @@ func (pc *PeerConnection) run() {
 	var localPeerAddr = fmt.Sprintf("%s:%s", localWGIP.String(), a[len(a)-1])
 
 	for {
-		var message *pkt
-		var ok bool
-		select {
-		case message, ok = <-messageChan:
-			if !ok {
-				return
-			}
+		func() {
+			var message *pkt
+			var ok bool
 
-			switch {
-			case stun.IsMessage(message.message):
-				m := new(stun.Message)
-				m.Raw = message.message
-				decErr := m.Decode()
-				if decErr != nil {
-					pc.logger.Error.Println("Unable to decode STUN message:", decErr)
-					break
+			defer func() {
+				if message != nil {
+					defaultBufferPool.Put(message.message)
 				}
-				var xorAddr stun.XORMappedAddress
-				if getErr := xorAddr.GetFrom(m); getErr != nil {
-					pc.logger.Error.Println("Unable to get STUN XOR address:", getErr)
-					break
+			}()
+
+			select {
+			case message, ok = <-messageChan:
+				if !ok {
+					return
 				}
 
-				if publicAddr.String() != xorAddr.String() {
-					pc.logger.Info.Printf("My public address for peer %s: %s\n", pc.peerID, xorAddr)
-					publicAddr = xorAddr
-					pc.myAddr, err = net.ResolveUDPAddr("udp4", xorAddr.String())
-					sharedutils.CheckError(err)
+				switch {
+				case stun.IsMessage(message.message):
+					m := new(stun.Message)
+					m.Raw = message.message
+					decErr := m.Decode()
+					if decErr != nil {
+						pc.logger.Error.Println("Unable to decode STUN message:", decErr)
+						break
+					}
+					var xorAddr stun.XORMappedAddress
+					if getErr := xorAddr.GetFrom(m); getErr != nil {
+						pc.logger.Error.Println("Unable to get STUN XOR address:", getErr)
+						break
+					}
 
-					go func() {
-						for {
-							select {
-							case <-time.After(1 * time.Second):
-								pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
-								GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
-							case <-foundPeer:
-								pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
-								return
+					if publicAddr.String() != xorAddr.String() {
+						pc.logger.Info.Printf("My public address for peer %s: %s\n", pc.peerID, xorAddr)
+						publicAddr = xorAddr
+						pc.myAddr, err = net.ResolveUDPAddr("udp4", xorAddr.String())
+						sharedutils.CheckError(err)
+
+						go func() {
+							for {
+								select {
+								case <-time.After(1 * time.Second):
+									pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
+									GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+								case <-foundPeer:
+									pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
+									return
+								}
 							}
-						}
-					}()
+						}()
 
-					peerAddrChan = pc.getPeerAddr()
+						peerAddrChan = pc.getPeerAddr()
+					}
+
+				case string(message.message) == pingMsg:
+					pc.logger.Debug.Println("Received ping from", pc.peerAddr)
+					pc.lastKeepalive = time.Now()
+
+				default:
+					if message.raddr.String() == fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort) {
+						n := len(message.message)
+						pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.peerAddr, n)
+						udpSend(message.message, pc.localPeerConn, pc.peerAddr)
+					} else {
+						n := len(message.message)
+						pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.wgConn.RemoteAddr(), n)
+						pc.wgConn.Write(message.message)
+					}
+
 				}
 
-			case string(message.message) == pingMsg:
-				pc.logger.Debug.Println("Received ping from", pc.peerAddr)
+			case peerStr := <-peerAddrChan:
+				if !pc.triedPrivate {
+					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
+				}
+
+				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
+				GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+
+				pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
+				if err != nil {
+					log.Fatalln("resolve peeraddr:", err)
+				}
+				conf := ""
+				conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
+				conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
+				conf += "replace_allowed_ips=true\n"
+				conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
+
+				SetConfigMulti(pc.device, conf)
+
+				pc.started = true
+				pc.triedPrivate = true
+				foundPeer <- true
 				pc.lastKeepalive = time.Now()
 
-			default:
-				if message.raddr.String() == fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort) {
-					n := len(message.message)
-					pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.peerAddr, n)
-					udpSend(message.message, pc.localPeerConn, pc.peerAddr)
+			case <-keepalive:
+				// Keep NAT binding alive using STUN server or the peer once it's known
+				if pc.peerAddr == nil {
+					err = sendBindingRequest(pc.localPeerConn, stunAddr)
 				} else {
-					n := len(message.message)
-					pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.wgConn.RemoteAddr(), n)
-					pc.wgConn.Write(message.message)
+					err = udpSendStr(keepaliveMsg, pc.localPeerConn, pc.peerAddr)
 				}
 
+				if err != nil {
+					pc.logger.Error.Println("keepalive:", err)
+				}
+
+				if pc.started && pc.lastKeepalive.Before(time.Now().Add(-5*time.Second)) {
+					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
+					return
+				}
 			}
-
-		case peerStr := <-peerAddrChan:
-			if !pc.triedPrivate {
-				pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
-			}
-
-			pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
-			GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
-
-			pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
-			if err != nil {
-				log.Fatalln("resolve peeraddr:", err)
-			}
-			conf := ""
-			conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-			conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
-			conf += "replace_allowed_ips=true\n"
-			conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
-
-			SetConfigMulti(pc.device, conf)
-
-			pc.started = true
-			pc.triedPrivate = true
-			foundPeer <- true
-			pc.lastKeepalive = time.Now()
-
-		case <-keepalive:
-			// Keep NAT binding alive using STUN server or the peer once it's known
-			if pc.peerAddr == nil {
-				err = sendBindingRequest(pc.localPeerConn, stunAddr)
-			} else {
-				err = udpSendStr(keepaliveMsg, pc.localPeerConn, pc.peerAddr)
-			}
-
-			if err != nil {
-				pc.logger.Error.Println("keepalive:", err)
-			}
-
-			if pc.started && pc.lastKeepalive.Before(time.Now().Add(-5*time.Second)) {
-				pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
-				return
-			}
-		}
-		if message != nil {
-			defaultBufferPool.Put(message.message)
-		}
+		}()
 	}
 }
 

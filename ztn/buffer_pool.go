@@ -1,28 +1,45 @@
 package ztn
 
-import "sync"
+import (
+	"sync"
+)
 
 var defaultBufferPool = NewBufferPool()
 
+const maxBufferPoolPktSize = 2000
+
 type BufferPool struct {
 	sync.Pool
+	sync.Mutex
+	aliveBuffers int
 }
 
 func NewBufferPool() *BufferPool {
 	return &BufferPool{
+		Mutex: sync.Mutex{},
 		Pool: sync.Pool{
 			New: func() interface{} {
-				return make([]byte, 1024)
+				return make([]byte, maxBufferPoolPktSize)
 			},
 		},
 	}
 }
 
+func (bp *BufferPool) GetAliveBuffers() int {
+	return bp.aliveBuffers
+}
+
 func (bp *BufferPool) Get() []byte {
+	bp.Lock()
+	bp.aliveBuffers++
+	bp.Unlock()
 	return bp.Pool.Get().([]byte)
 }
 
 func (bp *BufferPool) Put(a []byte) {
-	a = a[:1024]
+	bp.Lock()
+	bp.aliveBuffers--
+	bp.Unlock()
+	a = a[:maxBufferPoolPktSize]
 	bp.Pool.Put(a)
 }
