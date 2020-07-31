@@ -23,6 +23,8 @@ func SetupAPIClient() {
 		fmt.Print("Server: ")
 		server, _ = reader.ReadString('\n')
 		server = strings.Trim(server, "\r\n")
+	} else {
+		fmt.Println("Using environment provided server:", server)
 	}
 
 	username := sharedutils.EnvOrDefault("WG_USERNAME", "")
@@ -31,9 +33,11 @@ func SetupAPIClient() {
 		fmt.Print("Username: ")
 		username, _ = reader.ReadString('\n')
 		username = strings.Trim(username, "\r\n")
+	} else {
+		fmt.Println("Using environment provided username:", username)
 	}
 
-	fmt.Print("Enter Password: ")
+	fmt.Print("Enter Password for " + username + ": ")
 	bytePassword, _ := terminal.ReadPassword(0)
 	password := string(bytePassword)
 
