@@ -38,7 +38,7 @@ func SetupAPIClient() {
 			port = "9999"
 		}
 	} else {
-		fmt.Println("Using environment provided server port:", server)
+		fmt.Println("Using environment provided server port:", port)
 	}
 
 	username := sharedutils.EnvOrDefault("WG_USERNAME", "")
