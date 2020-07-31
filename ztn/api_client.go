@@ -27,6 +27,20 @@ func SetupAPIClient() {
 		fmt.Println("Using environment provided server:", server)
 	}
 
+	port := sharedutils.EnvOrDefault("WG_SERVER_PORT", "")
+	if port == "" {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Server port (default 9999): ")
+		port, _ = reader.ReadString('\n')
+		port = strings.Trim(port, "\r\n")
+
+		if port == "" {
+			port = "9999"
+		}
+	} else {
+		fmt.Println("Using environment provided server port:", server)
+	}
+
 	username := sharedutils.EnvOrDefault("WG_USERNAME", "")
 	if username == "" {
 		reader := bufio.NewReader(os.Stdin)
@@ -42,7 +56,7 @@ func SetupAPIClient() {
 	password := string(bytePassword)
 
 	APIClientCtx = context.Background()
-	APIClient = unifiedapiclient.New(APIClientCtx, username, password, "https", server, "9999")
+	APIClient = unifiedapiclient.New(APIClientCtx, username, password, "https", server, port)
 }
 
 func GetAPIClient() *unifiedapiclient.Client {
