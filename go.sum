@@ -139,6 +139,8 @@ github.com/inverse-inc/packetfence/go v0.0.0-20200730163422-0761d37a27c5 h1:R4jW
 github.com/inverse-inc/packetfence/go v0.0.0-20200730163422-0761d37a27c5/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
 github.com/inverse-inc/packetfence/go v0.0.0-20200730164048-e9dc1fe57dca h1:DXDHgaugrxvLo8D31b8Y6oMJ1Effi02rnzeMrK1o+QA=
 github.com/inverse-inc/packetfence/go v0.0.0-20200730164048-e9dc1fe57dca/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
+github.com/inverse-inc/packetfence/go v0.0.0-20200731114134-e21ed381aade h1:5i70DHdpkuwhnACYNVUQEx6lEU5W1x2dLMHcJf2bzD4=
+github.com/inverse-inc/packetfence/go v0.0.0-20200731114134-e21ed381aade/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
 github.com/jcuga/golongpoll v1.1.0 h1:2CWYEd5sH23aOxzMZ9xw5yjiZC8XdNG5wa70+KBkJrQ=
 github.com/jcuga/golongpoll v1.1.0/go.mod h1:sM63poxLraGZiLM83pQwKL3GbcPxWaxWcD7Hj94CcBc=
