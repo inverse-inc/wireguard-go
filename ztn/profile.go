@@ -86,6 +86,7 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) {
 
 	SetConfig(device, "listen_port", fmt.Sprintf("%d", localWGPort))
 	SetConfig(device, "private_key", keyToHex(p.PrivateKey))
+	SetConfig(device, "persistent_keepalive_interval", "5")
 }
 
 func (p *Profile) FillProfileFromServer() {

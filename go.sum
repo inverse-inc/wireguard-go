@@ -122,6 +122,8 @@ github.com/inconshreveable/log15 v0.0.0-20171019012758-0decfc6c20d9/go.mod h1:cO
 github.com/inverse-inc/go-ipset v0.0.0-20190925174109-4d5749cc4aa6/go.mod h1:unv1cVDLrlwXyLhg2b+QkK6rZ0GQ6DGbZOkGCfl10/M=
 github.com/inverse-inc/go-radius v0.0.0-20200310093817-85565fe93aa5/go.mod h1:IQmy9DslBZ9lU4/y/MphJ9oY//4r9A9wQwqOjjLmBso=
 github.com/inverse-inc/packetfence v10.1.0+incompatible h1:UK4ytTCgWpk07BIvTuTnSqr27aWRmpQk46VvuFe67G8=
+github.com/inverse-inc/packetfence v10.1.1-0.20200805163627-58ba8952580c+incompatible h1:F4gMi5LHi7iEEFStdMg0bUUNeHL3HmmEO56tB7IMhB8=
+github.com/inverse-inc/packetfence v10.1.1-0.20200805163627-58ba8952580c+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36 h1:6mQM09YcCuLCzLr/hGLmldoT5jHHtM+a7G3v5NNYcY0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36/go.mod h1:WlVGQDgT+HJRzbbMUMJB3tC5VZJnA1WO1GKXgq9lymc=
 github.com/inverse-inc/packetfence/go v0.0.0-20200729120005-d8f9c1cc13a4 h1:3T4SNX5VJeQyjC3YqFY9DefZnbIO3uN9jBADKBDfvPI=
