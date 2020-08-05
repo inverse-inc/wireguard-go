@@ -78,8 +78,8 @@ type Profile struct {
 	AllowedPeers     []string `json:"allowed_peers"`
 }
 
-func (p *Profile) SetupWireguard(device *device.Device) {
-	err := exec.Command("ip", "address", "add", "dev", "wg0", fmt.Sprintf("%s/%d", p.WireguardIP, p.WireguardNetmask)).Run()
+func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) {
+	err := exec.Command("ip", "address", "add", "dev", WGInterface, fmt.Sprintf("%s/%d", p.WireguardIP, p.WireguardNetmask)).Run()
 	sharedutils.CheckError(err)
 	err = exec.Command("ip", "link", "set", "wg0", "up").Run()
 	sharedutils.CheckError(err)

@@ -272,7 +272,7 @@ func main() {
 	}
 	profile.FillProfileFromServer()
 
-	profile.SetupWireguard(device)
+	profile.SetupWireguard(device, interfaceName)
 
 	for _, peerID := range profile.AllowedPeers {
 		startPeer(device, profile, peerID)
