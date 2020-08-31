@@ -18,7 +18,7 @@ import (
 const udp = "udp"
 const pingMsg = "ping"
 
-const stunServer = "stun.l.google.com:19302"
+const stunServer = "srv.semaan.ca:3478"
 
 type pkt struct {
 	raddr   *net.UDPAddr
