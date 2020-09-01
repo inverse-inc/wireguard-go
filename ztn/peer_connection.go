@@ -11,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
-	"golang.zx2c4.com/wireguard/device"
+	"github.com/inverse-inc/wireguard-go/device"
 	"gortc.io/stun"
 )
 

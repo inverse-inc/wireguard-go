@@ -11,8 +11,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
-	"golang.zx2c4.com/wireguard/device"
-	"golang.zx2c4.com/wireguard/ztn"
+	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
 func startInverse(interfaceName string, device *device.Device) {

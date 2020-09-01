@@ -16,9 +16,9 @@ import (
 	"syscall"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
-	"golang.zx2c4.com/wireguard/device"
-	"golang.zx2c4.com/wireguard/ipc"
-	"golang.zx2c4.com/wireguard/tun"
+	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/ipc"
+	"github.com/inverse-inc/wireguard-go/tun"
 
 	_ "net/http/pprof"
 )

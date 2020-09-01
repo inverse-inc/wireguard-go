@@ -17,7 +17,7 @@ import (
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
-	"golang.zx2c4.com/wireguard/conn"
+	"github.com/inverse-inc/wireguard-go/conn"
 )
 
 type QueueHandshakeElement struct {

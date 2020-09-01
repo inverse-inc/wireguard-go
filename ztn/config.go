@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"golang.zx2c4.com/wireguard/device"
+	"github.com/inverse-inc/wireguard-go/device"
 )
 
 func SetConfig(device *device.Device, k, v string) {

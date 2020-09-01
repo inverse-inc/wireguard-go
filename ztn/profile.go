@@ -9,7 +9,7 @@ import (
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
-	"golang.zx2c4.com/wireguard/device"
+	"github.com/inverse-inc/wireguard-go/device"
 )
 
 type ServerChallenge struct {
