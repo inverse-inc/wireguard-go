@@ -11,7 +11,6 @@ import (
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/packetfence/go/unifiedapiclient"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var APIClient *unifiedapiclient.Client
@@ -73,8 +72,7 @@ func SetupAPIClient() {
 	}
 
 	fmt.Print("Enter Password for " + username + ": ")
-	bytePassword, _ := terminal.ReadPassword(0)
-	password := string(bytePassword)
+	password := ReadPassword()
 
 	httpClient := &http.Client{
 		Transport: &http.Transport{
