@@ -73,6 +73,8 @@ func main() {
 	}()
 	logger.Info.Println("UAPI listener started")
 
+	startInverse()
+
 	// wait for program to terminate
 
 	signal.Notify(term, os.Interrupt)
