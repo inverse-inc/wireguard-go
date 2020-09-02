@@ -2,3 +2,8 @@ wireguard-go
 vendor
 .gopath
 ireallywantobuildon_linux.go
+
+# windows build related
+amd64
+x86
+.deps
