@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"os/exec"
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
@@ -79,10 +78,7 @@ type Profile struct {
 }
 
 func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) {
-	err := exec.Command("ip", "address", "add", "dev", WGInterface, fmt.Sprintf("%s/%d", p.WireguardIP, p.WireguardNetmask)).Run()
-	sharedutils.CheckError(err)
-	err = exec.Command("ip", "link", "set", "wg0", "up").Run()
-	sharedutils.CheckError(err)
+	p.setupInterface(device, WGInterface)
 
 	SetConfig(device, "listen_port", fmt.Sprintf("%d", localWGPort))
 	SetConfig(device, "private_key", keyToHex(p.PrivateKey))

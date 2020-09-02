@@ -46,3 +46,18 @@ func b64keyToURLb64(k string) string {
 	sharedutils.CheckError(err)
 	return base64.URLEncoding.EncodeToString(b[:])
 }
+
+func ipv4MaskString(mask int) string {
+	_, ipv4Net, err := net.ParseCIDR(fmt.Sprintf("0.0.0.0/%d", mask))
+	if err != nil {
+		panic(err)
+	}
+
+	m := ipv4Net.Mask
+
+	if len(m) != 4 {
+		panic("ipv4Mask: len must be 4 bytes")
+	}
+
+	return fmt.Sprintf("%d.%d.%d.%d", m[0], m[1], m[2], m[3])
+}

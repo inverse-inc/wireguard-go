@@ -30,10 +30,8 @@ func main() {
 	}
 	interfaceName := os.Args[1]
 
-	fmt.Fprintln(os.Stderr, "Warning: this is a test program for Windows, mainly used for debugging this Go package. For a real WireGuard for Windows client, the repo you want is <https://git.zx2c4.com/wireguard-windows/>, which includes this code as a module.")
-
 	logger = device.NewLogger(
-		device.LogLevelDebug,
+		device.LogLevelInfo,
 		fmt.Sprintf("(%s) ", interfaceName),
 	)
 	logger.Info.Println("Starting wireguard-go version", device.WireGuardGoVersion)
