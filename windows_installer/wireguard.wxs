@@ -75,13 +75,17 @@
 		<ComponentGroup Id="WireGuardComponents">
 			<Component Directory="WireGuardFolder" Id="WireGuardExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1acc">
 				<File Source="..\$(var.WIREGUARD_PLATFORM)\wireguard.exe" KeyPath="yes">
+				</File>
+			</Component>
+			<Component Directory="WireGuardFolder" Id="PsExecExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1a69">
+				<File Source=".deps\PsExec.exe" KeyPath="yes">
+				</File>
+			</Component>
+			<Component Directory="WireGuardFolder" Id="LaunchExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1a70">
+				<File Source=".\run.bat" KeyPath="yes">
 					<Shortcut Id="WireGuardStartMenuShortcut" Directory="ProgramMenuFolder" Name="WireGuard" Description="WireGuard: Fast, Modern, Secure VPN Tunnel" WorkingDirectory="WireGuardFolder" Advertise="yes" />
 				</File>
 				<ServiceControl Id="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" Name="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" /><!-- A dummy to make WiX create ServiceControl table for us. -->
-			</Component>
-			<Component Directory="WireGuardFolder" Id="PsExecExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1a69">
-				<File Source="..\$(var.WIREGUARD_PLATFORM)\PsExec.exe" KeyPath="yes">
-				</File>
 			</Component>
 			<Component Directory="SystemFolder" Win64="no" Id="Wg32Executable" Guid="5ca31841-97d8-4614-a318-f1e268135ba7">
 				<File Source="..\x86\wg.exe" Id="Wg32Executable" />
@@ -137,7 +141,7 @@
 		<!--
 			Launch wireguard.exe after setup complete
 		-->
-		<CustomAction Id="LaunchApplication" HideTarget="yes" Impersonate="no" Execute="deferred" FileKey="wireguard.exe" ExeCommand="" Return="asyncNoWait" />
+		<CustomAction Id="LaunchApplication" HideTarget="yes" Impersonate="no" Execute="deferred" FileKey="run.bat" ExeCommand="" Return="asyncNoWait" />
 		<InstallExecuteSequence>
 			<Custom Action="LaunchApplication" Before="InstallFinalize">(&amp;WireGuardFeature = 3) AND NOT DO_NOT_LAUNCH</Custom>
 		</InstallExecuteSequence>
@@ -145,7 +149,7 @@
 		<!--
 			Launch wireguard.exe on product reconfiguration (starting same MSI again)
 		-->
-		<CustomAction Id="LaunchApplicationAsOrdinaryUser" HideTarget="yes" FileKey="wireguard.exe" ExeCommand="" Return="asyncNoWait" />
+		<CustomAction Id="LaunchApplicationAsOrdinaryUser" HideTarget="yes" FileKey="run.bat" ExeCommand="" Return="asyncNoWait" />
 		<InstallExecuteSequence>
 			<Custom Action="LaunchApplicationAsOrdinaryUser" After="InstallFinalize">(&amp;WireGuardFeature = -1) AND (!WireGuardFeature = 3) AND NOT DO_NOT_LAUNCH</Custom>
 		</InstallExecuteSequence>
