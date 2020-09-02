@@ -83,6 +83,8 @@ func SetupAPIClient() {
 
 	APIClientCtx = context.Background()
 	APIClient = unifiedapiclient.New(APIClientCtx, username, password, "https", server, port)
+
+	APIClient.URILogDebug = true
 }
 
 func GetAPIClient() *unifiedapiclient.Client {

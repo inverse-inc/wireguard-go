@@ -136,6 +136,8 @@ github.com/inverse-inc/packetfence v10.1.1-0.20200901164242-85d4ad27649c+incompa
 github.com/inverse-inc/packetfence v10.1.1-0.20200901164242-85d4ad27649c+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.1.1-0.20200901170008-04cae66879ca+incompatible h1:yQALZh6SrrGecoQkG1ChFTaCU1txoCfT0TRXUJGoz3g=
 github.com/inverse-inc/packetfence v10.1.1-0.20200901170008-04cae66879ca+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
+github.com/inverse-inc/packetfence v10.1.1-0.20200902172018-c4772999cd05+incompatible h1:cuaMv/iOxuBvUfnycpZqybr56t9Ptpla2E8AiNEdnYc=
+github.com/inverse-inc/packetfence v10.1.1-0.20200902172018-c4772999cd05+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36 h1:6mQM09YcCuLCzLr/hGLmldoT5jHHtM+a7G3v5NNYcY0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36/go.mod h1:WlVGQDgT+HJRzbbMUMJB3tC5VZJnA1WO1GKXgq9lymc=
 github.com/inverse-inc/packetfence/go v0.0.0-20200729120005-d8f9c1cc13a4 h1:3T4SNX5VJeQyjC3YqFY9DefZnbIO3uN9jBADKBDfvPI=
@@ -169,6 +171,10 @@ github.com/inverse-inc/packetfence/go v0.0.0-20200901164242-85d4ad27649c h1:YS3C
 github.com/inverse-inc/packetfence/go v0.0.0-20200901164242-85d4ad27649c/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
 github.com/inverse-inc/packetfence/go v0.0.0-20200901170008-04cae66879ca h1:AKWHaBssb3Uzgp8aT7HrAm8YorpBUJLHZS7kxyGllkQ=
 github.com/inverse-inc/packetfence/go v0.0.0-20200901170008-04cae66879ca/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
+github.com/inverse-inc/packetfence/go v0.0.0-20200902172018-c4772999cd05 h1:cDTW518FXkyImLY2t1wpTOtwhQYryW/R5VFVJCHa7u4=
+github.com/inverse-inc/packetfence/go v0.0.0-20200902172018-c4772999cd05/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
+github.com/inverse-inc/wireguard-go v0.0.20200320 h1:1vE6zVeO7fix9cJX1Z9ZQ+ikPIIx7vIyU0o0tLDD88g=
+github.com/inverse-inc/wireguard-go v0.0.20200320/go.mod h1:lDian4Sw4poJ04SgHh35nzMVwGSYlPumkdnHcucAQoY=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
 github.com/jcuga/golongpoll v1.1.0 h1:2CWYEd5sH23aOxzMZ9xw5yjiZC8XdNG5wa70+KBkJrQ=
 github.com/jcuga/golongpoll v1.1.0/go.mod h1:sM63poxLraGZiLM83pQwKL3GbcPxWaxWcD7Hj94CcBc=
@@ -377,8 +383,6 @@ golang.org/x/tools v0.0.0-20190621195816-6e04913cbbac/go.mod h1:/rFqwRUd4F7ZHNgw
 golang.org/x/tools v0.0.0-20191029041327-9cc4af7d6b2c/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
-github.com/inverse-inc/wireguard-go v0.0.20200320 h1:1vE6zVeO7fix9cJX1Z9ZQ+ikPIIx7vIyU0o0tLDD88g=
-github.com/inverse-inc/wireguard-go v0.0.20200320/go.mod h1:lDian4Sw4poJ04SgHh35nzMVwGSYlPumkdnHcucAQoY=
 google.golang.org/api v0.3.1/go.mod h1:6wY9I6uQWHQ8EM57III9mq/AjF+i8G65rmVagqKMtkk=
 google.golang.org/appengine v1.1.0/go.mod h1:EbEs0AVv82hx2wNQdGPgUI5lhzA/G0D9YwlJXL52JkM=
 google.golang.org/appengine v1.4.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
