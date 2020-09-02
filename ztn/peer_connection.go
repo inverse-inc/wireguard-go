@@ -296,7 +296,7 @@ func (pc *PeerConnection) getPeerAddr() <-chan string {
 
 	go func() {
 		c := GLPClient(p2pk)
-		c.Start()
+		c.Start(APIClientCtx)
 		for {
 			select {
 			case e := <-c.EventsChan:

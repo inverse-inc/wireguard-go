@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/inverse-inc/packetfence/go/log"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/packetfence/go/unifiedapiclient"
 )
@@ -81,7 +82,7 @@ func SetupAPIClient() {
 	}
 	unifiedapiclient.SetHTTPClient(httpClient)
 
-	APIClientCtx = context.Background()
+	APIClientCtx = log.LoggerNewContext(context.Background())
 	APIClient = unifiedapiclient.New(APIClientCtx, username, password, "https", server, port)
 
 	APIClient.URILogDebug = true

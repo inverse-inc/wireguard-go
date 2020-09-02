@@ -92,7 +92,7 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 
 	myID := base64.URLEncoding.EncodeToString(pub[:])
 	c := ztn.GLPPrivateClient(priv, pub, serverPub)
-	c.Start()
+	c.Start(ztn.APIClientCtx)
 	for {
 		select {
 		case e := <-c.EventsChan:

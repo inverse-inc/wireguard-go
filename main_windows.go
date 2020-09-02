@@ -34,6 +34,9 @@ func main() {
 		device.LogLevelInfo,
 		fmt.Sprintf("(%s) ", interfaceName),
 	)
+
+	os.Setenv("LOG_LEVEL","info")
+
 	logger.Info.Println("Starting wireguard-go version", device.WireGuardGoVersion)
 	logger.Debug.Println("Debug log enabled")
 
