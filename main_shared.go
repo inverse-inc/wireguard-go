@@ -22,7 +22,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		PrivateKey: base64.StdEncoding.EncodeToString(privateKey[:]),
 		PublicKey:  base64.StdEncoding.EncodeToString(publicKey[:]),
 	}
-	profile.FillProfileFromServer()
+	profile.FillProfileFromServer(logger)
 
 	profile.SetupWireguard(device, interfaceName)
 

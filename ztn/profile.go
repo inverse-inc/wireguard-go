@@ -75,6 +75,7 @@ type Profile struct {
 	PublicKey        string   `json:"public_key"`
 	PrivateKey       string   `json:"private_key"`
 	AllowedPeers     []string `json:"allowed_peers"`
+	logger           *device.Logger
 }
 
 func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) {
@@ -85,10 +86,15 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) {
 	SetConfig(device, "persistent_keepalive_interval", "5")
 }
 
-func (p *Profile) FillProfileFromServer() {
+func (p *Profile) FillProfileFromServer(logger *device.Logger) {
+	p.logger = logger
+
 	auth := DoServerChallenge(p)
 
-	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(b64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth), &p)
+	mac, err := p.findClientMAC()
+	sharedutils.CheckError(err)
+
+	err = GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(b64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth)+"&mac="+url.QueryEscape(mac.String()), &p)
 	sharedutils.CheckError(err)
 }
 

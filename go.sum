@@ -179,6 +179,8 @@ github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0 h1:jFSY
 github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
 github.com/inverse-inc/wireguard-go v0.0.20200320 h1:1vE6zVeO7fix9cJX1Z9ZQ+ikPIIx7vIyU0o0tLDD88g=
 github.com/inverse-inc/wireguard-go v0.0.20200320/go.mod h1:lDian4Sw4poJ04SgHh35nzMVwGSYlPumkdnHcucAQoY=
+github.com/jackpal/gateway v1.0.6 h1:/MJORKvJEwNVldtGVJC2p2cwCnsSoLn3hl3zxmZT7tk=
+github.com/jackpal/gateway v1.0.6/go.mod h1:lTpwd4ACLXmpyiCTRtfiNyVnUmqT9RivzCDQetPfnjA=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
 github.com/jcuga/golongpoll v1.1.0 h1:2CWYEd5sH23aOxzMZ9xw5yjiZC8XdNG5wa70+KBkJrQ=
 github.com/jcuga/golongpoll v1.1.0/go.mod h1:sM63poxLraGZiLM83pQwKL3GbcPxWaxWcD7Hj94CcBc=
