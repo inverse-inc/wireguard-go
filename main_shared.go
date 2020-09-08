@@ -45,6 +45,8 @@ func getKeys() ([32]byte, [32]byte) {
 	sharedutils.CheckError(err)
 	authFile := path.Join(usr.HomeDir, "auth.json")
 
+	logger.Info.Println("Using auth file:", authFile)
+
 	auth := struct {
 		PublicKey  string `json:"public_key"`
 		PrivateKey string `json:"private_key"`
