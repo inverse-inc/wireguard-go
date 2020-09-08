@@ -18,12 +18,12 @@ if [ -z "$BIN_OUTPUT" ]; then
   BIN_OUTPUT=wireguard-go
 fi
 
-./.deps/go/bin/go build -v -o $BIN_OUTPUT
+./.deps/go/bin/go build -v -o $BIN_OUTPUT || exit 1
 
 cd macoswrapper
 if [ -z "$MACOSWRAPPER_BIN_OUTPUT" ]; then
   MACOSWRAPPER_BIN_OUTPUT=macoswrapper
 fi
 
-../.deps/go/bin/go build -v -o $MACOSWRAPPER_BIN_OUTPUT
+../.deps/go/bin/go build -v -o $MACOSWRAPPER_BIN_OUTPUT || exit 1
 

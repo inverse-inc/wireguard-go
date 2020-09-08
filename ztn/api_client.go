@@ -9,6 +9,9 @@ import (
 	"os"
 	"strings"
 
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/widget"
+
 	"github.com/inverse-inc/packetfence/go/log"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/packetfence/go/unifiedapiclient"
@@ -18,7 +21,7 @@ var APIClient *unifiedapiclient.Client
 var APIClientCtx context.Context
 
 // TODO: replace with prompts or configuration
-func SetupAPIClient() {
+func SetupAPIClientCLI() {
 	server := sharedutils.EnvOrDefault("WG_SERVER", "")
 	if server == "" {
 		reader := bufio.NewReader(os.Stdin)
@@ -88,9 +91,78 @@ func SetupAPIClient() {
 	APIClient.URILogDebug = true
 }
 
+var spacePlaceholder = "                          "
+
+func SetupAPIClientGUI() {
+	a := app.New()
+	w := a.NewWindow("Wireguard client")
+
+	serverEntry := widget.NewEntry()
+	serverEntry.PlaceHolder = "ztn.example.com"
+	serverEntry.Text = sharedutils.EnvOrDefault("WG_SERVER", "")
+
+	serverPortEntry := widget.NewEntry()
+	serverPortEntry.Text = "9999"
+	serverEntry.Text = sharedutils.EnvOrDefault("WG_SERVER_PORT", "")
+
+	verifyServerEntry := widget.NewCheck("Verify server identity", func(bool) {})
+	verifyServerEntry.Checked = (sharedutils.EnvOrDefault("WG_SERVER_VERIFY_TLS", "true") == "true")
+
+	usernameEntry := widget.NewEntry()
+	usernameEntry.PlaceHolder = spacePlaceholder
+	usernameEntry.Text = sharedutils.EnvOrDefault("WG_USERNAME", "")
+
+	passwordEntry := widget.NewEntry()
+	passwordEntry.Password = true
+	passwordEntry.PlaceHolder = spacePlaceholder
+
+	w.SetContent(widget.NewVBox(
+		widget.NewLabel("Wireguard client configuration"),
+		widget.NewHBox(
+			widget.NewLabel("Server"),
+			serverEntry,
+		),
+		widget.NewHBox(
+			widget.NewLabel("Server port"),
+			serverPortEntry,
+		),
+		widget.NewHBox(
+			verifyServerEntry,
+		),
+		widget.NewHBox(
+			widget.NewLabel("Username"),
+			usernameEntry,
+		),
+		widget.NewHBox(
+			widget.NewLabel("Password"),
+			passwordEntry,
+		),
+		widget.NewButton("Connect", func() {
+			httpClient := &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifyServerEntry.Checked},
+				},
+			}
+			unifiedapiclient.SetHTTPClient(httpClient)
+
+			APIClientCtx = log.LoggerNewContext(context.Background())
+			APIClient = unifiedapiclient.New(APIClientCtx, usernameEntry.Text, passwordEntry.Text, "https", serverEntry.Text, serverPortEntry.Text)
+
+			APIClient.URILogDebug = true
+			a.Quit()
+		}),
+	))
+
+	w.ShowAndRun()
+}
+
 func GetAPIClient() *unifiedapiclient.Client {
 	if APIClient == nil {
-		SetupAPIClient()
+		if sharedutils.EnvOrDefault("WG_CLI", "false") == "true" {
+			SetupAPIClientCLI()
+		} else {
+			SetupAPIClientGUI()
+		}
 	}
 	return APIClient
 }
