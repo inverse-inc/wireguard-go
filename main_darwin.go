@@ -1,4 +1,4 @@
-// +build linux
+// +build darwin
 
 /* SPDX-License-Identifier: MIT
  *
@@ -68,31 +68,8 @@ func main() {
 
 	warning()
 
-	var foreground bool
-	var interfaceName string
-	if len(os.Args) < 2 || len(os.Args) > 3 {
-		printUsage()
-		return
-	}
-
-	switch os.Args[1] {
-
-	case "-f", "--foreground":
-		foreground = true
-		if len(os.Args) != 3 {
-			printUsage()
-			return
-		}
-		interfaceName = os.Args[2]
-
-	default:
-		foreground = false
-		if len(os.Args) != 2 {
-			printUsage()
-			return
-		}
-		interfaceName = os.Args[1]
-	}
+        foreground := true
+        interfaceName := "utun8"
 
 	if !foreground {
 		foreground = os.Getenv(ENV_WG_PROCESS_FOREGROUND) == "1"
