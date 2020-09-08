@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os/exec"
 
 	"github.com/getlantern/systray"
 	"github.com/getlantern/systray/example/icon"
-	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
 
 func main() {
@@ -20,8 +20,17 @@ func main() {
 		mQuit.SetIcon(icon.Data)
 
 		cmd := exec.Command("sudo", "../wireguard-go", "-f", "wg0")
-		out, err := cmd.Output()
-		fmt.Println(string(out))
-		sharedutils.CheckError(err)
+		stdout, _ := cmd.StdoutPipe()
+		cmd.Start()
+
+		scanner := bufio.NewScanner(stdout)
+		scanner.Split(bufio.ScanWords)
+		for scanner.Scan() {
+			m := scanner.Text()
+			fmt.Println(m)
+		}
+
+		cmd.Wait()
+
 	}, func() {})
 }
