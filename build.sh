@@ -1,9 +1,12 @@
 #!/bin/bash
 
+if [ -z "$GOOS" ]; then
+	GOOS=linux
+fi
 
 if ! [ -f .deps/prepared ]; then
   mkdir .deps
-  wget https://golang.org/dl/go1.15.1.linux-amd64.tar.gz -O .deps/go.tar.gz
+  curl -L https://golang.org/dl/go1.15.1.$GOOS-amd64.tar.gz > .deps/go.tar.gz
   cd .deps/
   tar -xvf go.tar.gz
   cd -

@@ -24,7 +24,7 @@ cp ../amd64/wireguard build/Wireguard.app/Contents/MacOS/wireguard-go
 
 cp wireguard.icns build/Wireguard.app/Contents/Resources/
 
-#codesign --deep --force --verbose --sign Inverse build/Wireguard.app
+codesign --deep --force --verbose --sign Inverse build/Wireguard.app
 
 ./.deps/create-dmg/create-dmg \
   --volname "Wireguard Installer" \
