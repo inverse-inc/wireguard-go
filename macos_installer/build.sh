@@ -26,6 +26,9 @@ cp wireguard.icns build/Wireguard.app/Contents/Resources/
 
 codesign --deep --force --verbose --sign Inverse build/Wireguard.app
 
+rm -fr dist/
+mkdir dist/
+
 ./.deps/create-dmg/create-dmg \
   --volname "Wireguard Installer" \
   --background "installer_background.png" \
@@ -35,5 +38,5 @@ codesign --deep --force --verbose --sign Inverse build/Wireguard.app
   --icon "Wireguard.app" 200 190 \
   --hide-extension "Wireguard.app" \
   --app-drop-link 600 185 \
-  "Wireguard-Installer.dmg" \
+  "dist/Wireguard-Installer.dmg" \
   "build/"
