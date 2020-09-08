@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if ! [ -f .deps/prepared ]; then
+  mkdir .deps
+  cd .deps
+  git clone https://github.com/create-dmg/create-dmg.git || exit 1
+  cd -
+  touch .deps/prepared
+fi
+
 rm -fr build/
 
 mkdir -p build/Wireguard.app
@@ -10,15 +18,15 @@ mkdir build/Wireguard.app/Contents/PlugIns
 
 cp Info.plist build/Wireguard.app/Contents
 
-cp ../macoswrapper/macoswrapper build/Wireguard.app/Contents/MacOS/Wireguard
+cp ../amd64/macoswrapper build/Wireguard.app/Contents/MacOS/Wireguard
 cp wrapper.sh build/Wireguard.app/Contents/MacOS/wrapper
-cp ../wireguard-go build/Wireguard.app/Contents/MacOS/
+cp ../amd64/wireguard build/Wireguard.app/Contents/MacOS/wireguard-go
 
 cp wireguard.icns build/Wireguard.app/Contents/Resources/
 
-codesign --deep --force --verbose --sign Inverse build/Wireguard.app
+#codesign --deep --force --verbose --sign Inverse build/Wireguard.app
 
-create-dmg \
+./.deps/create-dmg/create-dmg \
   --volname "Wireguard Installer" \
   --background "installer_background.png" \
   --window-pos 200 120 \
