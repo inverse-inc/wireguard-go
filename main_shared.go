@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/user"
+	"path"
 	"runtime/debug"
 
 	"github.com/davecgh/go-spew/spew"
@@ -39,7 +41,9 @@ func startInverse(interfaceName string, device *device.Device) {
 }
 
 func getKeys() ([32]byte, [32]byte) {
-	authFile := "auth.json"
+	usr, err := user.Current()
+	sharedutils.CheckError(err)
+	authFile := path.Join(usr.HomeDir, "auth.json")
 
 	auth := struct {
 		PublicKey  string `json:"public_key"`
