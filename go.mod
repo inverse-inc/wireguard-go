@@ -3,7 +3,6 @@ module github.com/inverse-inc/wireguard-go
 go 1.13
 
 require (
-	github.com/cratonica/trayhost v0.0.0-20150112162955-98495206fd96
 	github.com/davecgh/go-spew v1.1.1
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
