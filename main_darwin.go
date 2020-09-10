@@ -14,7 +14,9 @@ import (
 	"runtime"
 	"strconv"
 	"syscall"
+	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
@@ -61,10 +63,8 @@ func warning() {
 }
 
 func main() {
-	if len(os.Args) == 2 && os.Args[1] == "--version" {
-		fmt.Printf("wireguard-go v%s\n\nUserspace WireGuard daemon for %s-%s.\nInformation available at https://www.wireguard.com.\nCopyright (C) Jason A. Donenfeld <Jason@zx2c4.com>.\n", device.WireGuardGoVersion, runtime.GOOS, runtime.GOARCH)
-		return
-	}
+	godotenv.Load(os.Args[1])
+	os.Remove(os.Args[1])
 
 	warning()
 
@@ -252,4 +252,22 @@ func main() {
 	device.Close()
 
 	logger.Info.Println("Shutting down")
+}
+
+func checkParentIsAlive() {
+	for {
+		ppid64, err := strconv.Atoi(os.Getenv("WG_GUI_PID"))
+		sharedutils.CheckError(err)
+		ppid := int(ppid64)
+		fmt.Println("parent PID", ppid)
+		process, err := os.FindProcess(ppid)
+		if err != nil || ppid == 1 {
+			logger.Info.Println("Parent process is dead, exiting")
+			quit()
+		} else if err := process.Signal(syscall.Signal(0)); err != nil {
+			logger.Info.Println("Parent process is dead, exiting")
+			quit()
+		}
+		time.Sleep(1 * time.Second)
+	}
 }

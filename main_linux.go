@@ -285,6 +285,9 @@ func checkParentIsAlive() {
 		if err != nil || ppid == 1 {
 			logger.Info.Println("Parent process is dead, exiting")
 			quit()
+		} else if err := process.Signal(syscall.Signal(0)); err != nil {
+			logger.Info.Println("Parent process is dead, exiting")
+			quit()
 		}
 		time.Sleep(1 * time.Second)
 	}

@@ -18,7 +18,7 @@ mkdir build/Wireguard.app/Contents/PlugIns
 
 cp Info.plist build/Wireguard.app/Contents
 
-cp ../amd64/macoswrapper build/Wireguard.app/Contents/MacOS/Wireguard
+cp ../amd64/guiwrapper build/Wireguard.app/Contents/MacOS/Wireguard
 cp wrapper.sh build/Wireguard.app/Contents/MacOS/wrapper
 cp ../amd64/wireguard build/Wireguard.app/Contents/MacOS/wireguard-go
 

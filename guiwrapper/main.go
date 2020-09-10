@@ -33,12 +33,15 @@ func setupSystray() {
 func main() {
 	fmt.Println("Starting up")
 	SetupAPIClientGUI(func() {
-		systray.Run(func() {
-			setupSystray()
-			run()
-			postRun()
-			quit()
-		}, func() {})
+		run()
+		postRun()
+		quit()
+		//systray.Run(func() {
+		//	setupSystray()
+		//	run()
+		//	postRun()
+		//	quit()
+		//}, func() {})
 	})
 }
 

@@ -26,4 +26,12 @@ if [ -z "$MACOSWRAPPER_BIN_OUTPUT" ]; then
 fi
 
 ../.deps/go/bin/go build -v -o $MACOSWRAPPER_BIN_OUTPUT || exit 1
+cd ..
+
+cd guiwrapper
+if [ -z "$GUIWRAPPER_BIN_OUTPUT" ]; then
+  GUIWRAPPER_BIN_OUTPUT=guiwrapper
+fi
+
+../.deps/go/bin/go build -v -o $GUIWRAPPER_BIN_OUTPUT || exit 1
 
