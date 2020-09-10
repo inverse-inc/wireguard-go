@@ -15,3 +15,5 @@ func run() {
 	wireguardCmd = cmd
 	cmd.Wait()
 }
+
+func postRun() {}

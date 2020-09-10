@@ -7,14 +7,17 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"os"
 	"os/signal"
 	"syscall"
+	"regexp"
+	"time"
 
 	"github.com/inverse-inc/wireguard-go/device"
-	"github.com/inverse-inc/wireguard-go/ipc"
-
+	"github.com/joho/godotenv"
 	"github.com/inverse-inc/wireguard-go/tun"
+	"github.com/inverse-inc/wireguard-go/ipc"
 )
 
 const (
@@ -25,10 +28,13 @@ const (
 var logger *device.Logger
 
 func main() {
-	if len(os.Args) != 2 {
-		os.Exit(ExitSetupFailed)
-	}
-	interfaceName := os.Args[1]
+	godotenv.Load(os.Args[1])
+
+	//for _, pair := range os.Environ() {
+	//	fmt.Println(pair)
+	//}
+
+	interfaceName := "wg0"
 
 	logger = device.NewLogger(
 		device.LogLevelInfo,
@@ -96,4 +102,19 @@ func main() {
 	device.Close()
 
 	logger.Info.Println("Shutting down")
+}
+
+func checkParentIsAlive() {
+	for {
+		cmd := exec.Command("tasklist")
+		output, err := cmd.Output()
+		if err != nil {
+			fmt.Println("Unable to run tasklist: ", err, string(output))
+		}
+		if !regexp.MustCompile(os.Getenv("WG_GUI_PROCESS_NAME")+`\s+`+os.Getenv("WG_GUI_PID")+`\s+`).Match(output) {
+			fmt.Println("GUI is dead, exiting")
+			quit()
+		}
+		time.Sleep(1 * time.Second)
+	}
 }

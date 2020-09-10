@@ -46,7 +46,7 @@ if exist .deps\prepared goto :render
 	set CGO_ENABLED=1
 	set CGO_CFLAGS=-O3 -Wall -Wno-unused-function -Wno-switch -std=gnu11 -DWINVER=0x0601
 	set CGO_LDFLAGS=-Wl,--dynamicbase -Wl,--nxcompat -Wl,--export-all-symbols
-	call :build_plat x86 i686 386 || goto :error
+	rem call :build_plat x86 i686 386 || goto :error
 	set CGO_LDFLAGS=%CGO_LDFLAGS% -Wl,--high-entropy-va
 	call :build_plat amd64 x86_64 amd64 || goto :error
 
@@ -81,7 +81,13 @@ if exist .deps\prepared goto :render
 	rem windres -i resources.rc -o resources.syso -O coff || exit /b %errorlevel%
 	echo [+] Building program %1
 	rem go build -ldflags="-H windowsgui -s -w" -tags walk_use_cgo -trimpath -v -o "%~1\wireguard.exe" || exit /b 1
+
+	cd guiwrapper
+	go build -v -o "..\%~1\guiwrapper.exe" || exit /b 1
+	cd ..
+	
 	go build -tags walk_use_cgo -trimpath -v -o "%~1\wireguard.exe" || exit /b 1
+
 	if not exist "%~1\wg.exe" (
 		echo [+] Building command line tools %1
 		del .deps\src\*.exe .deps\src\*.o .deps\src\wincompat\*.o 2> NUL

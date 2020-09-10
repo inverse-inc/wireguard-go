@@ -22,12 +22,12 @@ if '%errorlevel%' NEQ '0' (
 
     "%temp%\getadmin.vbs"
     del "%temp%\getadmin.vbs"
-    exit /B
+    rem exit /B
 
 :gotAdmin
     pushd "%CD%"
     CD /D "%~dp0"
 :--------------------------------------   
 
-"C:\Program Files\WireGuard\PsExec.exe" -h -u "nt authority\network service" -s "C:\Program Files\WireGuard\wireguard.exe" wg0
+"C:\Program Files\WireGuard\PsExec.exe" -h -u "nt authority\network service" -s "C:\Program Files\WireGuard\wireguard.exe" %1
 pause

@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"net/http"
-	"os"
 
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/widget"
@@ -65,18 +64,19 @@ func SetupAPIClientGUI(callback func()) {
 				},
 			}
 			unifiedapiclient.SetHTTPClient(httpClient)
-			os.Setenv("WG_USERNAME", usernameEntry.Text)
-			os.Setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
-			os.Setenv("WG_SERVER", serverEntry.Text)
-			os.Setenv("WG_SERVER_PORT", serverPortEntry.Text)
+			setenv("WG_USERNAME", usernameEntry.Text)
+			setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
+			setenv("WG_SERVER", serverEntry.Text)
+			setenv("WG_SERVER_PORT", serverPortEntry.Text)
 			verifySslStr := "y"
 			if !verifyServerEntry.Checked {
 				verifySslStr = "n"
 			}
-			os.Setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
-
+			setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
+			
+			w.SetContent(widget.NewLabel("Connecting..."))
 			callback()
-			a.Quit()
+			//TODO implement check on a localhost running HTTP API that the wireguard agent should run
 		}),
 	))
 

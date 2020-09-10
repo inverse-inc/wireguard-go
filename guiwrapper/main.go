@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"fmt"
 
 	"github.com/getlantern/systray"
 	"github.com/getlantern/systray/example/icon"
@@ -30,10 +31,12 @@ func setupSystray() {
 }
 
 func main() {
+	fmt.Println("Starting up")
 	SetupAPIClientGUI(func() {
 		systray.Run(func() {
 			setupSystray()
 			run()
+			postRun()
 			quit()
 		}, func() {})
 	})
