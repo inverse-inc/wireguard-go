@@ -11,6 +11,7 @@ require (
 	github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0
 	github.com/jackpal/gateway v1.0.6
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca
+	github.com/mitchellh/go-ps v1.0.0
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
 	golang.org/x/sys v0.0.0-20200515095857-1151b9dac4a9

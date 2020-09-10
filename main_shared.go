@@ -15,9 +15,12 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn"
+	"github.com/mitchellh/go-ps"
 )
 
 func startInverse(interfaceName string, device *device.Device) {
+	go checkParentIsAlive()
+
 	privateKey, publicKey := getKeys()
 
 	profile := ztn.Profile{
@@ -38,6 +41,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		//PPROF
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
+
 }
 
 func getKeys() ([32]byte, [32]byte) {
@@ -132,4 +136,21 @@ func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
 			}
 		}(peerID, peerProfile)
 	}
+}
+
+func findppid(pid int) int {
+	list, err := ps.Processes()
+	if err != nil {
+		sharedutils.CheckError(err)
+	}
+	for _, p := range list {
+		if p.Pid() == pid {
+			return p.PPid()
+		}
+	}
+	return 0
+}
+
+func quit() {
+	os.Exit(0)
 }

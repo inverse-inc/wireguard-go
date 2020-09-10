@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
@@ -275,4 +276,16 @@ func main() {
 	device.Close()
 
 	logger.Info.Println("Shutting down")
+}
+
+func checkParentIsAlive() {
+	for {
+		ppid := findppid(int(os.Getppid()))
+		_, err := os.FindProcess(ppid)
+		if err != nil || ppid == 1 {
+			logger.Info.Println("Parent process is dead, exiting")
+			quit()
+		}
+		time.Sleep(1 * time.Second)
+	}
 }
