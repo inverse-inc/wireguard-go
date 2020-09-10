@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 
@@ -31,12 +30,13 @@ func setupSystray() {
 }
 
 func main() {
-	systray.Run(func() {
-		fmt.Println("Launching GUI wrapper")
-		setupSystray()
-		run()
-		quit()
-	}, func() {})
+	SetupAPIClientGUI(func() {
+		systray.Run(func() {
+			setupSystray()
+			run()
+			quit()
+		}, func() {})
+	})
 }
 
 func quit() {
