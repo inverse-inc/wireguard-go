@@ -6,18 +6,17 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
 
 func run() {
 	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		panic(err)
-	}
+	sharedutils.CheckError(err)
 
 	cmd := exec.Command("/usr/bin/open", "-a", "Terminal.app", dir+"/wrapper")
-	//cmd := exec.Command("/opt/X11/bin/xterm", dir+"/wrapper")
 	err = cmd.Run()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
