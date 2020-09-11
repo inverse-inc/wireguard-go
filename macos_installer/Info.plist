@@ -22,6 +22,8 @@
   <integer>0</integer>
   <key>IFMinorVersion</key>
   <integer>1</integer>
+  <key>LSUIElement</key>
+  <string>1</string>
 </dict>
 </plist>
 

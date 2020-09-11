@@ -6,6 +6,7 @@ import (
 
 	"github.com/getlantern/systray"
 	"github.com/getlantern/systray/example/icon"
+	"github.com/joho/godotenv"
 )
 
 func setupSystray() {
@@ -30,6 +31,7 @@ func setupSystray() {
 func main() {
 	systray.Run(func() {
 		setupSystray()
+		godotenv.Load(os.Args[1])
 		go checkParentIsAlive()
 	}, func() {})
 }

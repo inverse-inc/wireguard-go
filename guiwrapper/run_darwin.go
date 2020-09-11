@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os/exec"
 	"time"
+
+	"github.com/inverse-inc/wireguard-go/util"
 )
 
 func run() {
@@ -13,8 +15,9 @@ func run() {
 }
 
 func postRun() {
+	fmt.Println("Tunnel was launched. Waiting for the end of this process")
 	for {
-		fmt.Println("Tunnel was launched. Waiting for the end of this process")
-		time.Sleep(1 * time.Minute)
+		//TODO: receive a signal from the tunnel that it has exited
+		time.Sleep(1 * time.Second)
 	}
 }

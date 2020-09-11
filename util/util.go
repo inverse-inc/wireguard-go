@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
-	"syscall"
 	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
@@ -17,11 +16,7 @@ func CheckGUIIsAliveUNIX(quit func()) {
 		ppid64, err := strconv.Atoi(os.Getenv("WG_GUI_PID"))
 		sharedutils.CheckError(err)
 		ppid := int(ppid64)
-		process, err := os.FindProcess(ppid)
-		if err != nil || ppid == 1 {
-			fmt.Println("Parent process is dead, exiting")
-			quit()
-		} else if err := process.Signal(syscall.Signal(0)); err != nil {
+		if !CheckPIDIsAlive(ppid) {
 			fmt.Println("Parent process is dead, exiting")
 			quit()
 		}

@@ -18,8 +18,9 @@ func run() {
 }
 
 func postRun() {
+	fmt.Println("Tunnel was launched. Waiting for the end of this process")
 	for {
-		fmt.Println("Tunnel was launched. Waiting for the end of this process")
+		//TODO: receive a signal from the tunnel it has exited
 		time.Sleep(1 * time.Minute)
 	}
 }
