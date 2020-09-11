@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"syscall"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
@@ -24,12 +23,9 @@ func run() {
 	sharedutils.CheckError(err)
 
 	cmd = exec.Command("sudo", "-E", dir+"/wireguard", "-f", "wg0")
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Start()
 	wireguardCmd = cmd
-	cmd.Wait()
+	fmt.Println("starting", cmd)
+	runCmd(cmd)
 }
 
 func postRun() {}

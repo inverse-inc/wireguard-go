@@ -17,12 +17,8 @@ func run() {
 	sharedutils.CheckError(err)
 
 	cmd := exec.Command("/usr/bin/open", "-a", "Terminal.app", dir+"/wrapper")
-	err = cmd.Run()
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Start()
 	wireguardCmd = cmd
-	cmd.Wait()
+	runCmd(cmd)
 }
 
 func postRun() {
