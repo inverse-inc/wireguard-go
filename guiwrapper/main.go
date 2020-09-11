@@ -27,7 +27,12 @@ func main() {
 }
 
 func startTray() {
-	cmd := exec.Command(binPath("traywrapper"))
+	var cmd *exec.Cmd
+	if wgenv != nil {
+		cmd = exec.Command(binPath("traywrapper"), wgenv.Name())
+	} else {
+		cmd = exec.Command(binPath("traywrapper"))
+	}
 	runCmd(cmd)
 	fmt.Println("Tray has exited, exiting")
 	quit()
