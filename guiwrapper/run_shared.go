@@ -22,6 +22,7 @@ func binPath(name string) string {
 func runCmd(cmd *exec.Cmd) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Start()
+	err := cmd.Start()
+	sharedutils.CheckError(err)
 	cmd.Wait()
 }
