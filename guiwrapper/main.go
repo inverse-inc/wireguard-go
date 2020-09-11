@@ -80,10 +80,12 @@ func checkTunnelStatus() {
 				fmt.Println("Too many failures communicating with RPC server. Tunnel seems to be dead. Exiting.")
 				quit()
 			} else {
+				fmt.Println("Failed to contact tunnel for status update")
 				statusLabel.SetText("Tunnel seems to be inactive...")
 				fails++
 			}
 		} else {
+			fails = 0
 			status = statusReply.Status
 			statusLabel.SetText("Connected...")
 		}
