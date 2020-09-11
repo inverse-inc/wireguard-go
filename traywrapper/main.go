@@ -31,7 +31,9 @@ func setupSystray() {
 func main() {
 	systray.Run(func() {
 		setupSystray()
-		godotenv.Load(os.Args[1])
+		if len(os.Args) > 1 {
+			godotenv.Load(os.Args[1])
+		}
 		go checkParentIsAlive()
 	}, func() {})
 }
