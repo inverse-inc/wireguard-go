@@ -14,12 +14,12 @@ import (
 	"runtime"
 	"strconv"
 	"syscall"
-	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/tun"
+	"github.com/inverse-inc/wireguard-go/util"
 
 	_ "net/http/pprof"
 )
@@ -279,16 +279,5 @@ func main() {
 }
 
 func checkParentIsAlive() {
-	for {
-		ppid := findppid(int(os.Getppid()))
-		_, err := os.FindProcess(ppid)
-		if err != nil || ppid == 1 {
-			logger.Info.Println("Parent process is dead, exiting")
-			quit()
-		} else if err := process.Signal(syscall.Signal(0)); err != nil {
-			logger.Info.Println("Parent process is dead, exiting")
-			quit()
-		}
-		time.Sleep(1 * time.Second)
-	}
+	util.CheckParentIsAliveUNIX(quit)
 }
