@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os/exec"
 	"time"
-
-	"github.com/inverse-inc/wireguard-go/util"
 )
 
 func run() {
