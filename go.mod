@@ -5,8 +5,10 @@ go 1.13
 require (
 	fyne.io/fyne v1.3.3
 	github.com/davecgh/go-spew v1.1.1
+	github.com/fullstorydev/grpcurl v1.7.0 // indirect
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
+	github.com/golang/protobuf v1.4.2
 	github.com/inverse-inc/packetfence v10.1.1-0.20200902175525-e70bbbb66ca0+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0
 	github.com/jackpal/gateway v1.0.6
@@ -17,5 +19,6 @@ require (
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
 	golang.org/x/sys v0.0.0-20200515095857-1151b9dac4a9
 	golang.org/x/text v0.3.2
+	google.golang.org/grpc v1.30.0
 	gortc.io/stun v1.22.2
 )

@@ -16,7 +16,6 @@ func run() {
 
 	cmd = exec.Command("sudo", "-E", binPath("wireguard"), "-f", "wg0")
 	wireguardCmd = cmd
-	fmt.Println("starting", cmd)
 	runCmd(cmd)
 }
 

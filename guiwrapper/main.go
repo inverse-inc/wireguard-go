@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
 	"syscall"
+	"time"
+
+	"github.com/inverse-inc/wireguard-go/wgrpc"
+	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
 var wireguardCmd *exec.Cmd
@@ -18,6 +23,7 @@ func main() {
 	go startTray()
 	setupExitSignals()
 	SetupAPIClientGUI(func() {
+		go checkTunnelStatus()
 		run()
 		postRun()
 		quit()
@@ -52,4 +58,36 @@ func setupExitSignals() {
 		<-sigs
 		quit()
 	}()
+}
+
+func checkTunnelStatus() {
+	maxRpcFails := 5
+	ctx := context.Background()
+	rpc := ztn.WGRPCClient()
+	started := time.Now()
+	status := ""
+	fails := 0
+	for {
+		statusReply, err := rpc.GetStatus(ctx, &wgrpc.StatusRequest{})
+		if err != nil {
+			if status == "" {
+				fmt.Println("Failed to contact tunnel for initial status")
+				if time.Since(started) > 1*time.Minute {
+					fmt.Println("Waited too long for tunnel to start. Exiting")
+					quit()
+				}
+			} else if fails >= maxRpcFails {
+				fmt.Println("Too many failures communicating with RPC server. Tunnel seems to be dead. Exiting.")
+				quit()
+			} else {
+				statusLabel.SetText("Tunnel seems to be inactive...")
+				fails++
+			}
+		} else {
+			status = statusReply.Status
+			statusLabel.SetText("Connected...")
+		}
+
+		time.Sleep(1 * time.Second)
+	}
 }

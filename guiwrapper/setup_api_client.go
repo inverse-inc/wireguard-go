@@ -13,6 +13,8 @@ import (
 
 var spacePlaceholder = "                          "
 
+var statusLabel *widget.Label
+
 func SetupAPIClientGUI(callback func()) {
 	a := app.New()
 	w := a.NewWindow("Wireguard client")
@@ -73,8 +75,9 @@ func SetupAPIClientGUI(callback func()) {
 				verifySslStr = "n"
 			}
 			setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
-			
-			w.SetContent(widget.NewLabel("Connecting..."))
+
+			statusLabel = widget.NewLabel("Connecting...")
+			w.SetContent(statusLabel)
 			callback()
 			//TODO implement check on a localhost running HTTP API that the wireguard agent should run
 		}),

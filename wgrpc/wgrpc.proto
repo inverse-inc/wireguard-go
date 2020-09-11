@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "wgrpc";
+
+service WGService {
+  rpc GetStatus (StatusRequest) returns (StatusReply) {}
+}
+
+message StatusRequest {
+}
+
+message StatusReply {
+  string status = 1;
+}

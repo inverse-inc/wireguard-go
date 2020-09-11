@@ -15,10 +15,12 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn"
-	"github.com/mitchellh/go-ps"
+	ps "github.com/mitchellh/go-ps"
 )
 
 func startInverse(interfaceName string, device *device.Device) {
+	go ztn.StartRPC()
+
 	go checkParentIsAlive()
 
 	privateKey, publicKey := getKeys()
@@ -42,6 +44,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 
+	ztn.WGRPCServer.UpdateStatus("STARTED")
 }
 
 func getKeys() ([32]byte, [32]byte) {
