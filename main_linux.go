@@ -279,5 +279,5 @@ func main() {
 }
 
 func checkParentIsAlive() {
-	util.CheckParentIsAliveUNIX(quit)
+	util.CheckGUIIsAliveUNIX(quit)
 }

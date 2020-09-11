@@ -2,14 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"time"
 )
 
 func run() {
-	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
-
 	cmd := exec.Command("/usr/bin/open", "-a", "Terminal.app", binPath("wrapper"))
 	wireguardCmd = cmd
 	runCmd(cmd)

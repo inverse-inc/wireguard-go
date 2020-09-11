@@ -7,8 +7,6 @@ import (
 )
 
 func run() {
-	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
-
 	cmd := exec.Command("sudo", "echo", "Granted root access")
 	err := cmd.Run()
 	if err != nil {

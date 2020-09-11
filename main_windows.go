@@ -7,17 +7,15 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
 	"os"
 	"os/signal"
 	"syscall"
-	"regexp"
-	"time"
 
 	"github.com/inverse-inc/wireguard-go/device"
-	"github.com/joho/godotenv"
-	"github.com/inverse-inc/wireguard-go/tun"
 	"github.com/inverse-inc/wireguard-go/ipc"
+	"github.com/inverse-inc/wireguard-go/tun"
+	"github.com/inverse-inc/wireguard-go/util"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -42,7 +40,7 @@ func main() {
 		fmt.Sprintf("(%s) ", interfaceName),
 	)
 
-	os.Setenv("LOG_LEVEL","info")
+	os.Setenv("LOG_LEVEL", "info")
 
 	logger.Info.Println("Starting wireguard-go version", device.WireGuardGoVersion)
 	logger.Debug.Println("Debug log enabled")
@@ -106,16 +104,5 @@ func main() {
 }
 
 func checkParentIsAlive() {
-	for {
-		cmd := exec.Command("tasklist")
-		output, err := cmd.Output()
-		if err != nil {
-			fmt.Println("Unable to run tasklist: ", err, string(output))
-		}
-		if !regexp.MustCompile(os.Getenv("WG_GUI_PROCESS_NAME")+`\s+`+os.Getenv("WG_GUI_PID")+`\s+`).Match(output) {
-			fmt.Println("GUI is dead, exiting")
-			quit()
-		}
-		time.Sleep(1 * time.Second)
-	}
+	util.CheckGUIIsAliveWindows(quit)
 }

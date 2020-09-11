@@ -8,8 +8,6 @@ import (
 )
 
 func run() {
-	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
-	setenv("WG_GUI_PROCESS_NAME", "guiwrapper.exe")
 
 	cmd := exec.Command("C:\\Program Files\\Wireguard\\run.bat", wgenv.Name())
 	cmd.Stdout = os.Stdout

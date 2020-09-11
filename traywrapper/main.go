@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/getlantern/systray"
@@ -29,10 +30,12 @@ func setupSystray() {
 func main() {
 	systray.Run(func() {
 		setupSystray()
+		go checkParentIsAlive()
 	}, func() {})
 }
 
 func quit() {
+	fmt.Println("Tray is exiting")
 	systray.Quit()
 	os.Exit(0)
 }
