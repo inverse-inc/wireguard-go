@@ -58,7 +58,7 @@ if exist .deps\prepared goto :render
 	signtool sign /sha1 "%SigningCertificate%" /fd sha256 /tr "%TimestampServer%" /td sha256 /d WireGuard x86\wireguard.exe x86\wg.exe amd64\wireguard.exe amd64\wg.exe || goto :error
 
 :success
-	echo [+] Success. Launch wireguard.exe.
+	echo [+] Success.
 	exit /b 0
 
 :download
@@ -84,6 +84,10 @@ if exist .deps\prepared goto :render
 
 	cd guiwrapper
 	go build -v -o "..\%~1\guiwrapper.exe" || exit /b 1
+	cd ..
+
+	cd traywrapper
+	go build -v -o "..\%~1\traywrapper.exe" || exit /b 1
 	cd ..
 	
 	go build -tags walk_use_cgo -trimpath -v -o "%~1\wireguard.exe" || exit /b 1

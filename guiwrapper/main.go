@@ -14,7 +14,6 @@ var wgenv *os.File
 func main() {
 	fmt.Println("Starting up")
 	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
-	setenv("WG_GUI_WINDOWS_PROCESS_NAME", "guiwrapper.exe")
 
 	go startTray()
 	setupExitSignals()

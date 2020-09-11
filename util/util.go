@@ -3,8 +3,6 @@ package util
 import (
 	"fmt"
 	"os"
-	"os/exec"
-	"regexp"
 	"strconv"
 	"time"
 
@@ -26,13 +24,10 @@ func CheckGUIIsAliveUNIX(quit func()) {
 
 func CheckGUIIsAliveWindows(quit func()) {
 	for {
-		cmd := exec.Command("tasklist")
-		output, err := cmd.Output()
-		if err != nil {
-			fmt.Println("Unable to run tasklist: ", err, string(output))
-		}
-		if !regexp.MustCompile(os.Getenv("WG_GUI_WINDOWS_PROCESS_NAME") + `\s+` + os.Getenv("WG_GUI_PID") + `\s+`).Match(output) {
-			fmt.Println("GUI is dead, exiting")
+		ppid64, err := strconv.Atoi(os.Getenv("WG_GUI_PID"))
+		sharedutils.CheckError(err)
+		if !CheckPIDIsAlive(int(ppid64)) {
+			fmt.Println("GUI is dead, exiting", ppid64)
 			quit()
 		}
 		time.Sleep(1 * time.Second)

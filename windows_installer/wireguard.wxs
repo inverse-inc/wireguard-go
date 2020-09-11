@@ -85,6 +85,10 @@
 				<File Source="..\$(var.WIREGUARD_PLATFORM)\wireguard.exe" KeyPath="yes">
 				</File>
 			</Component>
+			<Component Directory="WireGuardFolder" Id="TraywrapperExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1fff">
+				<File Source="..\$(var.WIREGUARD_PLATFORM)\traywrapper.exe" KeyPath="yes">
+				</File>
+			</Component>
 			<Component Directory="WireGuardFolder" Id="PsExecExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1a69">
 				<File Source=".deps\PsExec.exe" KeyPath="yes">
 				</File>
