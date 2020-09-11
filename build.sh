@@ -34,4 +34,12 @@ if [ -z "$GUIWRAPPER_BIN_OUTPUT" ]; then
 fi
 
 ../.deps/go/bin/go build -v -o $GUIWRAPPER_BIN_OUTPUT || exit 1
+cd ..
 
+cd traywrapper
+if [ -z "$TRAYWRAPPER_BIN_OUTPUT" ]; then
+  TRAYWRAPPER_BIN_OUTPUT=traywrapper
+fi
+
+../.deps/go/bin/go build -v -o $TRAYWRAPPER_BIN_OUTPUT || exit 1
+cd ..

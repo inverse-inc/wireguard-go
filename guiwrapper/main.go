@@ -4,45 +4,27 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
-	"github.com/getlantern/systray"
-	"github.com/getlantern/systray/example/icon"
 )
 
 var wireguardCmd *exec.Cmd
 
-func setupSystray() {
-	systray.SetIcon(icon.Data)
-	systray.SetTitle("Wireguard client")
-	systray.SetTooltip("Wireguard client")
-	mQuit := systray.AddMenuItem("Quit", "Quit")
-
-	// Sets the icon of a menu item. Only available on Mac and Windows.
-	mQuit.SetIcon(icon.Data)
-
-	go func() {
-		for {
-			select {
-			case <-mQuit.ClickedCh:
-				quit()
-			}
-		}
-	}()
-}
-
 func main() {
 	fmt.Println("Starting up")
+	go startTray()
 	SetupAPIClientGUI(func() {
-		systray.Run(func() {
-			setupSystray()
-			run()
-			postRun()
-			quit()
-		}, func() {})
+		run()
+		postRun()
+		quit()
 	})
 }
 
+func startTray() {
+	cmd := exec.Command(binPath("traywrapper"))
+	runCmd(cmd)
+	fmt.Println("Tray has exited, exiting")
+	os.Exit(0)
+}
+
 func quit() {
-	systray.Quit()
 	os.Exit(0)
 }

@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
-
-	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
 
 func run() {
@@ -19,10 +16,7 @@ func run() {
 		os.Exit(1)
 	}
 
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	sharedutils.CheckError(err)
-
-	cmd = exec.Command("sudo", "-E", dir+"/wireguard", "-f", "wg0")
+	cmd = exec.Command("sudo", "-E", binPath("wireguard"), "-f", "wg0")
 	wireguardCmd = cmd
 	fmt.Println("starting", cmd)
 	runCmd(cmd)
