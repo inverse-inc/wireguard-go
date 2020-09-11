@@ -10,8 +10,6 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
 
-var wgenv *os.File
-
 func init() {
 	var err error
 	tmp := os.Getenv("HOME")

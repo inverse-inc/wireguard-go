@@ -64,7 +64,6 @@ func warning() {
 
 func main() {
 	godotenv.Load(os.Args[1])
-	os.Remove(os.Args[1])
 
 	warning()
 

@@ -11,7 +11,6 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
 
-var wgenv *os.File
 func setenv(k, v string) {
 	if wgenv == nil {
 		var err error

@@ -27,7 +27,6 @@ var logger *device.Logger
 
 func main() {
 	godotenv.Load(os.Args[1])
-	os.Remove(os.Args[1])
 
 	//for _, pair := range os.Environ() {
 	//	fmt.Println(pair)
