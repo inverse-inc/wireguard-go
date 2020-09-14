@@ -14,33 +14,35 @@ import (
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
-	"github.com/inverse-inc/wireguard-go/natt"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
-	"github.com/inverse-inc/wireguard-go/ztn"
+	"github.com/inverse-inc/wireguard-go/ztn/api"
+	"github.com/inverse-inc/wireguard-go/ztn/natt"
+	"github.com/inverse-inc/wireguard-go/ztn/profile"
+	"github.com/inverse-inc/wireguard-go/ztn/rpc"
 	ps "github.com/mitchellh/go-ps"
 )
 
 func startInverse(interfaceName string, device *device.Device) {
-	go ztn.StartRPC()
+	go rpc.StartRPC()
 
 	go checkParentIsAlive()
 
 	privateKey, publicKey := getKeys()
 
-	profile := ztn.Profile{
+	profile := profile.Profile{
 		PrivateKey: base64.StdEncoding.EncodeToString(privateKey[:]),
 		PublicKey:  base64.StdEncoding.EncodeToString(publicKey[:]),
 	}
 	err := profile.FillProfileFromServer(logger)
 	if err != nil {
 		logger.Error.Println("Got error when filling profile from server", err)
-		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+		rpc.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
 	}
 
 	err = profile.SetupWireguard(device, interfaceName)
 	if err != nil {
 		logger.Error.Println("Got error when setting up wireguard interface", err)
-		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+		rpc.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
 	}
 
 	for _, peerID := range profile.AllowedPeers {
@@ -102,11 +104,11 @@ func getKeys() ([32]byte, [32]byte) {
 	}
 }
 
-func listenEvents(device *device.Device, profile ztn.Profile) {
-	chal, err := ztn.GetServerChallenge(&profile)
+func listenEvents(device *device.Device, profile profile.Profile) {
+	chal, err := profile.GetServerChallenge(&profile)
 	if err != nil {
 		logger.Error.Println("Got an error while starting to listen events", err)
-		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+		rpc.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
 	}
 
 	priv, err := remoteclients.B64KeyToBytes(profile.PrivateKey)
@@ -117,12 +119,12 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 	sharedutils.CheckError(err)
 
 	myID := base64.URLEncoding.EncodeToString(pub[:])
-	c := ztn.GLPPrivateClient(priv, pub, serverPub)
-	c.Start(ztn.APIClientCtx)
+	c := api.GLPPrivateClient(priv, pub, serverPub)
+	c.Start(api.APIClientCtx)
 	for {
 		select {
 		case e := <-c.EventsChan:
-			event := ztn.Event{}
+			event := api.Event{}
 			err := json.Unmarshal(e.Data, &event)
 			sharedutils.CheckError(err)
 			if event.Type == "new_peer" && event.Data["id"].(string) != myID {
@@ -132,13 +134,13 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 	}
 }
 
-func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
-	peerProfile, err := ztn.GetPeerProfile(peerID)
+func startPeer(device *device.Device, prof profile.Profile, peerID string) {
+	peerProfile, err := prof.GetPeerProfile(peerID)
 	if err != nil {
 		logger.Error.Println("Unable to fetch profile for peer", peerID, ". Error:", err)
 		logger.Error.Println(debug.Stack())
 	} else {
-		go func(peerID string, peerProfile ztn.PeerProfile) {
+		go func(peerID string, peerProfile profile.PeerProfile) {
 			for {
 				func() {
 					defer func() {
@@ -148,7 +150,7 @@ func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
 					}()
 					// methodType := "stun"
 					methodType := "upnpigd"
-					method, _ := natt.Create(ctx, methodType, device, logger, prof, peerProfile)
+					method, _ := natt.Create(api.APIClientCtx, methodType, device, logger, prof, peerProfile)
 					method.Start()
 				}()
 			}

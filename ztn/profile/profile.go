@@ -26,8 +26,8 @@ type ServerChallenge struct {
 	BytesPublicKey [32]byte
 }
 
-func DoServerChallenge(profile *Profile) (string, error) {
-	sc, err := GetServerChallenge(profile)
+func (p *Profile) DoServerChallenge(profile *Profile) (string, error) {
+	sc, err := p.GetServerChallenge(profile)
 	if err != nil {
 		return "", err
 	}
@@ -57,7 +57,7 @@ func DoServerChallenge(profile *Profile) (string, error) {
 	return base64.URLEncoding.EncodeToString(challengeEncrypted), nil
 }
 
-func GetServerChallenge(profile *Profile) (ServerChallenge, error) {
+func (p *Profile) GetServerChallenge(profile *Profile) (ServerChallenge, error) {
 	sc := ServerChallenge{}
 	err := api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/server_challenge?public_key="+url.QueryEscape(util.B64keyToURLb64(profile.PublicKey)), &sc)
 	if err != nil {
@@ -112,7 +112,7 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) erro
 func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 	p.logger = logger
 
-	auth, err := DoServerChallenge(p)
+	auth, err := p.DoServerChallenge(p)
 	if err != nil {
 		return err
 	}
@@ -168,13 +168,13 @@ type PeerProfile struct {
 	PublicKey   string `json:"public_key"`
 }
 
-func GetPeerProfile(id string) (PeerProfile, error) {
-	var p PeerProfile
+func (p *Profile) GetPeerProfile(id string) (PeerProfile, error) {
+	var peer PeerProfile
 	err := api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &p)
 
 	pkey, err := base64.URLEncoding.DecodeString(p.PublicKey)
 	sharedutils.CheckError(err)
-	p.PublicKey = base64.StdEncoding.EncodeToString(pkey)
+	peer.PublicKey = base64.StdEncoding.EncodeToString(pkey)
 
-	return p, err
+	return peer, err
 }

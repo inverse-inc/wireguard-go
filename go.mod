@@ -15,6 +15,7 @@ require (
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca
 	github.com/joho/godotenv v1.3.0
 	github.com/mitchellh/go-ps v1.0.0
+	github.com/scottjg/upnp v0.0.0-20161226025956-82caf20da2dd
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
 	golang.org/x/sys v0.0.0-20200515095857-1151b9dac4a9
