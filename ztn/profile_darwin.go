@@ -5,15 +5,20 @@ package ztn
 import (
 	"os/exec"
 
-	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 )
 
-func (p *Profile) setupInterface(device *device.Device, WGInterface string) {
+func (p *Profile) setupInterface(device *device.Device, WGInterface string) (error) {
 	// ipconfig set utun0 MANUAL 192.168.69.10 255.255.255.0
 	cmd := exec.Command("ipconfig", "set", WGInterface, "MANUAL", p.WireguardIP.String(), ipv4MaskString(p.WireguardNetmask))
 	err := cmd.Run()
-	sharedutils.CheckError(err)
+	if err != nil {
+		return err
+	}
 	err = exec.Command("ifconfig", WGInterface, "up").Run()
-	sharedutils.CheckError(err)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
