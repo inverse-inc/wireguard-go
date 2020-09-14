@@ -13,6 +13,12 @@ import (
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
+var messages = map[string]string{
+	wgrpc.STATUS_CONNECTED: "Connected",
+	wgrpc.STATUS_ERROR:     "An error has occured",
+	wgrpc.STATUS_NOT_READY: "Starting tunnel",
+}
+
 var wireguardCmd *exec.Cmd
 var wgenv *os.File
 
@@ -29,6 +35,13 @@ func main() {
 		quit()
 	})
 	quit()
+}
+
+func postRun() {
+	fmt.Println("Tunnel was launched. Waiting for the end of this process")
+	for {
+		time.Sleep(1 * time.Second)
+	}
 }
 
 func startTray() {
@@ -73,12 +86,10 @@ func checkTunnelStatus() {
 			if status == "" {
 				fmt.Println("Failed to contact tunnel for initial status")
 				if time.Since(started) > 1*time.Minute {
-					fmt.Println("Waited too long for tunnel to start. Exiting")
-					quit()
+					statusLabel.SetText("Failed to start tunnel process")
 				}
 			} else if fails >= maxRpcFails {
-				fmt.Println("Too many failures communicating with RPC server. Tunnel seems to be dead. Exiting.")
-				quit()
+				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead.")
 			} else {
 				fmt.Println("Failed to contact tunnel for status update")
 				statusLabel.SetText("Tunnel seems to be inactive...")
@@ -87,7 +98,11 @@ func checkTunnelStatus() {
 		} else {
 			fails = 0
 			status = statusReply.Status
-			statusLabel.SetText("Connected...")
+			if status == wgrpc.STATUS_ERROR {
+				statusLabel.SetText(messages[status] + ": " + statusReply.LastError)
+			} else {
+				statusLabel.SetText(messages[status])
+			}
 		}
 
 		time.Sleep(1 * time.Second)

@@ -10,6 +10,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/jackpal/gateway"
 )
 
@@ -20,25 +21,35 @@ type ServerChallenge struct {
 	BytesPublicKey [32]byte
 }
 
-func DoServerChallenge(profile *Profile) string {
+func DoServerChallenge(profile *Profile) (string, error) {
 	sc, err := GetServerChallenge(profile)
-	sharedutils.CheckError(err)
+	if err != nil {
+		return "", err
+	}
 
 	privateKey, err := remoteclients.B64KeyToBytes(profile.PrivateKey)
-	sharedutils.CheckError(err)
+	if err != nil {
+		return "", err
+	}
 
 	publicKey, err := remoteclients.B64KeyToBytes(profile.PublicKey)
-	sharedutils.CheckError(err)
+	if err != nil {
+		return "", err
+	}
 
 	challenge, err := sc.Decrypt(privateKey)
-	sharedutils.CheckError(err)
+	if err != nil {
+		return "", err
+	}
 
 	challenge = append(challenge, publicKey[:]...)
 
 	challengeEncrypted, err := sc.Encrypt(privateKey, challenge)
-	sharedutils.CheckError(err)
+	if err != nil {
+		return "", err
+	}
 
-	return base64.URLEncoding.EncodeToString(challengeEncrypted)
+	return base64.URLEncoding.EncodeToString(challengeEncrypted), nil
 }
 
 func GetServerChallenge(profile *Profile) (ServerChallenge, error) {
@@ -80,33 +91,52 @@ type Profile struct {
 	logger           *device.Logger
 }
 
-func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) {
-	p.setupInterface(device, WGInterface)
+func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) error {
+	err := p.setupInterface(device, WGInterface)
+	if err != nil {
+		return err
+	}
 
 	SetConfig(device, "listen_port", fmt.Sprintf("%d", localWGPort))
 	SetConfig(device, "private_key", keyToHex(p.PrivateKey))
+
+	WGRPCServer.UpdateStatus(wgrpc.STATUS_CONNECTED, nil)
+	return nil
 }
 
-func (p *Profile) FillProfileFromServer(logger *device.Logger) {
+func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 	p.logger = logger
 
-	auth := DoServerChallenge(p)
+	auth, err := DoServerChallenge(p)
+	if err != nil {
+		return err
+	}
 
 	mac, err := p.findClientMAC()
-	sharedutils.CheckError(err)
+	if err != nil {
+		return err
+	}
 
 	err = GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(b64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth)+"&mac="+url.QueryEscape(mac.String()), &p)
-	sharedutils.CheckError(err)
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
 }
 
 func (p *Profile) findClientMAC() (net.HardwareAddr, error) {
 	gwIP, err := gateway.DiscoverGateway()
-	sharedutils.CheckError(err)
+	if err != nil {
+		return net.HardwareAddr{}, err
+	}
 
 	p.logger.Debug.Println("Found default gateway", gwIP)
 
 	ifaces, err := net.Interfaces()
-	sharedutils.CheckError(err)
+	if err != nil {
+		return net.HardwareAddr{}, err
+	}
 
 	for _, i := range ifaces {
 		addrs, err := i.Addrs()

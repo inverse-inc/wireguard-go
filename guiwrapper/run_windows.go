@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
-	"time"
 )
 
 func run() {
@@ -15,11 +13,4 @@ func run() {
 	cmd.Start()
 	wireguardCmd = cmd
 	cmd.Wait()
-}
-
-func postRun() {
-	fmt.Println("Tunnel was launched. Waiting for the end of this process")
-	for {
-		time.Sleep(1 * time.Minute)
-	}
 }

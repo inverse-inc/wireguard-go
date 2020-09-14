@@ -1,14 +1,12 @@
 package main
 
 import (
-	"crypto/tls"
 	"encoding/base64"
-	"net/http"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
-	"github.com/inverse-inc/packetfence/go/unifiedapiclient"
 )
 
 var spacePlaceholder = "                          "
@@ -38,8 +36,11 @@ func SetupAPIClientGUI(callback func()) {
 	passwordEntry.Password = true
 	passwordEntry.PlaceHolder = spacePlaceholder
 
+	formError := widget.NewLabelWithStyle("", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	formError.Hide()
+
 	w.SetContent(widget.NewVBox(
-		widget.NewLabel("Wireguard client configuration"),
+		formError,
 		widget.NewHBox(
 			widget.NewLabel("Server"),
 			serverEntry,
@@ -60,12 +61,27 @@ func SetupAPIClientGUI(callback func()) {
 			passwordEntry,
 		),
 		widget.NewButton("Connect", func() {
-			httpClient := &http.Client{
-				Transport: &http.Transport{
-					TLSClientConfig: &tls.Config{InsecureSkipVerify: !verifyServerEntry.Checked},
-				},
+
+			showFormError := func(msg string) {
+				formError.SetText(msg)
+				formError.Show()
 			}
-			unifiedapiclient.SetHTTPClient(httpClient)
+
+			if usernameEntry.Text == "" {
+				showFormError("You must enter a username")
+				return
+			}
+
+			if passwordEntry.Text == "" {
+				showFormError("You must enter a password")
+				return
+			}
+
+			if serverEntry.Text == "" {
+				showFormError("You must enter a server to connect to")
+				return
+			}
+
 			setenv("WG_USERNAME", usernameEntry.Text)
 			setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
 			setenv("WG_SERVER", serverEntry.Text)
@@ -76,7 +92,7 @@ func SetupAPIClientGUI(callback func()) {
 			}
 			setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
 
-			statusLabel = widget.NewLabel("Connecting...")
+			statusLabel = widget.NewLabel("Opening tunnel process")
 			w.SetContent(statusLabel)
 			callback()
 			//TODO implement check on a localhost running HTTP API that the wireguard agent should run

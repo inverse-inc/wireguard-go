@@ -14,6 +14,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
 )
@@ -29,9 +30,17 @@ func startInverse(interfaceName string, device *device.Device) {
 		PrivateKey: base64.StdEncoding.EncodeToString(privateKey[:]),
 		PublicKey:  base64.StdEncoding.EncodeToString(publicKey[:]),
 	}
-	profile.FillProfileFromServer(logger)
+	err := profile.FillProfileFromServer(logger)
+	if err != nil {
+		logger.Error.Println("Got error when filling profile from server", err)
+		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+	}
 
-	profile.SetupWireguard(device, interfaceName)
+	err = profile.SetupWireguard(device, interfaceName)
+	if err != nil {
+		logger.Error.Println("Got error when setting up wireguard interface", err)
+		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+	}
 
 	for _, peerID := range profile.AllowedPeers {
 		startPeer(device, profile, peerID)
@@ -44,7 +53,6 @@ func startInverse(interfaceName string, device *device.Device) {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 
-	ztn.WGRPCServer.UpdateStatus("STARTED")
 }
 
 func getKeys() ([32]byte, [32]byte) {
@@ -95,7 +103,11 @@ func getKeys() ([32]byte, [32]byte) {
 
 func listenEvents(device *device.Device, profile ztn.Profile) {
 	chal, err := ztn.GetServerChallenge(&profile)
-	sharedutils.CheckError(err)
+	if err != nil {
+		logger.Error.Println("Got an error while starting to listen events", err)
+		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+	}
+
 	priv, err := remoteclients.B64KeyToBytes(profile.PrivateKey)
 	sharedutils.CheckError(err)
 	pub, err := remoteclients.B64KeyToBytes(profile.PublicKey)

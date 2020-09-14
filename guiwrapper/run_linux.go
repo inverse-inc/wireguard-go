@@ -18,5 +18,3 @@ func run() {
 	wireguardCmd = cmd
 	runCmd(cmd)
 }
-
-func postRun() {}
