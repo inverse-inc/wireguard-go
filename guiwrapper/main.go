@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/inverse-inc/wireguard-go/wgrpc"
-	"github.com/inverse-inc/wireguard-go/ztn"
+	"github.com/inverse-inc/wireguard-go/ztn/rpc"
 )
 
 var messages = map[string]string{
@@ -76,7 +76,7 @@ func setupExitSignals() {
 func checkTunnelStatus() {
 	maxRpcFails := 5
 	ctx := context.Background()
-	rpc := ztn.WGRPCClient()
+	rpc := rpc.WGRPCClient()
 	started := time.Now()
 	status := ""
 	fails := 0
