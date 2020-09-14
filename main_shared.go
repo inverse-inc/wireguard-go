@@ -14,6 +14,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/natt"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
@@ -145,8 +146,10 @@ func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
 							logger.Error.Println("Recovered error", r, "while handling peer", peerProfile.PublicKey, ". Will attempt to connect to it again.")
 						}
 					}()
-					pc := ztn.NewPeerConnection(device, logger, profile, peerProfile)
-					pc.Start()
+					// methodType := "stun"
+					methodType := "upnpigd"
+					method, _ := natt.Create(ctx, methodType, device, logger, prof, peerProfile)
+					method.Start()
 				}()
 			}
 		}(peerID, peerProfile)

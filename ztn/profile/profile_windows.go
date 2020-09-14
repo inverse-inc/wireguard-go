@@ -1,6 +1,6 @@
 // +build windows
 
-package ztn
+package profile
 
 import (
 	"fmt"

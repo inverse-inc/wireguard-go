@@ -1,6 +1,6 @@
 // +build darwin
 
-package ztn
+package profile
 
 import (
 	"os/exec"

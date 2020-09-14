@@ -1,4 +1,4 @@
-package ztn
+package profile
 
 import (
 	"encoding/base64"
@@ -11,6 +11,11 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
+	"github.com/inverse-inc/wireguard-go/ztn/api"
+	"github.com/inverse-inc/wireguard-go/ztn/config"
+	"github.com/inverse-inc/wireguard-go/ztn/constants"
+	"github.com/inverse-inc/wireguard-go/ztn/rpc"
+	"github.com/inverse-inc/wireguard-go/ztn/util"
 	"github.com/jackpal/gateway"
 )
 
@@ -54,7 +59,7 @@ func DoServerChallenge(profile *Profile) (string, error) {
 
 func GetServerChallenge(profile *Profile) (ServerChallenge, error) {
 	sc := ServerChallenge{}
-	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/server_challenge?public_key="+url.QueryEscape(b64keyToURLb64(profile.PublicKey)), &sc)
+	err := api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/server_challenge?public_key="+url.QueryEscape(util.B64keyToURLb64(profile.PublicKey)), &sc)
 	if err != nil {
 		return sc, err
 	}
@@ -97,10 +102,10 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) erro
 		return err
 	}
 
-	SetConfig(device, "listen_port", fmt.Sprintf("%d", localWGPort))
-	SetConfig(device, "private_key", keyToHex(p.PrivateKey))
+	config.SetConfig(device, "listen_port", fmt.Sprintf("%d", constants.LocalWGPort))
+	config.SetConfig(device, "private_key", util.KeyToHex(p.PrivateKey))
 
-	WGRPCServer.UpdateStatus(wgrpc.STATUS_CONNECTED, nil)
+	rpc.WGRPCServer.UpdateStatus(wgrpc.STATUS_CONNECTED, nil)
 	return nil
 }
 
@@ -117,7 +122,7 @@ func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 		return err
 	}
 
-	err = GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(b64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth)+"&mac="+url.QueryEscape(mac.String()), &p)
+	err = api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(util.B64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth)+"&mac="+url.QueryEscape(mac.String()), &p)
 	if err != nil {
 		return err
 	} else {
@@ -165,7 +170,7 @@ type PeerProfile struct {
 
 func GetPeerProfile(id string) (PeerProfile, error) {
 	var p PeerProfile
-	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &p)
+	err := api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &p)
 
 	pkey, err := base64.URLEncoding.DecodeString(p.PublicKey)
 	sharedutils.CheckError(err)

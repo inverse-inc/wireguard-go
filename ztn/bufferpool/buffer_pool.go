@@ -1,10 +1,10 @@
-package ztn
+package bufferpool
 
 import (
 	"sync"
 )
 
-var defaultBufferPool = NewBufferPool()
+var DefaultBufferPool = NewBufferPool()
 
 const maxBufferPoolPktSize = 1500
 

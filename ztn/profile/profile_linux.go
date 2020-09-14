@@ -1,6 +1,6 @@
 // +build linux
 
-package ztn
+package profile
 
 import (
 	"fmt"

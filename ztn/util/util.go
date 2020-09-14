@@ -1,4 +1,4 @@
-package ztn
+package util
 
 import (
 	"encoding/base64"
@@ -11,7 +11,7 @@ import (
 	"gortc.io/stun"
 )
 
-func udpSend(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {
+func UdpSend(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {
 	_, err := conn.WriteToUDP(msg, addr)
 	if err != nil {
 		return fmt.Errorf("send: %v", err)
@@ -20,20 +20,20 @@ func udpSend(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {
 	return nil
 }
 
-func udpSendStr(msg string, conn *net.UDPConn, addr *net.UDPAddr) error {
-	return udpSend([]byte(msg), conn, addr)
+func UdpSendStr(msg string, conn *net.UDPConn, addr *net.UDPAddr) error {
+	return UdpSend([]byte(msg), conn, addr)
 }
 
-func keyToHex(b64 string) string {
+func KeyToHex(b64 string) string {
 	data, err := base64.StdEncoding.DecodeString(b64)
 	sharedutils.CheckError(err)
 	return hex.EncodeToString(data)
 }
 
-func sendBindingRequest(conn *net.UDPConn, addr *net.UDPAddr) error {
+func SendBindingRequest(conn *net.UDPConn, addr *net.UDPAddr) error {
 	m := stun.MustBuild(stun.TransactionID, stun.BindingRequest)
 
-	err := udpSend(m.Raw, conn, addr)
+	err := UdpSend(m.Raw, conn, addr)
 	if err != nil {
 		return fmt.Errorf("binding: %v", err)
 	}
@@ -60,4 +60,10 @@ func ipv4MaskString(mask int) string {
 	}
 
 	return fmt.Sprintf("%d.%d.%d.%d", m[0], m[1], m[2], m[3])
+}
+
+func B64keyToURLb64(k string) string {
+	b, err := remoteclients.B64KeyToBytes(k)
+	sharedutils.CheckError(err)
+	return base64.URLEncoding.EncodeToString(b[:])
 }

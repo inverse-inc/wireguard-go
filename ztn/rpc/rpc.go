@@ -1,4 +1,4 @@
-package ztn
+package rpc
 
 import (
 	"fmt"
