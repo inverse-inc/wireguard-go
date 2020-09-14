@@ -9,6 +9,7 @@ import (
 
 	"github.com/inverse-inc/packetfence/go/log"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/inverse-inc/upnp"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn/api"
 	"github.com/inverse-inc/wireguard-go/ztn/bufferpool"
@@ -16,7 +17,6 @@ import (
 	"github.com/inverse-inc/wireguard-go/ztn/constants"
 	"github.com/inverse-inc/wireguard-go/ztn/profile"
 	"github.com/inverse-inc/wireguard-go/ztn/util"
-	"github.com/scottjg/upnp"
 )
 
 var mapping = new(upnp.Upnp)
