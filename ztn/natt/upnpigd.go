@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net"
 	"strings"
 
@@ -22,7 +23,6 @@ import (
 var mapping = new(upnp.Upnp)
 
 var localPort = constants.LocalWGPort
-var remotePort = constants.LocalWGPort
 
 // UPnPIGD struct
 type UPnPIGD struct {
@@ -53,7 +53,7 @@ func NewUPnPIGD(ctx context.Context, d *device.Device, logger *device.Logger, my
 }
 
 // Init initialyse
-func (hole *UPnPIGD) init(context context.Context, d *device.Device, logger *device.Logger, myProfile profile.Profile, peerProfile profile.PeerProfile) {
+func (natt *UPnPIGD) init(context context.Context, d *device.Device, logger *device.Logger, myProfile profile.Profile, peerProfile profile.PeerProfile) {
 	log.SetProcessName("wireguard-go")
 	ctx := log.LoggerNewContext(context)
 	e := &ExternalConnection{
@@ -65,11 +65,11 @@ func (hole *UPnPIGD) init(context context.Context, d *device.Device, logger *dev
 		PeerProfile: peerProfile,
 		Ctx:         ctx,
 	}
-	hole.ConnectionPeer = e
+	natt.ConnectionPeer = e
 }
 
 // GetExternalInfo fetch wan information
-func (hole *UPnPIGD) GetExternalInfo() error {
+func (natt *UPnPIGD) GetExternalInfo() error {
 	err := CheckNet()
 	if err != nil {
 		return errors.New("your router does not support the UPnP protocol.")
@@ -79,9 +79,12 @@ func (hole *UPnPIGD) GetExternalInfo() error {
 	if err != nil {
 		return err
 	}
+
+	remotePort := rand.Intn(constants.HigherPort-constants.LowerPort) + constants.LowerPort
+
 	MyUDP := &net.UDPAddr{IP: myExternalIP, Port: remotePort}
-	hole.ConnectionPeer.MyAddr = MyUDP
-	err = hole.AddPortMapping(localPort, remotePort)
+	natt.ConnectionPeer.MyAddr = MyUDP
+	err = natt.AddPortMapping(localPort, remotePort)
 	if err != nil {
 		return errors.New("Fail to add the port mapping")
 	}
@@ -89,10 +92,10 @@ func (hole *UPnPIGD) GetExternalInfo() error {
 }
 
 // AddPortMapping insert port mapping in the gateway
-func (hole *UPnPIGD) AddPortMapping(localPort, remotePort int) error {
+func (natt *UPnPIGD) AddPortMapping(localPort, remotePort int) error {
 	if err := mapping.AddPortMapping(localPort, remotePort, 60, "UDP", "WireguardGO"); err == nil {
 		fmt.Println("Port mapped successfully")
-		hole.ConnectionPeer.Logger.Info.Print("Port mapped successfully")
+		natt.ConnectionPeer.Logger.Info.Print("Port mapped successfully")
 		return nil
 	}
 	return errors.New("Fail to add the port mapping")
@@ -104,30 +107,28 @@ func DelPortMapping(localPort, remotePort int) {
 }
 
 // Run execute the Method
-func (hole *UPnPIGD) Start() error {
+func (natt *UPnPIGD) Start() error {
 	var err error
-	err = hole.GetExternalInfo()
+	err = natt.GetExternalInfo()
 
-	hole.ConnectionPeer.LocalPeerConn, err = net.ListenUDP(udp, nil)
+	natt.ConnectionPeer.LocalPeerConn, err = net.ListenUDP(udp, nil)
 	sharedutils.CheckError(err)
 
-	hole.ConnectionPeer.Logger.Debug.Printf("Listening on %s for peer %s\n", hole.ConnectionPeer.LocalPeerConn.LocalAddr(), hole.ConnectionPeer.PeerID)
+	natt.ConnectionPeer.Logger.Debug.Printf("Listening on %s for peer %s\n", natt.ConnectionPeer.LocalPeerConn.LocalAddr(), natt.ConnectionPeer.PeerID)
 
 	messageChan := make(chan *pkt)
-	hole.ConnectionPeer.Listen(hole.ConnectionPeer.LocalPeerConn, messageChan)
+	natt.ConnectionPeer.Listen(natt.ConnectionPeer.LocalPeerConn, messageChan)
 
 	var peerAddrChan <-chan string
 
 	foundPeer := make(chan bool)
 
-	a := strings.Split(hole.ConnectionPeer.LocalPeerConn.LocalAddr().String(), ":")
+	a := strings.Split(natt.ConnectionPeer.LocalPeerConn.LocalAddr().String(), ":")
 	var localPeerAddr = fmt.Sprintf("%s:%s", constants.LocalWGIP.String(), a[len(a)-1])
-	// var localWGAddr = fmt.Sprintf("%s:%d", constants.LocalWGIP.String(), constants.LocalWGPort)
 
 	for {
 		res := func() bool {
 			var message *pkt
-			// var ok bool
 
 			defer func() {
 				if message != nil {
@@ -138,27 +139,27 @@ func (hole *UPnPIGD) Start() error {
 			select {
 
 			case peerStr := <-peerAddrChan:
-				if hole.ConnectionPeer.ShouldTryPrivate() {
-					hole.ConnectionPeer.Logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", hole.ConnectionPeer.PeerID, ". This connection attempt may fail")
+				if natt.ConnectionPeer.ShouldTryPrivate() {
+					natt.ConnectionPeer.Logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", natt.ConnectionPeer.PeerID, ". This connection attempt may fail")
 				}
 
-				hole.ConnectionPeer.Logger.Debug.Println("Publishing for peer join", hole.ConnectionPeer.PeerID)
-				api.GLPPublish(hole.ConnectionPeer.BuildP2PKey(), hole.ConnectionPeer.BuildNetworkEndpointEvent(hole))
+				natt.ConnectionPeer.Logger.Debug.Println("Publishing for peer join", natt.ConnectionPeer.PeerID)
+				api.GLPPublish(natt.ConnectionPeer.BuildP2PKey(), natt.ConnectionPeer.BuildNetworkEndpointEvent(natt))
 
-				hole.ConnectionPeer.PeerAddr, err = net.ResolveUDPAddr(udp, peerStr)
+				natt.ConnectionPeer.PeerAddr, err = net.ResolveUDPAddr(udp, peerStr)
 				if err != nil {
 					// pc.Logger.Fatalln("resolve peeraddr:", err)
 				}
 				conf := ""
-				conf += fmt.Sprintf("public_key=%s\n", util.KeyToHex(hole.ConnectionPeer.PeerProfile.PublicKey))
+				conf += fmt.Sprintf("public_key=%s\n", util.KeyToHex(natt.ConnectionPeer.PeerProfile.PublicKey))
 				conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
 				conf += "replace_allowed_ips=true\n"
-				conf += fmt.Sprintf("allowed_ip=%s/32\n", hole.ConnectionPeer.PeerProfile.WireguardIP.String())
+				conf += fmt.Sprintf("allowed_ip=%s/32\n", natt.ConnectionPeer.PeerProfile.WireguardIP.String())
 
-				config.SetConfigMulti(hole.ConnectionPeer.Device, conf)
+				config.SetConfigMulti(natt.ConnectionPeer.Device, conf)
 
-				hole.ConnectionPeer.Started = true
-				hole.ConnectionPeer.TriedPrivate = true
+				natt.ConnectionPeer.Started = true
+				natt.ConnectionPeer.TriedPrivate = true
 				foundPeer <- true
 			}
 			return true
@@ -169,6 +170,6 @@ func (hole *UPnPIGD) Start() error {
 	}
 }
 
-func (hole *UPnPIGD) GetPrivateAddr() string {
+func (natt *UPnPIGD) GetPrivateAddr() string {
 	return "mysuperipzammit"
 }

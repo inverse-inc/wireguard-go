@@ -79,7 +79,7 @@ func SetupAPIClientCLI() {
 
 func mustGetenv(k string) string {
 	if v := os.Getenv(k); v == "" {
-		panic("Key " + k + " is empty in the enviorment")
+		panic("Key " + k + " is empty in the environment")
 	} else {
 		return v
 	}
