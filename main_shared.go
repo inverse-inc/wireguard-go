@@ -148,8 +148,8 @@ func startPeer(device *device.Device, prof profile.Profile, peerID string) {
 							logger.Error.Println("Recovered error", r, "while handling peer", peerProfile.PublicKey, ". Will attempt to connect to it again.")
 						}
 					}()
-					// methodType := "stun"
-					methodType := "upnpigd"
+					methodType := "stun"
+					// methodType := "upnpigd"
 					method, _ := natt.Create(api.APIClientCtx, methodType, device, logger, prof, peerProfile)
 					method.Start()
 				}()
