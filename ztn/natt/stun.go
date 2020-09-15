@@ -11,7 +11,6 @@ import (
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn/api"
 	"github.com/inverse-inc/wireguard-go/ztn/bufferpool"
-	"github.com/inverse-inc/wireguard-go/ztn/config"
 	"github.com/inverse-inc/wireguard-go/ztn/constants"
 	"github.com/inverse-inc/wireguard-go/ztn/profile"
 	"github.com/inverse-inc/wireguard-go/ztn/util"
@@ -172,13 +171,8 @@ func (natt *STUN) Run() error {
 				if err != nil {
 					// pc.Logger.Fatalln("resolve peeraddr:", err)
 				}
-				conf := ""
-				conf += fmt.Sprintf("public_key=%s\n", util.KeyToHex(natt.ConnectionPeer.PeerProfile.PublicKey))
-				conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
-				conf += "replace_allowed_ips=true\n"
-				conf += fmt.Sprintf("allowed_ip=%s/32\n", natt.ConnectionPeer.PeerProfile.WireguardIP.String())
 
-				config.SetConfigMulti(natt.ConnectionPeer.Device, conf)
+				natt.ConnectionPeer.SetConfig(natt.ConnectionPeer, localPeerAddr)
 
 				natt.ConnectionPeer.Started = true
 				natt.ConnectionPeer.TriedPrivate = true

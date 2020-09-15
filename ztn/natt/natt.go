@@ -13,7 +13,9 @@ import (
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn/api"
 	"github.com/inverse-inc/wireguard-go/ztn/bufferpool"
+	"github.com/inverse-inc/wireguard-go/ztn/config"
 	"github.com/inverse-inc/wireguard-go/ztn/profile"
+	"github.com/inverse-inc/wireguard-go/ztn/util"
 )
 
 var localWGIP = net.ParseIP("127.0.0.1")
@@ -157,4 +159,14 @@ func (ext *ExternalConnection) reset() {
 		ext.TriedPrivate = false
 	}
 	ext.Connected = false
+}
+
+func (ext *ExternalConnection) SetConfig(External *ExternalConnection, localPeerAddr string) {
+	conf := ""
+	conf += fmt.Sprintf("public_key=%s\n", util.KeyToHex(External.PeerProfile.PublicKey))
+	conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
+	conf += "replace_allowed_ips=true\n"
+	conf += fmt.Sprintf("allowed_ip=%s/32\n", External.PeerProfile.WireguardIP.String())
+
+	config.SetConfigMulti(External.Device, conf)
 }
