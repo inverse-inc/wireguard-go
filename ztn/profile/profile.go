@@ -123,6 +123,7 @@ func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 	}
 
 	err = api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(util.B64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth)+"&mac="+url.QueryEscape(mac.String()), &p)
+
 	if err != nil {
 		return err
 	} else {
@@ -170,11 +171,10 @@ type PeerProfile struct {
 
 func (p *Profile) GetPeerProfile(id string) (PeerProfile, error) {
 	var peer PeerProfile
-	err := api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &p)
+	err := api.GetAPIClient().Call(api.APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &peer)
 
-	pkey, err := base64.URLEncoding.DecodeString(p.PublicKey)
+	pkey, err := base64.URLEncoding.DecodeString(peer.PublicKey)
 	sharedutils.CheckError(err)
 	peer.PublicKey = base64.StdEncoding.EncodeToString(pkey)
-
 	return peer, err
 }

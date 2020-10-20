@@ -70,6 +70,7 @@ func (natt *UPnPIGD) init(context context.Context, d *device.Device, logger *dev
 func (natt *UPnPIGD) GetExternalInfo() error {
 	err := CheckNet()
 	if err != nil {
+
 		return errors.New("your router does not support the UPnP protocol.")
 	}
 
@@ -82,6 +83,7 @@ func (natt *UPnPIGD) GetExternalInfo() error {
 
 	MyUDP := &net.UDPAddr{IP: myExternalIP, Port: remotePort}
 	natt.ConnectionPeer.MyAddr = MyUDP
+
 	err = natt.AddPortMapping(localPort, remotePort)
 	if err != nil {
 		return errors.New("Fail to add the port mapping")
@@ -108,6 +110,8 @@ func DelPortMapping(localPort, remotePort int) {
 func (natt *UPnPIGD) Start() error {
 	var err error
 	err = natt.GetExternalInfo()
+
+	api.GLPPublish(natt.ConnectionPeer.BuildP2PKey(), natt.ConnectionPeer.BuildNetworkEndpointEvent(natt))
 
 	natt.ConnectionPeer.LocalPeerConn, err = net.ListenUDP(udp, nil)
 	sharedutils.CheckError(err)
@@ -142,13 +146,11 @@ func (natt *UPnPIGD) Start() error {
 				}
 
 				natt.ConnectionPeer.Logger.Debug.Println("Publishing for peer join", natt.ConnectionPeer.PeerID)
-				api.GLPPublish(natt.ConnectionPeer.BuildP2PKey(), natt.ConnectionPeer.BuildNetworkEndpointEvent(natt))
 
 				natt.ConnectionPeer.PeerAddr, err = net.ResolveUDPAddr(udp, peerStr)
 				if err != nil {
 					// pc.Logger.Fatalln("resolve peeraddr:", err)
 				}
-
 				natt.ConnectionPeer.SetConfig(natt.ConnectionPeer, localPeerAddr)
 
 				natt.ConnectionPeer.Started = true
@@ -157,6 +159,8 @@ func (natt *UPnPIGD) Start() error {
 			}
 			return true
 		}()
+
+		peerAddrChan = natt.ConnectionPeer.GetPeerAddr()
 		if !res {
 			return errors.New("Failed upnpigd")
 		}
