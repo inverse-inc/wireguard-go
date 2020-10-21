@@ -41,8 +41,10 @@ type PeerConnection struct {
 	peerAddr *net.UDPAddr
 
 	started       bool
-	connected     bool
 	lastKeepalive time.Time
+
+	connectedInbound  bool
+	connectedOutbound bool
 
 	triedPrivate bool
 }
@@ -76,16 +78,14 @@ func (pc *PeerConnection) reset() {
 	pc.lastKeepalive = time.Time{}
 
 	// Reset the triedPrivate flag if a connection attempt was already successful so that it retries from scratch next time
-	if pc.connected {
+	if pc.Connected() {
 		pc.triedPrivate = false
 	}
-	pc.connected = false
+	pc.connectedInbound = false
+	pc.connectedOutbound = false
 }
 
 func (pc *PeerConnection) run() {
-	//TODO: remove this hack
-	pc.triedPrivate = true
-
 	var err error
 	pc.wgConn, err = net.DialUDP("udp4", nil, &net.UDPAddr{IP: localWGIP, Port: localWGPort})
 	sharedutils.CheckError(err)
@@ -203,14 +203,15 @@ func (pc *PeerConnection) run() {
 				case string(message.message) == pingMsg:
 					pc.logger.Debug.Println("Received ping from", pc.peerAddr)
 					pc.lastKeepalive = time.Now()
-					pc.connected = true
 
 				default:
 					if message.raddr.String() == localWGAddr {
+						pc.connectedOutbound = true
 						n := len(message.message)
 						pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.peerAddr, n)
 						udpSend(message.message, pc.localPeerConn, pc.peerAddr)
 					} else {
+						pc.connectedInbound = true
 						n := len(message.message)
 						pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.wgConn.RemoteAddr(), n)
 						pc.wgConn.Write(message.message)
@@ -358,4 +359,8 @@ func (pc *PeerConnection) getPeerAddr() <-chan string {
 
 func (pc *PeerConnection) ShouldTryPrivate() bool {
 	return !pc.triedPrivate
+}
+
+func (pc *PeerConnection) Connected() bool {
+	return pc.connectedInbound && pc.connectedOutbound
 }
