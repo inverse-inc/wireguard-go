@@ -165,7 +165,7 @@ func (ext *ExternalConnection) reset() {
 }
 
 func (ext *ExternalConnection) SetConfig(External *ExternalConnection, localPeerAddr string) {
-	if localPeerAddr == "" {
+	if localPeerAddr == "<nil>" {
 		localPeerAddr = "169.254.0.254:" + strconv.Itoa(constants.LocalWGPort)
 	}
 	conf := ""
