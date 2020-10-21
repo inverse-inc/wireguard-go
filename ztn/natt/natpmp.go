@@ -171,5 +171,5 @@ func (natt *NatPMP) GetPrivateAddr() string {
 	_, ip, err := natt.ConnectionPeer.MyProfile.FindClientMAC()
 	if err != nil {
 	}
-	return ip.String()
+	return ip.IP.String()
 }
