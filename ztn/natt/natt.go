@@ -57,6 +57,7 @@ type Creater func(context.Context, *device.Device, *device.Logger, profile.Profi
 var methodLookup = map[string]Creater{
 	"stun":    NewSTUN,
 	"upnpigd": NewUPnPIGD,
+	"natpmp":  NewNatPMP,
 }
 
 // Create function

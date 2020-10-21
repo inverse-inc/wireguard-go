@@ -15,42 +15,54 @@ import (
 	"github.com/inverse-inc/wireguard-go/ztn/bufferpool"
 	"github.com/inverse-inc/wireguard-go/ztn/constants"
 	"github.com/inverse-inc/wireguard-go/ztn/profile"
+	"github.com/jackpal/gateway"
+	natpmp "github.com/jackpal/go-nat-pmp"
 )
 
-var mapping = new(upnp.Upnp)
+var mappingUpnp = new(upnp.Upnp)
 
-var localPort = constants.LocalWGPort
-
-// UPnPIGD struct
-type UPnPIGD struct {
+// NatPMP struct
+type NatPMP struct {
 	ConnectionPeer *ExternalConnection
 }
 
 // CheckNet search for a gateway
-func CheckNet() error {
-	err := mapping.SearchGateway()
+func (natt *NatPMP) CheckNet() error {
+	_, err := gateway.DiscoverGateway()
 	return err
 }
 
 // ExternalIPAddr return the WAN ip
-func ExternalIPAddr() (net.IP, error) {
-	err := mapping.ExternalIPAddr()
+func (natt *NatPMP) ExternalIPAddr() (net.IP, error) {
+	gatewayIP, err := gateway.DiscoverGateway()
 	if err != nil {
 		return nil, err
 	}
-	return net.ParseIP(mapping.GatewayOutsideIP), nil
+
+	client := natpmp.NewClient(gatewayIP)
+
+	response, err := client.GetExternalAddress()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("External IP address: %v\n", response.ExternalIPAddress)
+
+	if err != nil {
+		return nil, err
+	}
+	return net.ParseIP(fmt.Sprintf("%d.%d.%d.%d", response.ExternalIPAddress[0], response.ExternalIPAddress[1], response.ExternalIPAddress[2], response.ExternalIPAddress[3])), nil
 
 }
 
-// NewUPnPIGD Init
-func NewUPnPIGD(ctx context.Context, d *device.Device, logger *device.Logger, myProfile profile.Profile, peerProfile profile.PeerProfile) (Method, error) {
-	method := UPnPIGD{}
+// NewNatPMP Init
+func NewNatPMP(ctx context.Context, d *device.Device, logger *device.Logger, myProfile profile.Profile, peerProfile profile.PeerProfile) (Method, error) {
+	method := NatPMP{}
 	method.init(ctx, d, logger, myProfile, peerProfile)
 	return &method, nil
 }
 
 // Init initialyse
-func (natt *UPnPIGD) init(context context.Context, d *device.Device, logger *device.Logger, myProfile profile.Profile, peerProfile profile.PeerProfile) {
+func (natt *NatPMP) init(context context.Context, d *device.Device, logger *device.Logger, myProfile profile.Profile, peerProfile profile.PeerProfile) {
 	log.SetProcessName("wireguard-go")
 	ctx := log.LoggerNewContext(context)
 	e := &ExternalConnection{
@@ -66,31 +78,22 @@ func (natt *UPnPIGD) init(context context.Context, d *device.Device, logger *dev
 }
 
 // GetExternalInfo fetch wan information
-func (natt *UPnPIGD) GetExternalInfo() error {
-	err := CheckNet()
+func (natt *NatPMP) GetExternalInfo() error {
+	err := natt.CheckNet()
 	if err != nil {
-
-		return errors.New("your router does not support the UPnP protocol.")
+		return errors.New("Your router does not support the NAT PMP protocol !")
 	}
 
-	myExternalIP, err := ExternalIPAddr()
+	myExternalIP, err := natt.ExternalIPAddr()
 	if err != nil {
 		return err
 	}
 
-	if natt.ConnectionPeer.MyAddr != nil && natt.ConnectionPeer.MyAddr.IP.Equal(myExternalIP) {
+	remotePort := rand.Intn(constants.HigherPort-constants.LowerPort) + constants.LowerPort
 
-		err = natt.AddPortMapping(localPort, natt.ConnectionPeer.MyAddr.Port)
-
-	} else {
-		remotePort := rand.Intn(constants.HigherPort-constants.LowerPort) + constants.LowerPort
-
-		MyUDP := &net.UDPAddr{IP: myExternalIP, Port: remotePort}
-		natt.ConnectionPeer.MyAddr = MyUDP
-
-		err = natt.AddPortMapping(localPort, remotePort)
-
-	}
+	MyUDP := &net.UDPAddr{IP: myExternalIP, Port: remotePort}
+	natt.ConnectionPeer.MyAddr = MyUDP
+	err = natt.AddPortMapping(localPort, remotePort)
 	if err != nil {
 		return errors.New("Fail to add the port mapping")
 	}
@@ -98,8 +101,8 @@ func (natt *UPnPIGD) GetExternalInfo() error {
 }
 
 // AddPortMapping insert port mapping in the gateway
-func (natt *UPnPIGD) AddPortMapping(localPort, remotePort int) error {
-	if err := mapping.AddPortMapping(localPort, remotePort, 60, "UDP", "WireguardGO"); err == nil {
+func (natt *NatPMP) AddPortMapping(localPort, remotePort int) error {
+	if err := mappingUpnp.AddPortMapping(localPort, remotePort, 60, "UDP", "WireguardGO"); err == nil {
 		fmt.Println("Port mapped successfully")
 		natt.ConnectionPeer.Logger.Info.Print("Port mapped successfully")
 		return nil
@@ -108,12 +111,12 @@ func (natt *UPnPIGD) AddPortMapping(localPort, remotePort int) error {
 }
 
 // DelPortMapping delete port mapping in the gateway
-func (natt *UPnPIGD) DelPortMapping(localPort, remotePort int) {
-	mapping.DelPortMapping(remotePort, "UDP")
+func DelPortMapping(localPort, remotePort int) {
+	mappingUpnp.DelPortMapping(remotePort, "UDP")
 }
 
-// Run execute the Method
-func (natt *UPnPIGD) Start() error {
+// Start method for NAT PMP
+func (natt *NatPMP) Start() error {
 	var err error
 	err = natt.GetExternalInfo()
 
@@ -159,12 +162,12 @@ func (natt *UPnPIGD) Start() error {
 		}()
 
 		if !res {
-			return errors.New("Failed upnpigd")
+			return errors.New("Failed NAT PMP")
 		}
 	}
 }
 
-func (natt *UPnPIGD) GetPrivateAddr() string {
+func (natt *NatPMP) GetPrivateAddr() string {
 	_, ip, err := natt.ConnectionPeer.MyProfile.FindClientMAC()
 	if err != nil {
 	}
