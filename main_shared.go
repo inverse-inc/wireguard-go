@@ -28,7 +28,9 @@ var knownPeers = struct {
 func startInverse(interfaceName string, device *device.Device) {
 	go ztn.StartRPC()
 
-	go checkParentIsAlive()
+	if !ztn.RunningInCLI() {
+		go checkParentIsAlive()
+	}
 
 	privateKey, publicKey := getKeys()
 

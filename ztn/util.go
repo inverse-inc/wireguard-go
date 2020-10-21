@@ -61,3 +61,7 @@ func ipv4MaskString(mask int) string {
 
 	return fmt.Sprintf("%d.%d.%d.%d", m[0], m[1], m[2], m[3])
 }
+
+func RunningInCLI() bool {
+	return sharedutils.EnvOrDefault("WG_CLI", "false") == "true"
+}
