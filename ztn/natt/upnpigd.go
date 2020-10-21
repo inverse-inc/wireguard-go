@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/inverse-inc/packetfence/go/log"
-	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/upnp"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn/api"
@@ -79,12 +78,19 @@ func (natt *UPnPIGD) GetExternalInfo() error {
 		return err
 	}
 
-	remotePort := rand.Intn(constants.HigherPort-constants.LowerPort) + constants.LowerPort
+	if natt.ConnectionPeer.MyAddr != nil && natt.ConnectionPeer.MyAddr.IP.Equal(myExternalIP) {
 
-	MyUDP := &net.UDPAddr{IP: myExternalIP, Port: remotePort}
-	natt.ConnectionPeer.MyAddr = MyUDP
+		err = natt.AddPortMapping(localPort, natt.ConnectionPeer.MyAddr.Port)
 
-	err = natt.AddPortMapping(localPort, remotePort)
+	} else {
+		remotePort := rand.Intn(constants.HigherPort-constants.LowerPort) + constants.LowerPort
+
+		MyUDP := &net.UDPAddr{IP: myExternalIP, Port: remotePort}
+		natt.ConnectionPeer.MyAddr = MyUDP
+
+		err = natt.AddPortMapping(localPort, remotePort)
+
+	}
 	if err != nil {
 		return errors.New("Fail to add the port mapping")
 	}
@@ -113,20 +119,11 @@ func (natt *UPnPIGD) Start() error {
 
 	api.GLPPublish(natt.ConnectionPeer.BuildP2PKey(), natt.ConnectionPeer.BuildNetworkEndpointEvent(natt))
 
-	natt.ConnectionPeer.LocalPeerConn, err = net.ListenUDP(udp, nil)
-	sharedutils.CheckError(err)
-
-	natt.ConnectionPeer.Logger.Debug.Printf("Listening on %s for peer %s\n", natt.ConnectionPeer.LocalPeerConn.LocalAddr(), natt.ConnectionPeer.PeerID)
-
-	messageChan := make(chan *pkt)
-	natt.ConnectionPeer.Listen(natt.ConnectionPeer.LocalPeerConn, messageChan)
-
 	var peerAddrChan <-chan string
 
 	foundPeer := make(chan bool)
 
-	a := strings.Split(natt.ConnectionPeer.LocalPeerConn.LocalAddr().String(), ":")
-	var localPeerAddr = fmt.Sprintf("%s:%s", constants.LocalWGIP.String(), a[len(a)-1])
+	peerAddrChan = natt.ConnectionPeer.GetPeerAddr()
 
 	for {
 		res := func() bool {
@@ -145,9 +142,10 @@ func (natt *UPnPIGD) Start() error {
 					natt.ConnectionPeer.Logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", natt.ConnectionPeer.PeerID, ". This connection attempt may fail")
 				}
 
-				natt.ConnectionPeer.Logger.Debug.Println("Publishing for peer join", natt.ConnectionPeer.PeerID)
-
 				natt.ConnectionPeer.PeerAddr, err = net.ResolveUDPAddr(udp, peerStr)
+
+				a := strings.Split(peerStr, ":")
+				var localPeerAddr = fmt.Sprintf("%s:%s", constants.LocalWGIP.String(), a[len(a)-1])
 				if err != nil {
 					// pc.Logger.Fatalln("resolve peeraddr:", err)
 				}
@@ -160,7 +158,6 @@ func (natt *UPnPIGD) Start() error {
 			return true
 		}()
 
-		peerAddrChan = natt.ConnectionPeer.GetPeerAddr()
 		if !res {
 			return errors.New("Failed upnpigd")
 		}
@@ -168,5 +165,8 @@ func (natt *UPnPIGD) Start() error {
 }
 
 func (natt *UPnPIGD) GetPrivateAddr() string {
-	return "mysuperipzammit"
+	_, ip, err := natt.ConnectionPeer.MyProfile.FindClientMAC()
+	if err != nil {
+	}
+	return ip.String()
 }

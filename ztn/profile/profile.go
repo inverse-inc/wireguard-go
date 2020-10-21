@@ -117,7 +117,7 @@ func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 		return err
 	}
 
-	mac, err := p.findClientMAC()
+	mac, _, err := p.FindClientMAC()
 	if err != nil {
 		return err
 	}
@@ -131,17 +131,17 @@ func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 	}
 }
 
-func (p *Profile) findClientMAC() (net.HardwareAddr, error) {
+func (p *Profile) FindClientMAC() (net.HardwareAddr, net.IPNet, error) {
 	gwIP, err := gateway.DiscoverGateway()
 	if err != nil {
-		return net.HardwareAddr{}, err
+		return net.HardwareAddr{}, net.IPNet{}, err
 	}
 
 	p.logger.Debug.Println("Found default gateway", gwIP)
 
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return net.HardwareAddr{}, err
+		return net.HardwareAddr{}, net.IPNet{}, err
 	}
 
 	for _, i := range ifaces {
@@ -155,13 +155,13 @@ func (p *Profile) findClientMAC() (net.HardwareAddr, error) {
 			case *net.IPNet:
 				if ipnet.Contains(gwIP) {
 					p.logger.Info.Println("Found MAC address", i.HardwareAddr, "on interface", ipnet, "("+i.Name+")")
-					return i.HardwareAddr, nil
+					return i.HardwareAddr, *ipnet, nil
 				}
 			}
 		}
 	}
 
-	return net.HardwareAddr{}, errors.New("Unable to find MAC address")
+	return net.HardwareAddr{}, net.IPNet{}, errors.New("Unable to find MAC address")
 }
 
 type PeerProfile struct {
