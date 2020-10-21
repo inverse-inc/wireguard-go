@@ -207,6 +207,8 @@ func (pc *PeerConnection) run() {
 			case peerStr := <-peerAddrChan:
 				if pc.ShouldTryPrivate() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
+				} else {
+					pc.logger.Info.Println("Connecting to public IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
 				}
 
 				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
