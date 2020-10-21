@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/inverse-inc/packetfence/go/log"
 	"github.com/inverse-inc/upnp"
@@ -126,6 +125,8 @@ func (natt *UPnPIGD) Start() error {
 
 	peerAddrChan = natt.ConnectionPeer.GetPeerAddr()
 
+	natt.ConnectionPeer.TriedPrivate = true
+
 	for {
 		res := func() bool {
 			var message *pkt
@@ -145,13 +146,7 @@ func (natt *UPnPIGD) Start() error {
 
 				natt.ConnectionPeer.PeerAddr, err = net.ResolveUDPAddr(udp, peerStr)
 
-				a := strings.Split(peerStr, ":")
-				var localPeerAddr = fmt.Sprintf("%s:%s", constants.LocalWGIP.String(), a[len(a)-1])
-				if err != nil {
-					// pc.Logger.Fatalln("resolve peeraddr:", err)
-				}
-
-				natt.ConnectionPeer.SetConfig(natt.ConnectionPeer, localPeerAddr)
+				natt.ConnectionPeer.SetConfig(natt.ConnectionPeer, peerStr)
 
 				natt.ConnectionPeer.Started = true
 				natt.ConnectionPeer.TriedPrivate = true
