@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"strconv"
 	"strings"
 
 	"github.com/inverse-inc/packetfence/go/log"
@@ -149,6 +150,7 @@ func (natt *UPnPIGD) Start() error {
 				if err != nil {
 					// pc.Logger.Fatalln("resolve peeraddr:", err)
 				}
+
 				natt.ConnectionPeer.SetConfig(natt.ConnectionPeer, localPeerAddr)
 
 				natt.ConnectionPeer.Started = true
@@ -168,5 +170,5 @@ func (natt *UPnPIGD) GetPrivateAddr() string {
 	_, ip, err := natt.ConnectionPeer.MyProfile.FindClientMAC()
 	if err != nil {
 	}
-	return ip.IP.String()
+	return ip.IP.String() + ":" + strconv.Itoa(constants.LocalWGPort)
 }

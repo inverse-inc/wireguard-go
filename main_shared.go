@@ -148,8 +148,8 @@ func startPeer(device *device.Device, prof profile.Profile, peerID string) {
 						}
 					}()
 					// methodType := "stun"
-					// methodType := "upnpigd"
-					methodType := "natpmp"
+					methodType := "upnpigd"
+					// methodType := "natpmp"
 					method, _ := natt.Create(api.APIClientCtx, methodType, device, logger, prof, peerProfile)
 					method.Start()
 				}()
