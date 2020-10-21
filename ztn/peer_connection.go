@@ -3,6 +3,7 @@ package ztn
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -20,6 +21,15 @@ const udp = "udp"
 const pingMsg = "ping"
 
 const stunServer = "srv.semaan.ca:3478"
+
+type BindTechnique string
+
+const (
+	BindSTUN    = BindTechnique("STUN")
+	BindUPNPGID = BindTechnique("UPNPGID")
+)
+
+var DefaultBindTechnique = BindSTUN
 
 type pkt struct {
 	raddr   *net.UDPAddr
@@ -47,16 +57,19 @@ type PeerConnection struct {
 	connectedOutbound bool
 
 	triedPrivate bool
+
+	BindTechnique BindTechnique
 }
 
 func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profile, peerProfile PeerProfile) *PeerConnection {
 	pc := &PeerConnection{
-		device:      d,
-		logger:      logger,
-		myID:        myProfile.PublicKey,
-		peerID:      peerProfile.PublicKey,
-		MyProfile:   myProfile,
-		PeerProfile: peerProfile,
+		device:        d,
+		logger:        logger,
+		myID:          myProfile.PublicKey,
+		peerID:        peerProfile.PublicKey,
+		MyProfile:     myProfile,
+		PeerProfile:   peerProfile,
+		BindTechnique: DefaultBindTechnique,
 	}
 	return pc
 }
@@ -90,7 +103,7 @@ func (pc *PeerConnection) run() {
 	pc.wgConn, err = net.DialUDP("udp4", nil, &net.UDPAddr{IP: localWGIP, Port: localWGPort})
 	sharedutils.CheckError(err)
 
-	//stunAddr, err := net.ResolveUDPAddr(udp, stunServer)
+	stunAddr, err := net.ResolveUDPAddr(udp, stunServer)
 	sharedutils.CheckError(err)
 
 	pc.localPeerConn, err = net.ListenUDP(udp, nil)
@@ -98,7 +111,7 @@ func (pc *PeerConnection) run() {
 
 	pc.logger.Debug.Printf("Listening on %s for peer %s\n", pc.localPeerConn.LocalAddr(), pc.peerID)
 
-	var publicAddr stun.XORMappedAddress
+	var stunPublicAddr stun.XORMappedAddress
 
 	peerupnpgid := NewUPNPGID()
 
@@ -147,21 +160,7 @@ func (pc *PeerConnection) run() {
 					sharedutils.CheckError(err)
 					if newaddr.String() != pc.myAddr.String() {
 						pc.myAddr = newaddr
-
-						go func() {
-							for {
-								select {
-								case <-time.After(1 * time.Second):
-									pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
-									GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
-								case <-foundPeer:
-									pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
-									return
-								}
-							}
-						}()
-
-						peerAddrChan = pc.getPeerAddr()
+						peerAddrChan = pc.StartConnection(foundPeer)
 					}
 
 				case stun.IsMessage(message.message):
@@ -178,26 +177,12 @@ func (pc *PeerConnection) run() {
 						break
 					}
 
-					if publicAddr.String() != xorAddr.String() {
-						pc.logger.Info.Printf("My public address for peer %s: %s\n", pc.peerID, xorAddr)
-						publicAddr = xorAddr
+					if stunPublicAddr.String() != xorAddr.String() {
+						stunPublicAddr = xorAddr
 						pc.myAddr, err = net.ResolveUDPAddr("udp4", xorAddr.String())
 						sharedutils.CheckError(err)
 
-						go func() {
-							for {
-								select {
-								case <-time.After(1 * time.Second):
-									pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
-									GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
-								case <-foundPeer:
-									pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
-									return
-								}
-							}
-						}()
-
-						peerAddrChan = pc.getPeerAddr()
+						peerAddrChan = pc.StartConnection(foundPeer)
 					}
 
 				case string(message.message) == pingMsg:
@@ -247,8 +232,14 @@ func (pc *PeerConnection) run() {
 			case <-keepalive:
 				// Keep NAT binding alive using STUN server or the peer once it's known
 				if pc.peerAddr == nil {
-					//err = sendBindingRequest(pc.localPeerConn, stunAddr)
-					err = peerupnpgid.BindRequest(pc.localPeerConn, localPeerPort, messageChan)
+					pc.logger.Debug.Println("Using", pc.BindTechnique, "binding technique")
+					if pc.BindTechnique == BindSTUN {
+						err = sendBindingRequest(pc.localPeerConn, stunAddr)
+					} else if pc.BindTechnique == BindUPNPGID {
+						err = peerupnpgid.BindRequest(pc.localPeerConn, localPeerPort, messageChan)
+					} else {
+						err = errors.New("Unknown bind technique")
+					}
 				} else {
 					err = udpSendStr(keepaliveMsg, pc.localPeerConn, pc.peerAddr)
 				}
@@ -363,4 +354,23 @@ func (pc *PeerConnection) ShouldTryPrivate() bool {
 
 func (pc *PeerConnection) Connected() bool {
 	return pc.connectedInbound && pc.connectedOutbound
+}
+
+func (pc *PeerConnection) StartConnection(foundPeer chan bool) <-chan string {
+	pc.logger.Info.Printf("My public address for peer %s: %s\n", pc.peerID, pc.myAddr)
+
+	go func() {
+		for {
+			select {
+			case <-time.After(1 * time.Second):
+				pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
+				GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+			case <-foundPeer:
+				pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
+				return
+			}
+		}
+	}()
+
+	return pc.getPeerAddr()
 }

@@ -11,23 +11,23 @@ import (
 	"github.com/inverse-inc/upnp"
 )
 
-type upnpigd struct {
+type UPNPIGD struct {
 	sync.Mutex
 	id         uint64
 	mapping    upnp.Upnp
 	remotePort int
 }
 
-func NewUPNPGID() upnpigd {
-	return upnpigd{id: rand.Uint64(), mapping: upnp.Upnp{}}
+func NewUPNPGID() *UPNPIGD {
+	return &UPNPIGD{id: rand.Uint64(), mapping: upnp.Upnp{}}
 }
 
-func (u *upnpigd) CheckNet() error {
+func (u *UPNPIGD) CheckNet() error {
 	err := u.mapping.SearchGateway()
 	return err
 }
 
-func (u *upnpigd) ExternalIPAddr() (net.IP, error) {
+func (u *UPNPIGD) ExternalIPAddr() (net.IP, error) {
 	err := u.mapping.ExternalIPAddr()
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (u *upnpigd) ExternalIPAddr() (net.IP, error) {
 	return net.ParseIP(u.mapping.GatewayOutsideIP), nil
 }
 
-func (u *upnpigd) AddPortMapping(localPort, remotePort int) error {
+func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
 	if err := u.mapping.AddPortMapping(localPort, remotePort, 60, "UDP", "WireguardGO"); err == nil {
 		fmt.Println("Port mapped successfully", localPort, remotePort)
 		return nil
@@ -45,7 +45,7 @@ func (u *upnpigd) AddPortMapping(localPort, remotePort int) error {
 	}
 }
 
-func (u *upnpigd) IsMessage(b []byte) bool {
+func (u *UPNPIGD) IsMessage(b []byte) bool {
 	id, _ := binary.Uvarint(b[0:binary.MaxVarintLen64])
 	if id == u.id {
 		return true
@@ -54,7 +54,7 @@ func (u *upnpigd) IsMessage(b []byte) bool {
 	}
 }
 
-func (u *upnpigd) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
+func (u *UPNPIGD) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
 	var buf = defaultBufferPool.Get()
 	binary.PutUvarint(buf, u.id)
 	buf[binary.MaxVarintLen64+1] = externalIP[12]
@@ -65,13 +65,13 @@ func (u *upnpigd) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
 	return buf
 }
 
-func (u *upnpigd) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
+func (u *UPNPIGD) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
 	ip := net.IPv4(buf[binary.MaxVarintLen64+1], buf[binary.MaxVarintLen64+2], buf[binary.MaxVarintLen64+3], buf[binary.MaxVarintLen64+4])
 	port, _ := binary.Uvarint(buf[binary.MaxVarintLen64+5:])
 	return ip, int(port), nil
 }
 
-func (u *upnpigd) BindRequest(localPeerConn *net.UDPConn, localPeerPort int, sendTo chan *pkt) error {
+func (u *UPNPIGD) BindRequest(localPeerConn *net.UDPConn, localPeerPort int, sendTo chan *pkt) error {
 	u.Lock()
 	defer u.Unlock()
 
