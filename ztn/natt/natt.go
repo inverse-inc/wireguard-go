@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 	"github.com/inverse-inc/wireguard-go/ztn/api"
 	"github.com/inverse-inc/wireguard-go/ztn/bufferpool"
 	"github.com/inverse-inc/wireguard-go/ztn/config"
+	"github.com/inverse-inc/wireguard-go/ztn/constants"
 	"github.com/inverse-inc/wireguard-go/ztn/profile"
 	"github.com/inverse-inc/wireguard-go/ztn/util"
 )
@@ -163,6 +165,9 @@ func (ext *ExternalConnection) reset() {
 }
 
 func (ext *ExternalConnection) SetConfig(External *ExternalConnection, localPeerAddr string) {
+	if localPeerAddr == "" {
+		localPeerAddr = "169.254.0.254:" + strconv.Itoa(constants.LocalWGPort)
+	}
 	conf := ""
 	conf += fmt.Sprintf("public_key=%s\n", util.KeyToHex(External.PeerProfile.PublicKey))
 	conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
