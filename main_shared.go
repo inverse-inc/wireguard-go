@@ -9,6 +9,7 @@ import (
 	"os/user"
 	"path"
 	"runtime/debug"
+	"sync"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
@@ -18,6 +19,11 @@ import (
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
 )
+
+var knownPeers = struct {
+	sync.Mutex
+	peers map[string]bool
+}{peers: map[string]bool{}}
 
 func startInverse(interfaceName string, device *device.Device) {
 	go ztn.StartRPC()
@@ -125,6 +131,7 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 			err := json.Unmarshal(e.Data, &event)
 			sharedutils.CheckError(err)
 			if event.Type == "new_peer" && event.Data["id"].(string) != myID {
+				logger.Debug.Println("Received new peer from pub/sub", event.Data["id"].(string))
 				startPeer(device, profile, event.Data["id"].(string))
 			}
 		}
@@ -132,6 +139,15 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 }
 
 func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
+	knownPeers.Lock()
+	if knownPeers.peers[peerID] {
+		logger.Debug.Println("Not starting", peerID, "since its already in the known peers")
+		return
+	} else {
+		knownPeers.peers[peerID] = true
+	}
+	knownPeers.Unlock()
+
 	peerProfile, err := ztn.GetPeerProfile(peerID)
 	if err != nil {
 		logger.Error.Println("Unable to fetch profile for peer", peerID, ". Error:", err)
@@ -143,6 +159,7 @@ func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
 					defer func() {
 						if r := recover(); r != nil {
 							logger.Error.Println("Recovered error", r, "while handling peer", peerProfile.PublicKey, ". Will attempt to connect to it again.")
+							debug.PrintStack()
 						}
 					}()
 					pc := ztn.NewPeerConnection(device, logger, profile, peerProfile)
