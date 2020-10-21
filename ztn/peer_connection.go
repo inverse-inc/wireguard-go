@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 
@@ -82,11 +83,14 @@ func (pc *PeerConnection) reset() {
 }
 
 func (pc *PeerConnection) run() {
+	//TODO: remove this hack
+	pc.triedPrivate = true
+
 	var err error
 	pc.wgConn, err = net.DialUDP("udp4", nil, &net.UDPAddr{IP: localWGIP, Port: localWGPort})
 	sharedutils.CheckError(err)
 
-	stunAddr, err := net.ResolveUDPAddr(udp, stunServer)
+	//stunAddr, err := net.ResolveUDPAddr(udp, stunServer)
 	sharedutils.CheckError(err)
 
 	pc.localPeerConn, err = net.ListenUDP(udp, nil)
@@ -95,6 +99,8 @@ func (pc *PeerConnection) run() {
 	pc.logger.Debug.Printf("Listening on %s for peer %s\n", pc.localPeerConn.LocalAddr(), pc.peerID)
 
 	var publicAddr stun.XORMappedAddress
+
+	peerupnpgid := NewUPNPGID()
 
 	messageChan := make(chan *pkt)
 	pc.listen(pc.localPeerConn, messageChan)
@@ -107,7 +113,9 @@ func (pc *PeerConnection) run() {
 	foundPeer := make(chan bool)
 
 	a := strings.Split(pc.localPeerConn.LocalAddr().String(), ":")
-	var localPeerAddr = fmt.Sprintf("%s:%s", localWGIP.String(), a[len(a)-1])
+	localPeerPort, err := strconv.Atoi(a[len(a)-1])
+	sharedutils.CheckError(err)
+	var localPeerAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localPeerPort)
 	var localWGAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort)
 
 	for {
@@ -128,6 +136,34 @@ func (pc *PeerConnection) run() {
 				}
 
 				switch {
+				case peerupnpgid.IsMessage(message.message):
+					externalIP, externalPort, err := peerupnpgid.ParseBindRequestPkt(message.message)
+					if err != nil {
+						pc.logger.Error.Println("Unable to decode UPNP GID message:", err)
+						break
+					}
+
+					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
+					sharedutils.CheckError(err)
+					if newaddr.String() != pc.myAddr.String() {
+						pc.myAddr = newaddr
+
+						go func() {
+							for {
+								select {
+								case <-time.After(1 * time.Second):
+									pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
+									GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+								case <-foundPeer:
+									pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
+									return
+								}
+							}
+						}()
+
+						peerAddrChan = pc.getPeerAddr()
+					}
+
 				case stun.IsMessage(message.message):
 					m := new(stun.Message)
 					m.Raw = message.message
@@ -210,7 +246,8 @@ func (pc *PeerConnection) run() {
 			case <-keepalive:
 				// Keep NAT binding alive using STUN server or the peer once it's known
 				if pc.peerAddr == nil {
-					err = sendBindingRequest(pc.localPeerConn, stunAddr)
+					//err = sendBindingRequest(pc.localPeerConn, stunAddr)
+					err = peerupnpgid.BindRequest(pc.localPeerConn, localPeerPort, messageChan)
 				} else {
 					err = udpSendStr(keepaliveMsg, pc.localPeerConn, pc.peerAddr)
 				}

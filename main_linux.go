@@ -19,7 +19,6 @@ import (
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/tun"
-	"github.com/inverse-inc/wireguard-go/util"
 
 	_ "net/http/pprof"
 )
@@ -279,5 +278,5 @@ func main() {
 }
 
 func checkParentIsAlive() {
-	util.CheckGUIIsAliveUNIX(quit)
+	//	util.CheckGUIIsAliveUNIX(quit)
 }
