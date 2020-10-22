@@ -24,7 +24,18 @@ func NewUPNPGID() *UPNPIGD {
 
 func (u *UPNPIGD) CheckNet() error {
 	err := u.mapping.SearchGateway()
-	return err
+	if err != nil {
+		return err
+	}
+	myExternalIP, err := u.ExternalIPAddr()
+	if err != nil {
+		return err
+	}
+
+	if isPrivateIP(myExternalIP) {
+		return errors.New("External IP is a private ip")
+	}
+	return nil
 }
 
 func (u *UPNPIGD) ExternalIPAddr() (net.IP, error) {
@@ -83,9 +94,6 @@ func (u *UPNPIGD) BindRequest(localPeerConn *net.UDPConn, localPeerPort int, sen
 	myExternalIP, err := u.ExternalIPAddr()
 	if err != nil {
 		return err
-	}
-	if isPrivateIP(myExternalIP) {
-		return errors.New("External IP is a private ip")
 	}
 
 	if u.remotePort == 0 {
