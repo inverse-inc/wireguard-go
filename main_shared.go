@@ -139,7 +139,7 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 			err := json.Unmarshal(e.Data, &event)
 			sharedutils.CheckError(err)
 			if event.Type == "new_peer" && event.Data["id"].(string) != myID {
-				logger.Debug.Println("Received new peer from pub/sub", event.Data["id"].(string))
+				logger.Info.Println("Received new peer from pub/sub", event.Data["id"].(string))
 				startPeer(device, profile, event.Data["id"].(string))
 			}
 		}
@@ -161,6 +161,7 @@ func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
 		logger.Error.Println("Unable to fetch profile for peer", peerID, ". Error:", err)
 		logger.Error.Println(debug.Stack())
 	} else {
+		logger.Info.Println("Starting connection to peer", peerID)
 		go func(peerID string, peerProfile ztn.PeerProfile) {
 			for {
 				func() {

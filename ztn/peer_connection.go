@@ -359,7 +359,7 @@ func (pc *PeerConnection) Connected() bool {
 }
 
 func (pc *PeerConnection) StartConnection(foundPeer chan bool) <-chan string {
-	pc.logger.Info.Printf("My public address for peer %s: %s\n", pc.peerID, pc.myAddr)
+	pc.logger.Info.Printf("My public address for peer %s: %s. Obtained via %s\n", pc.peerID, pc.myAddr, pc.BindTechnique)
 
 	go func() {
 		for {
