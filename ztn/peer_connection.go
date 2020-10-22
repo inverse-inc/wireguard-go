@@ -381,6 +381,7 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string) {
 	conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	conf += "replace_allowed_ips=true\n"
 	conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
+	conf += "persistent_keepalive_interval=1"
 
 	SetConfigMulti(pc.device, conf)
 
