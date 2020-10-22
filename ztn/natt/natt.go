@@ -173,6 +173,7 @@ func (ext *ExternalConnection) SetConfig(External *ExternalConnection, localPeer
 	conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
 	conf += "replace_allowed_ips=true\n"
 	conf += fmt.Sprintf("allowed_ip=%s/32\n", External.PeerProfile.WireguardIP.String())
+	conf += "persistent_keepalive_interval=1"
 
 	config.SetConfigMulti(External.Device, conf)
 }
