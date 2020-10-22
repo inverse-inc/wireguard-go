@@ -89,6 +89,23 @@ type Device struct {
 		device tun.Device
 		mtu    int32
 	}
+
+	filters struct {
+		receive atomic.Value
+	}
+}
+
+func (d *Device) SetReceiveFilter(f func([]byte) error) {
+    d.filters.receive.Store(f)
+}
+
+func (d *Device) filterReceive(p []byte) error {
+	v := d.filters.receive.Load()
+	if v == nil {
+		return nil
+	}
+
+	return v.(func([]byte) error)(p)
 }
 
 /* Converts the peer into a "zombie", which remains in the peer map,

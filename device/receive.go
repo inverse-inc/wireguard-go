@@ -279,6 +279,7 @@ func (device *Device) RoutineDecryption() {
 				content,
 				nil,
 			)
+
 			if err != nil {
 				elem.Drop()
 				device.PutMessageBuffer(elem.buffer)
