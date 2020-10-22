@@ -84,6 +84,9 @@ func (u *UPNPIGD) BindRequest(localPeerConn *net.UDPConn, localPeerPort int, sen
 	if err != nil {
 		return err
 	}
+	if isPrivateIP(myExternalIP) {
+		return errors.New("External IP is a private ip")
+	}
 
 	if u.remotePort == 0 {
 		u.remotePort = rand.Intn(40000-30000) + 30000
