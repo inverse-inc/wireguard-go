@@ -26,12 +26,6 @@ type NatPMP struct {
 	ConnectionPeer *ExternalConnection
 }
 
-// CheckNet search for a gateway
-func (natt *NatPMP) CheckNet() error {
-	_, err := gateway.DiscoverGateway()
-	return err
-}
-
 // ExternalIPAddr return the WAN ip
 func (natt *NatPMP) ExternalIPAddr() (net.IP, error) {
 	gatewayIP, err := gateway.DiscoverGateway()
@@ -79,14 +73,10 @@ func (natt *NatPMP) init(context context.Context, d *device.Device, logger *devi
 
 // GetExternalInfo fetch wan information
 func (natt *NatPMP) GetExternalInfo() error {
-	err := natt.CheckNet()
-	if err != nil {
-		return errors.New("Your router does not support the NAT PMP protocol !")
-	}
 
 	myExternalIP, err := natt.ExternalIPAddr()
 	if err != nil {
-		return err
+		return errors.New("Your router does not support the NAT PMP protocol !")
 	}
 
 	remotePort := rand.Intn(constants.HigherPort-constants.LowerPort) + constants.LowerPort
