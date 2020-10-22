@@ -36,7 +36,7 @@ func (u *UPNPIGD) ExternalIPAddr() (net.IP, error) {
 }
 
 func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
-	if err := u.mapping.AddPortMapping(localPort, remotePort, 60, "UDP", "WireguardGO"); err == nil {
+	if err := u.mapping.AddPortMapping(localPort, remotePort, 3600, "UDP", "WireguardGO"); err == nil {
 		fmt.Println("Port mapped successfully", localPort, remotePort)
 		return nil
 	} else {

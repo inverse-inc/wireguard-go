@@ -118,7 +118,7 @@ func (pc *PeerConnection) run() {
 	messageChan := make(chan *pkt)
 	pc.listen(pc.localPeerConn, messageChan)
 	pc.listen(pc.wgConn, messageChan)
-	var peerAddrChan <-chan string
+	var peerAddrChan chan string
 
 	keepalive := time.Tick(500 * time.Millisecond)
 	keepaliveMsg := pingMsg
@@ -128,7 +128,7 @@ func (pc *PeerConnection) run() {
 	a := strings.Split(pc.localPeerConn.LocalAddr().String(), ":")
 	localPeerPort, err := strconv.Atoi(a[len(a)-1])
 	sharedutils.CheckError(err)
-	var localPeerAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localPeerPort)
+	//var localPeerAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localPeerPort)
 	var localWGAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort)
 
 	for {
@@ -193,38 +193,31 @@ func (pc *PeerConnection) run() {
 					if message.raddr.String() == localWGAddr {
 						pc.connectedOutbound = true
 						n := len(message.message)
-						pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.peerAddr, n)
+						pc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", pc.peerAddr, n, message.raddr)
 						udpSend(message.message, pc.localPeerConn, pc.peerAddr)
 					} else {
 						pc.connectedInbound = true
 						n := len(message.message)
-						pc.logger.Debug.Printf("send to WG server: [%s]: %d bytes\n", pc.wgConn.RemoteAddr(), n)
+						pc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", pc.wgConn.RemoteAddr(), n, message.raddr)
+						if !pc.Connected() && message.raddr.String() != pc.peerAddr.String() {
+							pc.logger.Info.Println("Peer address changed from", pc.peerAddr.String(), "to", message.raddr.String())
+							pc.setupPeerConnection(message.raddr.String())
+						}
 						pc.wgConn.Write(message.message)
 					}
-
 				}
 
 			case peerStr := <-peerAddrChan:
 				if pc.ShouldTryPrivate() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
 				} else {
-					pc.logger.Info.Println("Connecting to public IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
+					pc.logger.Info.Println("Connecting to public IP address of peer", peerStr, "for peer", pc.peerID, ".")
 				}
 
 				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
 				GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
 
-				pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
-				if err != nil {
-					log.Fatalln("resolve peeraddr:", err)
-				}
-				conf := ""
-				conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-				conf += fmt.Sprintf("endpoint=%s\n", localPeerAddr)
-				conf += "replace_allowed_ips=true\n"
-				conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
-
-				SetConfigMulti(pc.device, conf)
+				pc.setupPeerConnection(peerStr)
 
 				pc.started = true
 				pc.triedPrivate = true
@@ -319,7 +312,7 @@ func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 	}}
 }
 
-func (pc *PeerConnection) getPeerAddr() <-chan string {
+func (pc *PeerConnection) getPeerAddr() chan string {
 	result := make(chan string)
 	myID := pc.MyProfile.PublicKey
 
@@ -358,7 +351,7 @@ func (pc *PeerConnection) Connected() bool {
 	return pc.connectedInbound && pc.connectedOutbound
 }
 
-func (pc *PeerConnection) StartConnection(foundPeer chan bool) <-chan string {
+func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
 	pc.logger.Info.Printf("My public address for peer %s: %s. Obtained via %s\n", pc.peerID, pc.myAddr, pc.BindTechnique)
 
 	go func() {
@@ -375,4 +368,20 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) <-chan string {
 	}()
 
 	return pc.getPeerAddr()
+}
+
+func (pc *PeerConnection) setupPeerConnection(peerStr string) {
+	var err error
+	pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
+	if err != nil {
+		log.Fatalln("resolve peeraddr:", err)
+	}
+	conf := ""
+	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
+	conf += fmt.Sprintf("endpoint=%s\n", peerStr)
+	conf += "replace_allowed_ips=true\n"
+	conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
+
+	SetConfigMulti(pc.device, conf)
+
 }
