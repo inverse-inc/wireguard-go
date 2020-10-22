@@ -190,6 +190,7 @@ func (pc *PeerConnection) run() {
 					pc.lastKeepalive = time.Now()
 
 				default:
+					pc.lastKeepalive = time.Now()
 					if message.raddr.String() == localWGAddr {
 						pc.connectedOutbound = true
 						n := len(message.message)
