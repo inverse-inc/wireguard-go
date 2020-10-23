@@ -27,6 +27,7 @@ type BindTechnique string
 const (
 	BindSTUN    = BindTechnique("STUN")
 	BindUPNPGID = BindTechnique("UPNPGID")
+	BindNATPMP  = BindTechnique("NATPMP")
 )
 
 var DefaultBindTechnique = BindSTUN
@@ -115,6 +116,8 @@ func (pc *PeerConnection) run() {
 
 	peerupnpgid := NewUPNPGID()
 
+	peernatpmp := NewNATPMP()
+
 	messageChan := make(chan *pkt)
 	pc.listen(pc.localPeerConn, messageChan)
 	pc.listen(pc.wgConn, messageChan)
@@ -162,7 +165,19 @@ func (pc *PeerConnection) run() {
 						pc.myAddr = newaddr
 						peerAddrChan = pc.StartConnection(foundPeer)
 					}
+				case peernatpmp.IsMessage(message.message):
+					externalIP, externalPort, err := peernatpmp.ParseBindRequestPkt(message.message)
+					if err != nil {
+						pc.logger.Error.Println("Unable to decode UPNP GID message:", err)
+						break
+					}
 
+					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
+					sharedutils.CheckError(err)
+					if newaddr.String() != pc.myAddr.String() {
+						pc.myAddr = newaddr
+						peerAddrChan = pc.StartConnection(foundPeer)
+					}
 				case stun.IsMessage(message.message):
 					m := new(stun.Message)
 					m.Raw = message.message
@@ -233,6 +248,8 @@ func (pc *PeerConnection) run() {
 						err = sendBindingRequest(pc.localPeerConn, stunAddr)
 					} else if pc.BindTechnique == BindUPNPGID {
 						err = peerupnpgid.BindRequest(pc.localPeerConn, localPeerPort, messageChan)
+					} else if pc.BindTechnique == BindNATPMP {
+						err = peernatpmp.BindRequest(pc.localPeerConn, localPeerPort, messageChan)
 					} else {
 						err = errors.New("Unknown bind technique")
 					}
