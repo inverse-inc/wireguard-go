@@ -28,8 +28,11 @@ var knownPeers = struct {
 func startInverse(interfaceName string, device *device.Device) {
 	// If our router supports UPNPGID, then we use it
 	if ztn.NewUPNPGID().CheckNet() == nil {
-		logger.Info.Println("Router supports UPNP GID, it will be used to create public P2P connections")
+		logger.Info.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
 		ztn.DefaultBindTechnique = ztn.BindUPNPGID
+	} else if ztn.NewNATPMP().CheckNet() == nil {{
+		logger.Info.Println("Router supports NAT PMP, it will be used to create public P2P connections")
+		ztn.DefaultBindTechnique = ztn.BindNATPMP
 	}
 
 	go ztn.StartRPC()
