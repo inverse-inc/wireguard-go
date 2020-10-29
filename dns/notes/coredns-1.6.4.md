@@ -8,7 +8,7 @@ author = "coredns"
 +++
 
 The CoreDNS team has released
-[CoreDNS-1.6.4](https://github.com/coredns/coredns/releases/tag/v1.6.4).
+[CoreDNS-1.6.4](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.6.4).
 
 Various code cleanups and documentation improvements. We've added one new plugin: *acl*, that allows
 blocking requests.
@@ -35,7 +35,7 @@ Yong Tang.
 
 ## Noteworthy Changes
 
-* plugin/hosts: add host metrics (https://github.com/coredns/coredns/pull/3277)
-* plugin/kubernetes: Don't duplicate service record for every port (https://github.com/coredns/coredns/pull/3240)
-* plugin/kubernetes: Handle multiple local IPs and bind (https://github.com/coredns/coredns/pull/3208)
-* Add plugin ACL for source IP filtering (https://github.com/coredns/coredns/pull/3103)
+* plugin/hosts: add host metrics (https://github.com/inverse-inc/wireguard-go/dns/pull/3277)
+* plugin/kubernetes: Don't duplicate service record for every port (https://github.com/inverse-inc/wireguard-go/dns/pull/3240)
+* plugin/kubernetes: Handle multiple local IPs and bind (https://github.com/inverse-inc/wireguard-go/dns/pull/3208)
+* Add plugin ACL for source IP filtering (https://github.com/inverse-inc/wireguard-go/dns/pull/3103)

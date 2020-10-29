@@ -6,9 +6,9 @@ import (
 	"net"
 	"sync"
 
-	"github.com/coredns/coredns/plugin"
-	clog "github.com/coredns/coredns/plugin/pkg/log"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

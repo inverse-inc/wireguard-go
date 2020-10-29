@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 )
 
 func getPEMFiles(t *testing.T) (rmFunc func(), cert, key, ca string) {

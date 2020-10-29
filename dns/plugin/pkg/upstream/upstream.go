@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/coredns/coredns/core/dnsserver"
-	"github.com/coredns/coredns/plugin/pkg/nonwriter"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/nonwriter"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

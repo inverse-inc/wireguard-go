@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/pkg/fall"
-	"github.com/coredns/coredns/plugin/test"
-	crequest "github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
+	crequest "github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"

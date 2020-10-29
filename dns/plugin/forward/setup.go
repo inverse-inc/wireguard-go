@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/dnstap"
-	"github.com/coredns/coredns/plugin/pkg/parse"
-	pkgtls "github.com/coredns/coredns/plugin/pkg/tls"
-	"github.com/coredns/coredns/plugin/pkg/transport"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/dnstap"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/parse"
+	pkgtls "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/tls"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 )
 
 func init() { plugin.Register("forward", setup) }

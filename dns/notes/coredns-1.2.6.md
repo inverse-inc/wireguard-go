@@ -7,7 +7,7 @@ date = "2018-11-05T20:40:29+01:00"
 author = "coredns"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.2.6) of
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.2.6) of
 CoreDNS-1.2.6!
 
 ## Core

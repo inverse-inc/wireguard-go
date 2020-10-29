@@ -3,11 +3,11 @@ package metrics
 import (
 	"context"
 
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/metrics/vars"
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/pkg/rcode"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metrics/vars"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/rcode"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

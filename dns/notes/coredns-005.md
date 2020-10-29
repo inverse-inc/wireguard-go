@@ -7,7 +7,7 @@ title = "CoreDNS-005 Release"
 author = "coredns"
 +++
 
-CoreDNS-005 has been [released](https://github.com/coredns/coredns/releases/tag/v005)!
+CoreDNS-005 has been [released](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v005)!
 
 CoreDNS is a DNS server that chains plugins, where each plugin implements a DNS feature.
 
@@ -18,7 +18,7 @@ CoreDNS is a DNS server that chains plugins, where each plugin implements a DNS 
 A way to configure (external) plugin was added. Edit `plugin.cfg` and do a `go generate && go
 build` and your plugin has been added. This allows for out-of-tree plugin to be easily
 added. Documentation can be found in
-[plugin.cfg](https://github.com/coredns/coredns/blob/master/plugin.cfg).
+[plugin.cfg](https://github.com/inverse-inc/wireguard-go/dns/blob/master/plugin.cfg).
 
 ## Plugin improvements
 
@@ -32,7 +32,7 @@ added. Documentation can be found in
 * *proxy*: fix a bug when a connection hangs and never gets release (#467)
 * *proxy*: Fold *httpproxy* into it, which is now a normal proxy with a special `protocol`. For
   Monitoring an extra label was added: `proxy_proto` that shows the protocol used (`dns` or `https_google`).
-  See the [proxy README.md](https://github.com/coredns/coredns/blob/master/plugin/proxy/README.md) for details.
+  See the [proxy README.md](https://github.com/inverse-inc/wireguard-go/dns/blob/master/plugin/proxy/README.md) for details.
 * *httpproxy*: removed because functionality is moved to *proxy*.
 * *kubernetes*: Now implements the full
   [Kubernetes DNS Specification](https://github.com/kubernetes/dns/blob/master/docs/specification.md),
@@ -44,7 +44,7 @@ added. Documentation can be found in
   zone list, you can just add a list of CIDRs using the `cidrs` option.
 * *rewrite*: allow rewriting more bits of the incoming packet. This required some backward
   *incompatible* changes, e.g. a new **FIELD** keyword is now required. See the
-  [rewrite README.md](https://github.com/coredns/coredns/blob/master/plugin/rewrite/README.md) for details.
+  [rewrite README.md](https://github.com/inverse-inc/wireguard-go/dns/blob/master/plugin/rewrite/README.md) for details.
 
 
 # Contributors
@@ -59,7 +59,7 @@ John Belamaric,
 Miek Gieben,
 Yong Tang.
 
-If you want to help, please check out one of the [issues](https://github.com/coredns/coredns/issues/)
+If you want to help, please check out one of the [issues](https://github.com/inverse-inc/wireguard-go/dns/issues/)
 and start coding!
 
 For documentation and help, see our [community page](https://coredns.io/community/).

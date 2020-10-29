@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/etcd/msg"
-	"github.com/coredns/coredns/plugin/pkg/fall"
-	"github.com/coredns/coredns/plugin/pkg/upstream"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/etcd/msg"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/upstream"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 	etcdcv3 "go.etcd.io/etcd/clientv3"

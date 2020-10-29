@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/test"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

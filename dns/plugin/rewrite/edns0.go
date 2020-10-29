@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coredns/coredns/plugin/metadata"
-	"github.com/coredns/coredns/plugin/pkg/edns"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metadata"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/edns"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

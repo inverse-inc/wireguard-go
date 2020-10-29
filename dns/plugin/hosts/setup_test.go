@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/plugin/pkg/fall"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"
 )
 
 func TestHostsParse(t *testing.T) {

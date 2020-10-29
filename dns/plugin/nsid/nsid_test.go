@@ -5,11 +5,11 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/cache"
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/test"
-	"github.com/coredns/coredns/plugin/whoami"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/cache"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/whoami"
 
 	"github.com/miekg/dns"
 )

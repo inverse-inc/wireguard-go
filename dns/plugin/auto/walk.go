@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/coredns/coredns/plugin/file"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file"
 
 	"github.com/miekg/dns"
 )

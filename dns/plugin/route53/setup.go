@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/pkg/fall"
-	clog "github.com/coredns/coredns/plugin/pkg/log"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"
+	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"

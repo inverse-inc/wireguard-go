@@ -2,11 +2,11 @@ package secondary
 
 import (
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/file"
-	"github.com/coredns/coredns/plugin/pkg/parse"
-	"github.com/coredns/coredns/plugin/pkg/upstream"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/parse"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/upstream"
 )
 
 func init() { plugin.Register("secondary", setup) }

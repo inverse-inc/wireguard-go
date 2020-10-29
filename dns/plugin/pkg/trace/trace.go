@@ -1,7 +1,7 @@
 package trace
 
 import (
-	"github.com/coredns/coredns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 	ot "github.com/opentracing/opentracing-go"
 )
 

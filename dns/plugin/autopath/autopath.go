@@ -34,11 +34,11 @@ package autopath
 import (
 	"context"
 
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/metrics"
-	"github.com/coredns/coredns/plugin/pkg/dnsutil"
-	"github.com/coredns/coredns/plugin/pkg/nonwriter"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metrics"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnsutil"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/nonwriter"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

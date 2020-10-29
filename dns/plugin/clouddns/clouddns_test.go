@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/pkg/fall"
-	"github.com/coredns/coredns/plugin/pkg/upstream"
-	"github.com/coredns/coredns/plugin/test"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/upstream"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 	gcp "google.golang.org/api/dns/v1"

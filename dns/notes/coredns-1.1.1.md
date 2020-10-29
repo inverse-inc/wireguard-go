@@ -7,7 +7,7 @@ date = "2018-03-25T18:04:29+01:00"
 author = "coredns"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.1.1) of
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.1.1) of
 CoreDNS-1.1.1!
 
 This release fixes a **critical bug** in the *cache* plugin found by [Cure53](/2018/03/15/cure53-security-assessment/).
@@ -34,7 +34,7 @@ Miek Gieben,
 Yong Tang.
 
 And of course the people in [Cure53](https://cure53.de). Also special shout out to Mario Kleinsasser
-for helping to debug the [scrubbing issue](https://github.com/coredns/coredns/issues/1625).
+for helping to debug the [scrubbing issue](https://github.com/inverse-inc/wireguard-go/dns/issues/1625).
 
 For documentation see our (in progress!) [manual](/manual). For help and other resources, see our
 [community page](https://coredns.io/community/).

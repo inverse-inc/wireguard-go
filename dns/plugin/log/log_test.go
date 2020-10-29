@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	clog "github.com/coredns/coredns/plugin/pkg/log"
-	"github.com/coredns/coredns/plugin/pkg/replacer"
-	"github.com/coredns/coredns/plugin/pkg/response"
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/replacer"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/response"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 
 	"github.com/miekg/dns"
 )

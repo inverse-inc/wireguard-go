@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 )
 
 // Make sure the external miekg/dns dependency is up to date

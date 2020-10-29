@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"github.com/coredns/coredns/plugin/file/rrutil"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file/rrutil"
 
 	"github.com/miekg/dns"
 )

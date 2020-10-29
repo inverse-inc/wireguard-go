@@ -12,11 +12,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/debug"
-	"github.com/coredns/coredns/plugin/dnstap"
-	clog "github.com/coredns/coredns/plugin/pkg/log"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/debug"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/dnstap"
+	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 	ot "github.com/opentracing/opentracing-go"

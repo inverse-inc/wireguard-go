@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/coredns/coredns/plugin/file"
-	"github.com/coredns/coredns/plugin/file/tree"
-	clog "github.com/coredns/coredns/plugin/pkg/log"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file/tree"
+	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
 
 	"github.com/miekg/dns"
 )

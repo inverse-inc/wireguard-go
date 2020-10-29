@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/file/tree"
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file/tree"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 
 	"github.com/miekg/dns"
 )

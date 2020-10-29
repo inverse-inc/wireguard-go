@@ -7,14 +7,14 @@
 //
 // The take away: be mindful of this and don't blindly assume it's a good feature to have in your plugin.
 //
-// See https://github.com/coredns/coredns/issues/2723 for some discussion on this, which includes this quote:
+// See https://github.com/inverse-inc/wireguard-go/dns/issues/2723 for some discussion on this, which includes this quote:
 //
 // TL;DR: `fallthrough` is indeed risky and hackish, but still a good feature of CoreDNS as it allows to quickly answer boring edge cases.
 //
 package fall
 
 import (
-	"github.com/coredns/coredns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )
 
 // F can be nil to allow for no fallthrough, empty allow all zones to fallthrough or

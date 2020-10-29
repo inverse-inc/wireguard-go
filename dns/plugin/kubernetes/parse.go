@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/coredns/coredns/plugin/pkg/dnsutil"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnsutil"
 	"github.com/miekg/dns"
 )
 

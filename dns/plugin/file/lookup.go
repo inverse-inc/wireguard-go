@@ -3,9 +3,9 @@ package file
 import (
 	"context"
 
-	"github.com/coredns/coredns/plugin/file/rrutil"
-	"github.com/coredns/coredns/plugin/file/tree"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file/rrutil"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file/tree"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

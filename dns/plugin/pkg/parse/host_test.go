@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/pkg/transport"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 )
 
 func TestHostPortOrFile(t *testing.T) {

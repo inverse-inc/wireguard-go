@@ -7,7 +7,7 @@ title = "CoreDNS-007 Release"
 author = "coredns"
 +++
 
-CoreDNS-007 has been [released](https://github.com/coredns/coredns/releases/tag/v007)!
+CoreDNS-007 has been [released](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v007)!
 
 CoreDNS is a DNS server that chains plugins, where each plugin implements a DNS feature.
 
@@ -28,7 +28,7 @@ Back to the release.
 
 * `ServeDNS` is extended to take a context. This allows (for instance) tracing to start at an earlier entrypoint.
 * gRPC and TLS are made first class citizens. See [the zone
-  specification](https://github.com/coredns/coredns/blob/master/README.md#zone-specification) on how
+  specification](https://github.com/inverse-inc/wireguard-go/dns/blob/master/README.md#zone-specification) on how
   to use it. TL;DR using `grpc://` makes the server talk gRPC. The `tls` directive is used to
   specify TLS certificates.
 * Zipkin tracing can be enabled for all plugin.
@@ -63,7 +63,7 @@ Miek Gieben,
 Yong Tang,
 Yue Ko.
 
-If you want to help, please check out one of the [issues](https://github.com/coredns/coredns/issues/)
+If you want to help, please check out one of the [issues](https://github.com/inverse-inc/wireguard-go/dns/issues/)
 and start coding!
 
 For documentation and help, see our [community page](https://coredns.io/community/).

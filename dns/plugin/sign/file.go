@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coredns/coredns/plugin/file"
-	"github.com/coredns/coredns/plugin/file/tree"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file/tree"
 
 	"github.com/miekg/dns"
 )

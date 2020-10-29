@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/coredns/coredns/pb"
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/pb"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 
 	"github.com/miekg/dns"
 )

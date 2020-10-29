@@ -1,6 +1,6 @@
 package erratic
 
-import "github.com/coredns/coredns/request"
+import "github.com/inverse-inc/wireguard-go/dns/request"
 
 // AutoPath implements the AutoPathFunc call from the autopath plugin.
 func (e *Erratic) AutoPath(state request.Request) []string {

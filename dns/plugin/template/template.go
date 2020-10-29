@@ -7,12 +7,12 @@ import (
 	"strconv"
 	gotmpl "text/template"
 
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/metadata"
-	"github.com/coredns/coredns/plugin/metrics"
-	"github.com/coredns/coredns/plugin/pkg/fall"
-	"github.com/coredns/coredns/plugin/pkg/upstream"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metadata"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metrics"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/upstream"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

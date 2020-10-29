@@ -8,7 +8,7 @@ date = "2017-12-01T22:43:43-00:00"
 author = "coredns"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.0.0) of CoreDNS-1.0.0!
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.0.0) of CoreDNS-1.0.0!
 
 Release 1.0.0 and other recent releases have focused on improving the performance and
 functionality of the *kubernetes* plugin, since CoreDNS is now on track to eventually
@@ -69,7 +69,7 @@ Ruslan Drozhdzh,
 Uladzimir Trehubenka,
 Yong Tang.
 
-If you want to help, please check out one of the [issues](https://github.com/coredns/coredns/issues/)
+If you want to help, please check out one of the [issues](https://github.com/inverse-inc/wireguard-go/dns/issues/)
 and start coding!
 
 For documentation and help, see our [community page](https://coredns.io/community/).

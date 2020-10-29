@@ -4,7 +4,7 @@ package bufsize
 import (
 	"context"
 
-	"github.com/coredns/coredns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 
 	"github.com/miekg/dns"
 )

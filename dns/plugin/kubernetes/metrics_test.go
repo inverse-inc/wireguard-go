@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coredns/coredns/plugin/kubernetes/object"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/kubernetes/object"
 
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	api "k8s.io/api/core/v1"

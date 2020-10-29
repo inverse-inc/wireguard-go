@@ -7,7 +7,7 @@ title = "CoreDNS-001 Release"
 author = "coredns"
 +++
 
-CoreDNS-001 has been [released](https://github.com/coredns/coredns/releases). This is the first
+CoreDNS-001 has been [released](https://github.com/inverse-inc/wireguard-go/dns/releases). This is the first
 release! It provides a complete DNS server, that also does DNSSEC and is useful for service
 discovery in cloud setups.
 
@@ -16,7 +16,7 @@ discovery in cloud setups.
 [CoreDNS](https://coredns.io) is a DNS server that started its life as a fork of the [Caddy
 web(!)server](https://caddyserver.com).
 
-It chains [plugin](https://github.com/coredns/coredns/tree/master/plugin),
+It chains [plugin](https://github.com/inverse-inc/wireguard-go/dns/tree/master/plugin),
 where each plugin implements some DNS feature. CoreDNS is a complete replacement
 (with more features, and maybe less bugs) for [SkyDNS](https://github.com/skynetservices/skydns).
 
@@ -30,15 +30,15 @@ lines of code from CoreDNS.
 
 The core (ghe!) of CoreDNS is now in a good shape. Future work will focus on making the
 plugin better, e.g. the proxy implementation is slow and needs to be
-[faster](https://github.com/coredns/coredns/issues/184).
+[faster](https://github.com/inverse-inc/wireguard-go/dns/issues/184).
 
 ## New Plugins
 
 * There is now a [specific
-  plugin](https://github.com/coredns/coredns/tree/master/plugin/kubernetes) to deal with [Kubernetes](https://kubernetes.io).
-* The *bind* [plugin](https://github.com/coredns/coredns/tree/master/plugin/bind)  allows you to bind to a specific IP address, instead of using the wildcard
+  plugin](https://github.com/inverse-inc/wireguard-go/dns/tree/master/plugin/kubernetes) to deal with [Kubernetes](https://kubernetes.io).
+* The *bind* [plugin](https://github.com/inverse-inc/wireguard-go/dns/tree/master/plugin/bind)  allows you to bind to a specific IP address, instead of using the wildcard
   address.
-* A *whoami* [plugin](https://github.com/coredns/coredns/tree/master/plugin/whoami) reports
+* A *whoami* [plugin](https://github.com/inverse-inc/wireguard-go/dns/tree/master/plugin/whoami) reports
   back your address and port.
 * All other plugins are reworked to fit in the new plugin framework from Caddy version 0.9 (and
   up).
@@ -52,6 +52,6 @@ The following people helped with getting this release done:
 Cricket Liu, elcore, Félix Cantournet, Ilya Dmitrichenko, Joe Blow, Lee, Matt Layher,
 Michael Richmond, Miek Gieben, pixelbender, Yong Tang.
 
-If you want to help, please check out one of the [issues](https://github.com/coredns/coredns/issues/) and start coding!
+If you want to help, please check out one of the [issues](https://github.com/inverse-inc/wireguard-go/dns/issues/) and start coding!
 
 For documentation and help, see our [community page](https://coredns.io/community/).

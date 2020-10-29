@@ -7,12 +7,12 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/pkg/log"
-	"github.com/coredns/coredns/plugin/pkg/rcode"
-	_ "github.com/coredns/coredns/plugin/pkg/trace" // Plugin the trace package.
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/rcode"
+	_ "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/trace" // Plugin the trace package.
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 	ot "github.com/opentracing/opentracing-go"

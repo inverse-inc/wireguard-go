@@ -3,7 +3,7 @@ package dnstest
 import (
 	"net"
 
-	"github.com/coredns/coredns/plugin/pkg/reuseport"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/reuseport"
 
 	"github.com/miekg/dns"
 )

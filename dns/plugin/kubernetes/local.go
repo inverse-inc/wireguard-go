@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 )
 
 // boundIPs returns the list of non-loopback IPs that CoreDNS is bound to

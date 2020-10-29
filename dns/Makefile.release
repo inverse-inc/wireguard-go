@@ -15,7 +15,7 @@
 # Getting all pull requests merged since the last tag can be done with this "oneliner"
 # See the 'prs' target.
 #
-# % git log $(git describe --tags --abbrev=0)..HEAD --oneline | awk ' { $1="";print } ' | sed 's/^ //' | sed -e 's|#\([0-9]\)|https://github.com/coredns/coredns/pull/\1|'
+# % git log $(git describe --tags --abbrev=0)..HEAD --oneline | awk ' { $1="";print } ' | sed 's/^ //' | sed -e 's|#\([0-9]\)|https://github.com/inverse-inc/wireguard-go/dns/pull/\1|'
 #
 # As seen in notes/coredns-1.5.1.md we want to style the notes in the following manner:
 #
@@ -169,7 +169,7 @@ clean:
 
 .PHONY: prs
 prs:
-	git log $$(git describe --tags --abbrev=0)..HEAD --oneline | awk ' { $$1="";print } ' | sed 's/^ //' | sed -e 's|#\([0-9]\)|https://github.com/coredns/coredns/pull/\1|' | \
+	git log $$(git describe --tags --abbrev=0)..HEAD --oneline | awk ' { $$1="";print } ' | sed 's/^ //' | sed -e 's|#\([0-9]\)|https://github.com/inverse-inc/wireguard-go/dns/pull/\1|' | \
 		grep -v '^build(deps)' | \
 		grep -v '^auto go mod tidy'
 

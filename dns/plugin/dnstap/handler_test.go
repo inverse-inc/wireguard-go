@@ -5,8 +5,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/dnstap/msg"
-	test "github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/dnstap/msg"
+	test "github.com/inverse-inc/wireguard-go/dns/plugin/test"
 	tap "github.com/dnstap/golang-dnstap"
 	"github.com/miekg/dns"
 )

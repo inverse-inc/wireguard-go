@@ -55,4 +55,4 @@ _udp.example.org.       0       IN      SRV     0 0 40212
 [Read the blog post][blog] on how this plugin is built, or [explore the source code][code].
 
 [blog]: https://coredns.io/2017/03/01/how-to-add-plugins-to-coredns/
-[code]: https://github.com/coredns/coredns/blob/master/plugin/whoami/
+[code]: https://github.com/inverse-inc/wireguard-go/dns/blob/master/plugin/whoami/

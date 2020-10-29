@@ -1,9 +1,9 @@
 package kubernetes
 
 import (
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/kubernetes/object"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/kubernetes/object"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 )
 
 // AutoPath implements the AutoPathFunc call from the autopath plugin.

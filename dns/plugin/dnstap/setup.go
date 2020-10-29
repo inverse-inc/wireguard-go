@@ -4,10 +4,10 @@ import (
 	"strings"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/dnstap/dnstapio"
-	"github.com/coredns/coredns/plugin/pkg/parse"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/dnstap/dnstapio"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/parse"
 )
 
 func init() { plugin.Register("dnstap", setup) }

@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/coredns/coredns/plugin/pkg/edns"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/edns"
 
 	"github.com/miekg/dns"
 )

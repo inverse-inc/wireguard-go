@@ -7,8 +7,8 @@ import (
 	"net"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/plugin/pkg/reuseport"
-	"github.com/coredns/coredns/plugin/pkg/transport"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/reuseport"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 
 	"github.com/miekg/dns"
 )

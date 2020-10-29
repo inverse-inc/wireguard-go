@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/file"
-	"github.com/coredns/coredns/plugin/pkg/cache"
-	"github.com/coredns/coredns/plugin/pkg/dnstest"
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/cache"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 
 	"github.com/miekg/dns"
 )

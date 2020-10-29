@@ -8,7 +8,7 @@ date = "2017-09-10T20:24:43-04:00"
 author = "coredns"
 +++
 
-CoreDNS-011 has been [released](https://github.com/coredns/coredns/releases/tag/v011)!
+CoreDNS-011 has been [released](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v011)!
 
 CoreDNS is a DNS server that chains plugins, where each plugin implements a DNS feature.
 
@@ -69,7 +69,7 @@ varyoo,
 Yong Tang,
 张勋.
 
-If you want to help, please check out one of the [issues](https://github.com/coredns/coredns/issues/)
+If you want to help, please check out one of the [issues](https://github.com/inverse-inc/wireguard-go/dns/issues/)
 and start coding!
 
 For documentation and help, see our [community page](https://coredns.io/community/).

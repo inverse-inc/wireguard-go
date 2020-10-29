@@ -3,7 +3,7 @@ package dnstap
 import (
 	"time"
 
-	"github.com/coredns/coredns/plugin/dnstap/msg"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/dnstap/msg"
 	tap "github.com/dnstap/golang-dnstap"
 	"github.com/miekg/dns"
 )

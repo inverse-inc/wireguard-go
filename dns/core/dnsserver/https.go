@@ -3,7 +3,7 @@ package dnsserver
 import (
 	"net"
 
-	"github.com/coredns/coredns/plugin/pkg/nonwriter"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/nonwriter"
 )
 
 // DoHWriter is a nonwriter.Writer that adds more specific LocalAddr and RemoteAddr methods.

@@ -5,7 +5,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/kubernetes/object"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/kubernetes/object"
 
 	"github.com/miekg/dns"
 	api "k8s.io/api/core/v1"

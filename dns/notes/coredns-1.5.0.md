@@ -7,7 +7,7 @@ date = 2019-04-06T08:24:07+00:00
 author = "coredns"
 +++
 
-A new [release](https://github.com/coredns/coredns/releases/tag/v1.5.0): CoreDNS-1.5.0.
+A new [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.5.0): CoreDNS-1.5.0.
 
 **Two** new plugins in this release: [*grpc*](/plugins/grpc), and [*ready*](/plugins/ready). And
 some polish and simplifications in the core server code.
@@ -17,10 +17,10 @@ been fully deprecated. As is the [*proxy*](/explugins/proxy/) plugin.
 
 And a update on two important and active bugs:
 
-* [2593](https://github.com/coredns/coredns/issues/2593) seems to hone in on Docker and/or the
+* [2593](https://github.com/inverse-inc/wireguard-go/dns/issues/2593) seems to hone in on Docker and/or the
   container environment being a contributing factor.
 
-* [2624](https://github.com/coredns/coredns/issues/2624) is because of TLS session negotiating in
+* [2624](https://github.com/inverse-inc/wireguard-go/dns/issues/2624) is because of TLS session negotiating in
   the *forward* plugin.
 
 # Plugins

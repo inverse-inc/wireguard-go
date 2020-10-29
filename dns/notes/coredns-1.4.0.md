@@ -7,14 +7,14 @@ date = "2019-03-03T09:04:07+00:00"
 author = "coredns"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.4.0)
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.4.0)
 of CoreDNS-1.4.0! Our first release after we became a graduated project in
 [CNCF](https://www.cncf.io/).
 
 Deprecation notice for the *next* release:
 
- *  [*auto*](/plugins/auto) will deprecate **TIMEOUT** and recommends the use of RELOAD ([2516](https://github.com/coredns/coredns/issues/2516)).
- *  [*auto*](/plugins/file) and [*file*](/plugins/auto) will deprecate NO_RELOAD and recommends the use of RELOAD set to 0 ([2536](https://github.com/coredns/coredns/issues/2536)).
+ *  [*auto*](/plugins/auto) will deprecate **TIMEOUT** and recommends the use of RELOAD ([2516](https://github.com/inverse-inc/wireguard-go/dns/issues/2516)).
+ *  [*auto*](/plugins/file) and [*file*](/plugins/auto) will deprecate NO_RELOAD and recommends the use of RELOAD set to 0 ([2536](https://github.com/inverse-inc/wireguard-go/dns/issues/2536)).
  *  [*health*](/plugins/health) will revert back to report process level health without plugin
     status. A new *ready* plugin will make sure plugins have at least completed their startup
     sequence.
@@ -26,8 +26,8 @@ The [previous](/2019/01/13/coredns-1.3.1-release/) announced deprecations have b
 The (unused) gRPC watch functionally was removed from the server.
 
 Note we're actively working on two (probably related) bugs
-([2593](https://github.com/coredns/coredns/issues/2593),
-[2624](https://github.com/coredns/coredns/issues/2624)) which should hopefully result in a fix and
+([2593](https://github.com/inverse-inc/wireguard-go/dns/issues/2593),
+[2624](https://github.com/inverse-inc/wireguard-go/dns/issues/2624)) which should hopefully result in a fix and
 a new release fairly quickly.
 
 # Plugins

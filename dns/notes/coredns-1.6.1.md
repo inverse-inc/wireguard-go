@@ -8,7 +8,7 @@ author = "coredns"
 +++
 
 The CoreDNS team has released
-[CoreDNS-1.6.1](https://github.com/coredns/coredns/releases/tag/v1.6.1).
+[CoreDNS-1.6.1](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.6.1).
 
 This is a small (bug fix) release.
 
@@ -31,7 +31,7 @@ Yong Tang.
 
 ## Noteworthy Changes
 
-core: log panics (https://github.com/coredns/coredns/pull/3072)
-plugin/hosts: create inline map in setup (https://github.com/coredns/coredns/pull/3071)
-plugin/reload: Graceful reload of imported files (https://github.com/coredns/coredns/pull/3068)
-plugin/route53: Increase ListResourceRecordSets paging size. (https://github.com/coredns/coredns/pull/3073)
+core: log panics (https://github.com/inverse-inc/wireguard-go/dns/pull/3072)
+plugin/hosts: create inline map in setup (https://github.com/inverse-inc/wireguard-go/dns/pull/3071)
+plugin/reload: Graceful reload of imported files (https://github.com/inverse-inc/wireguard-go/dns/pull/3068)
+plugin/route53: Increase ListResourceRecordSets paging size. (https://github.com/inverse-inc/wireguard-go/dns/pull/3073)

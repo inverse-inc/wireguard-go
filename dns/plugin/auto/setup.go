@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
-	"github.com/coredns/coredns/plugin"
-	"github.com/coredns/coredns/plugin/metrics"
-	clog "github.com/coredns/coredns/plugin/pkg/log"
-	"github.com/coredns/coredns/plugin/pkg/upstream"
-	"github.com/coredns/coredns/plugin/transfer"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metrics"
+	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/upstream"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/transfer"
 )
 
 var log = clog.NewWithPlugin("auto")

@@ -41,7 +41,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 )
 
 // Provider interface needs to be implemented by each plugin willing to provide

@@ -5,8 +5,8 @@ package file
 import (
 	"strings"
 
-	"github.com/coredns/coredns/plugin/pkg/fuzz"
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fuzz"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 )
 
 // Fuzz fuzzes file.

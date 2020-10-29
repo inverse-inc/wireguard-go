@@ -7,7 +7,7 @@ date = "2018-06-19T09:39:29+01:00"
 author = "coredns"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.1.4) of
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.1.4) of
 CoreDNS-1.1.4!
 
 This release has a few enhancements in the plugins, and a few (Docker) improvements.
@@ -19,7 +19,7 @@ command line flag a noop.
 
 This is also a heads up that in the next release - 1.2.0 - the current *etcd* plugin will be
 replaced by a new plugin that supports etcd3, see this [pull
-request](https://github.com/coredns/coredns/pull/1702).
+request](https://github.com/inverse-inc/wireguard-go/dns/pull/1702).
 
 The Docker image is now built using a multistage build. This means the final image is based on
 `scratch` *and* all architectures now have certificates in the image (not just the amd64 one).

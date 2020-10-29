@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coredns/coredns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )
 
 // parseIP calls discards any v6 zone info, before calling net.ParseIP.

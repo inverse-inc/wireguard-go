@@ -8,7 +8,7 @@ date = "2017-12-11T14:43:43-00:00"
 author = "coredns"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.0.1) of CoreDNS-1.0.1!
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.0.1) of CoreDNS-1.0.1!
 
 This release fixes a crash in the *file* plugin and has some minor bug fixes for other plugins.
 One new plugin was added: *nsid*, that implements [RFC 5001](https://tools.ietf.org/html/rfc5001).
@@ -30,5 +30,5 @@ Seansean2,
 Yong Tang.
 
 If you want to help, please check out one of the
-[issues](https://github.com/coredns/coredns/issues/) and start coding! For documentation and help,
+[issues](https://github.com/inverse-inc/wireguard-go/dns/issues/) and start coding! For documentation and help,
 see our [community page](https://coredns.io/community/).

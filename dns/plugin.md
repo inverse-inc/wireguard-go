@@ -41,7 +41,7 @@ levels available are `log.Info`, `log.Warning`, `log.Error`, `log.Debug`. Each o
 a `f` variant. The plugin's name should be included, by using the log package like so:
 
 ~~~ go
-import clog "github.com/coredns/coredns/plugin/pkg/log"
+import clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
 
 var log = clog.NewWithPlugin("whoami")
 

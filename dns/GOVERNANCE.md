@@ -36,7 +36,7 @@ in a *reasonable* time frame, either providing insights, or assign the Pull Requ
 maintainers.
 
 Every Maintainer is listed in the
-[CODEOWNERS](https://github.com/coredns/coredns/blob/master/CODEOWNERS)
+[CODEOWNERS](https://github.com/inverse-inc/wireguard-go/dns/blob/master/CODEOWNERS)
 file, with their Github handle.
 
 A Maintainer should be a member of `maintainers@coredns.io`, although this is not a hard requirement.

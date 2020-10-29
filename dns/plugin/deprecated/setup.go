@@ -15,7 +15,7 @@ import (
 	"errors"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )
 
 // removed has the names of the plugins that need to error on startup.

@@ -8,7 +8,7 @@ author = "coredns"
 +++
 
 The CoreDNS team has released
-[CoreDNS-1.8.0](https://github.com/coredns/coredns/releases/tag/v1.8.0).
+[CoreDNS-1.8.0](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.8.0).
 
 If you are running 1.7.1 you want to upgrade for the *cache* plugin fixes.
 
@@ -55,14 +55,14 @@ Miek Gieben,
 Yong Tang.
 
 ## Noteworthy Changes
-* core: doh support: fix alpn for http/2 upgrade when using DoH (https://github.com/coredns/coredns/pull/4182)
-* core: doh support: make no TLS config fatal (https://github.com/coredns/coredns/pull/4162)
-* core: fix crash with no plugins (https://github.com/coredns/coredns/pull/4184)
-* core: Move caddy v1 in our GitHub org (https://github.com/coredns/coredns/pull/4018)
-* plugin/auto: allow fallthrough if no zones match (https://github.com/coredns/coredns/pull/4166)
-* plugin/cache: Fix filtering (https://github.com/coredns/coredns/pull/4148)
-* plugin/cache: Fix removing OPT (https://github.com/coredns/coredns/pull/4190)
-* plugin/dnstap: various cleanups (https://github.com/coredns/coredns/pull/4179)
-* plugin/ready: don't return 200 during shutdown (https://github.com/coredns/coredns/pull/4167)
-* plugin/trace: root span names no longer contain the query data (https://github.com/coredns/coredns/pull/4171)
-* plugin/transfer: Implement notifies for transfer plugin (https://github.com/coredns/coredns/pull/3972)
+* core: doh support: fix alpn for http/2 upgrade when using DoH (https://github.com/inverse-inc/wireguard-go/dns/pull/4182)
+* core: doh support: make no TLS config fatal (https://github.com/inverse-inc/wireguard-go/dns/pull/4162)
+* core: fix crash with no plugins (https://github.com/inverse-inc/wireguard-go/dns/pull/4184)
+* core: Move caddy v1 in our GitHub org (https://github.com/inverse-inc/wireguard-go/dns/pull/4018)
+* plugin/auto: allow fallthrough if no zones match (https://github.com/inverse-inc/wireguard-go/dns/pull/4166)
+* plugin/cache: Fix filtering (https://github.com/inverse-inc/wireguard-go/dns/pull/4148)
+* plugin/cache: Fix removing OPT (https://github.com/inverse-inc/wireguard-go/dns/pull/4190)
+* plugin/dnstap: various cleanups (https://github.com/inverse-inc/wireguard-go/dns/pull/4179)
+* plugin/ready: don't return 200 during shutdown (https://github.com/inverse-inc/wireguard-go/dns/pull/4167)
+* plugin/trace: root span names no longer contain the query data (https://github.com/inverse-inc/wireguard-go/dns/pull/4171)
+* plugin/transfer: Implement notifies for transfer plugin (https://github.com/inverse-inc/wireguard-go/dns/pull/3972)

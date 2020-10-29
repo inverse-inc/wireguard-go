@@ -1,8 +1,8 @@
 package dnssec
 
 import (
-	"github.com/coredns/coredns/plugin/pkg/response"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/response"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

@@ -3,7 +3,7 @@ package transfer
 import (
 	"fmt"
 
-	"github.com/coredns/coredns/plugin/pkg/rcode"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/rcode"
 
 	"github.com/miekg/dns"
 )

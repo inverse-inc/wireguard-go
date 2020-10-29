@@ -8,7 +8,7 @@ date = "2017-12-31T09:06:29+00:00"
 author = "coredns"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.0.2) of CoreDNS-1.0.2!
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.0.2) of CoreDNS-1.0.2!
 This release can be summarized as "help external plugin developers" as most changes are geared
 towards exposing CoreDNS functionality to make this as easy as possible. Is also a fairly small
 release.
@@ -16,7 +16,7 @@ release.
 ## Core
 
 Expose the directives list, so that external plugins can be easily added without mucking with
-CoreDNS code, see the [pull request](https://github.com/coredns/coredns/pull/1315) for details.
+CoreDNS code, see the [pull request](https://github.com/inverse-inc/wireguard-go/dns/pull/1315) for details.
 
 Fix crash when there are no handlers that can actually serve queries, i.e. a Corefile with only
 *debug* and *pprof* for instance.
@@ -40,5 +40,5 @@ Paul Greenberg,
 Yong Tang.
 
 If you want to help, please check out one of the
-[issues](https://github.com/coredns/coredns/issues/) and start coding! For documentation and help,
+[issues](https://github.com/inverse-inc/wireguard-go/dns/issues/) and start coding! For documentation and help,
 see our [community page](https://coredns.io/community/).

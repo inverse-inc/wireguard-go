@@ -8,11 +8,11 @@ author = "coredns"
 +++
 
 The CoreDNS team has released
-[CoreDNS-1.7.0](https://github.com/coredns/coredns/releases/tag/v1.7.0).
+[CoreDNS-1.7.0](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.7.0).
 
 This is a **backwards-incompatible release**. Major changes include:
 
-* Better [metrics names](https://github.com/coredns/coredns/pull/3776).
+* Better [metrics names](https://github.com/inverse-inc/wireguard-go/dns/pull/3776).
 * The *federation* plugin (which allows for v1 Kubernetes federation) has been removed. We've also removed
   some supporting code from the *kubernetes* plugin, so it will not build as an external plugin
   (with this version of CoreDNS).
@@ -79,15 +79,15 @@ Zou Nengren.
 
 ## Noteworthy Changes
 
-* plugin/azure: Fix environment option overwrite (https://github.com/coredns/coredns/pull/3922)
-* plugin/dns64: Add DNS64 plugin (https://github.com/coredns/coredns/pull/3534)
-* plugin/federation: Remove already-deprecated federation plugin (https://github.com/coredns/coredns/pull/3794)
-* plugin/forward: Fix only first upstream server is used in forward plugin (https://github.com/coredns/coredns/issues/3900)
-* plugin/forward: Avoid https protocol (https://github.com/coredns/coredns/pull/3817)
-* plugin/k8s_external: Add CNAME support for AWS ELB/NLB (https://github.com/coredns/coredns/pull/3916)
-* plugin/kubernetes: Remove already-deprecated options `resyncperiod` and `upstream` (https://github.com/coredns/coredns/pull/3737)
-* plugin/kubernetes: Populate client metadata for external queries (https://github.com/coredns/coredns/pull/3874)
-* plugin/kubernetes: Fix 0 weight in SRV records with 100 or more records in answer (https://github.com/coredns/coredns/pull/3931)
-* plugin/kubernetes: Handle tombstones in kubernetes plugin (https://github.com/coredns/coredns/pull/3887) and (https://github.com/coredns/coredns/pull/3890)
-* plugin/nsid: Fix NSID not being set on cached responses (https://github.com/coredns/coredns/pull/3822)
-* metrics: Better metrics names (https://github.com/coredns/coredns/pull/3776), (https://github.com/coredns/coredns/pull/3799), and (https://github.com/coredns/coredns/pull/3805)
+* plugin/azure: Fix environment option overwrite (https://github.com/inverse-inc/wireguard-go/dns/pull/3922)
+* plugin/dns64: Add DNS64 plugin (https://github.com/inverse-inc/wireguard-go/dns/pull/3534)
+* plugin/federation: Remove already-deprecated federation plugin (https://github.com/inverse-inc/wireguard-go/dns/pull/3794)
+* plugin/forward: Fix only first upstream server is used in forward plugin (https://github.com/inverse-inc/wireguard-go/dns/issues/3900)
+* plugin/forward: Avoid https protocol (https://github.com/inverse-inc/wireguard-go/dns/pull/3817)
+* plugin/k8s_external: Add CNAME support for AWS ELB/NLB (https://github.com/inverse-inc/wireguard-go/dns/pull/3916)
+* plugin/kubernetes: Remove already-deprecated options `resyncperiod` and `upstream` (https://github.com/inverse-inc/wireguard-go/dns/pull/3737)
+* plugin/kubernetes: Populate client metadata for external queries (https://github.com/inverse-inc/wireguard-go/dns/pull/3874)
+* plugin/kubernetes: Fix 0 weight in SRV records with 100 or more records in answer (https://github.com/inverse-inc/wireguard-go/dns/pull/3931)
+* plugin/kubernetes: Handle tombstones in kubernetes plugin (https://github.com/inverse-inc/wireguard-go/dns/pull/3887) and (https://github.com/inverse-inc/wireguard-go/dns/pull/3890)
+* plugin/nsid: Fix NSID not being set on cached responses (https://github.com/inverse-inc/wireguard-go/dns/pull/3822)
+* metrics: Better metrics names (https://github.com/inverse-inc/wireguard-go/dns/pull/3776), (https://github.com/inverse-inc/wireguard-go/dns/pull/3799), and (https://github.com/inverse-inc/wireguard-go/dns/pull/3805)

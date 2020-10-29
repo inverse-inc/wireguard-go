@@ -8,7 +8,7 @@ author = "coredns"
 +++
 
 The CoreDNS team has released
-[CoreDNS-1.6.8](https://github.com/coredns/coredns/releases/tag/v1.6.8).
+[CoreDNS-1.6.8](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.6.8).
 
 Again a small release with some nice improvements in the *forward* plugin, and overall polish. See
 "Noteworthy Changes" for more detail.
@@ -32,13 +32,13 @@ Zou Nengren.
 
 ## Noteworthy Changes
 
-* plugin/azure: Add private DNS support for azure plugin (https://github.com/coredns/coredns/pull/1516)
-* plugin/cache: explain drop metric (https://github.com/coredns/coredns/pull/3706)
-* plugin/forward: Add configuration flag to set if RecursionDesired should be set on health checks (https://github.com/coredns/coredns/pull/3679)
-* plugin/forward: Add exponential backoff to healthcheck (https://github.com/coredns/coredns/pull/3643)
-* plugin/forward: Add max_concurrent option (https://github.com/coredns/coredns/pull/3640)
-* plugin/hosts: Modifies NODATA handling (https://github.com/coredns/coredns/pull/3536)
-* plugin/kubernetes: fix metadata (https://github.com/coredns/coredns/pull/3642)
-* plugin/kubernetes: Return all records with matching IP for reverse queries (https://github.com/coredns/coredns/pull/3687)
-* plugin/metrics: Add query type to latency as well (https://github.com/coredns/coredns/pull/3685)
-* plugin/pkg/up: Make default intervals shorter (https://github.com/coredns/coredns/pull/3651)
+* plugin/azure: Add private DNS support for azure plugin (https://github.com/inverse-inc/wireguard-go/dns/pull/1516)
+* plugin/cache: explain drop metric (https://github.com/inverse-inc/wireguard-go/dns/pull/3706)
+* plugin/forward: Add configuration flag to set if RecursionDesired should be set on health checks (https://github.com/inverse-inc/wireguard-go/dns/pull/3679)
+* plugin/forward: Add exponential backoff to healthcheck (https://github.com/inverse-inc/wireguard-go/dns/pull/3643)
+* plugin/forward: Add max_concurrent option (https://github.com/inverse-inc/wireguard-go/dns/pull/3640)
+* plugin/hosts: Modifies NODATA handling (https://github.com/inverse-inc/wireguard-go/dns/pull/3536)
+* plugin/kubernetes: fix metadata (https://github.com/inverse-inc/wireguard-go/dns/pull/3642)
+* plugin/kubernetes: Return all records with matching IP for reverse queries (https://github.com/inverse-inc/wireguard-go/dns/pull/3687)
+* plugin/metrics: Add query type to latency as well (https://github.com/inverse-inc/wireguard-go/dns/pull/3685)
+* plugin/pkg/up: Make default intervals shorter (https://github.com/inverse-inc/wireguard-go/dns/pull/3651)

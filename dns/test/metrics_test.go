@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coredns/coredns/plugin/metrics"
-	"github.com/coredns/coredns/plugin/metrics/vars"
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metrics"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/metrics/vars"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 
 	"github.com/miekg/dns"
 )

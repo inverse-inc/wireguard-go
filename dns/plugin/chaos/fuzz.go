@@ -3,7 +3,7 @@
 package chaos
 
 import (
-	"github.com/coredns/coredns/plugin/pkg/fuzz"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fuzz"
 )
 
 // Fuzz fuzzes cache.

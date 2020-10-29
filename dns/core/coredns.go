@@ -3,5 +3,5 @@ package core
 
 import (
 	// plug in the server
-	_ "github.com/coredns/coredns/core/dnsserver"
+	_ "github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 )

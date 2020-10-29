@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coredns/coredns/plugin/file"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file"
 )
 
 func TestNames(t *testing.T) {

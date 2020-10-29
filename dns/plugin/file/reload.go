@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/coredns/coredns/plugin/transfer"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/transfer"
 )
 
 // Reload reloads a zone when it is changed on disk. If z.NoReload is true, no reloading will be done.

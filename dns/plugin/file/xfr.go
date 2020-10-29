@@ -1,8 +1,8 @@
 package file
 
 import (
-	"github.com/coredns/coredns/plugin/file/tree"
-	"github.com/coredns/coredns/plugin/transfer"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/file/tree"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/transfer"
 
 	"github.com/miekg/dns"
 )

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coredns/coredns/pb"
+	"github.com/inverse-inc/wireguard-go/dns/pb"
 
 	"github.com/miekg/dns"
 	"google.golang.org/grpc"

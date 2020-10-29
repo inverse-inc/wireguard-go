@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coredns/coredns/plugin/pkg/transport"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 
 	"github.com/miekg/dns"
 )

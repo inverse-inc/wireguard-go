@@ -7,7 +7,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	"github.com/miekg/dns"
 )

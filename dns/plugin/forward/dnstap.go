@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/coredns/coredns/plugin/dnstap/msg"
-	"github.com/coredns/coredns/request"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/dnstap/msg"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 
 	tap "github.com/dnstap/golang-dnstap"
 	"github.com/miekg/dns"

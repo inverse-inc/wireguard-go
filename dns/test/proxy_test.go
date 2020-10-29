@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/coredns/coredns/plugin/test"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
 
 	"github.com/miekg/dns"
 )

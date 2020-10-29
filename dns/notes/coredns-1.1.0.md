@@ -9,7 +9,7 @@ author = "coredns"
 enabled = "default"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.1.0) of
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.1.0) of
 CoreDNS-1.1.0!
 
 CoreDNS has been promoted to the [incubating](https://www.cncf.io/projects/graduation-criteria/)
@@ -41,7 +41,7 @@ block this for no good reason). I.e. this now works:
 ## Plugins
 
 * The plugins *shutdown* and *startup* where marked deprecated in 1.0.6. This release removes them. You should use [*on*](/explugins/on) instead.
-* A new plugin was added: *reload*, which watches for changes in your Corefile and then automatically will reload the process. This is not yet bullet proof, some plugins can fail to setup during a reload. See the discussion in [issue 1445](https://github.com/coredns/coredns/issues/1455).
+* A new plugin was added: *reload*, which watches for changes in your Corefile and then automatically will reload the process. This is not yet bullet proof, some plugins can fail to setup during a reload. See the discussion in [issue 1445](https://github.com/inverse-inc/wireguard-go/dns/issues/1455).
 * A number of plugins can only be used once in a server block, but didn't make this explicit. I.e. [*dnssec*](/plugins/dnssec) would silently overwrite earlier config. The following plugins now return an error when used multiple times **in a single Server Block**:
 *cache*,
 *dnssec*,

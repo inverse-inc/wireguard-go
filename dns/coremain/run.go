@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 )
 
 func init() {

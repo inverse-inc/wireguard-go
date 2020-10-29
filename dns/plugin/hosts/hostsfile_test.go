@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredns/coredns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )
 
 func testHostsfile(file string) *Hostsfile {

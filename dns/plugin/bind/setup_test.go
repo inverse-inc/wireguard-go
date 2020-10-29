@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 )
 
 func TestSetup(t *testing.T) {

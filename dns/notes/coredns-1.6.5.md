@@ -8,7 +8,7 @@ author = "coredns"
 +++
 
 The CoreDNS team has released
-[CoreDNS-1.6.5](https://github.com/coredns/coredns/releases/tag/v1.6.5).
+[CoreDNS-1.6.5](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.6.5).
 
 A fairly small release that polishes various plugins and fixes a bunch of bugs.
 
@@ -38,15 +38,15 @@ yuxiaobo96.
 
 ## Noteworthy Changes
 
-* core: Make request.Request smaller (https://github.com/coredns/coredns/pull/3351)
-* pkg/log: Add Clear to stop debug logging (https://github.com/coredns/coredns/pull/3372)
-* plugin/cache: move goroutine closure to separate function to save memory (https://github.com/coredns/coredns/pull/3353)
-* plugin/clouddns: remove initialization from init (https://github.com/coredns/coredns/pull/3349)
-* plugin/erratic: doc and zone transfer (https://github.com/coredns/coredns/pull/3340)
-* plugin/file: fix panic in miekg/dns.CompareDomainName() (https://github.com/coredns/coredns/pull/3337)
-* plugin/forward: make Yield not block (https://github.com/coredns/coredns/pull/3336)
-* plugin/forward: Move map to array (https://github.com/coredns/coredns/pull/3339)
-* plugin/kubernetes: Measure and expose DNS programming latency from Kubernetes plugin. (https://github.com/coredns/coredns/pull/3171)
-* plugin/route53: Remove amazon initialization from init (https://github.com/coredns/coredns/pull/3348)
-* plugin/transfer: Zone transfer plugin (https://github.com/coredns/coredns/pull/3223)
-* plugins: Add MustNormalize (https://github.com/coredns/coredns/pull/3385)
+* core: Make request.Request smaller (https://github.com/inverse-inc/wireguard-go/dns/pull/3351)
+* pkg/log: Add Clear to stop debug logging (https://github.com/inverse-inc/wireguard-go/dns/pull/3372)
+* plugin/cache: move goroutine closure to separate function to save memory (https://github.com/inverse-inc/wireguard-go/dns/pull/3353)
+* plugin/clouddns: remove initialization from init (https://github.com/inverse-inc/wireguard-go/dns/pull/3349)
+* plugin/erratic: doc and zone transfer (https://github.com/inverse-inc/wireguard-go/dns/pull/3340)
+* plugin/file: fix panic in miekg/dns.CompareDomainName() (https://github.com/inverse-inc/wireguard-go/dns/pull/3337)
+* plugin/forward: make Yield not block (https://github.com/inverse-inc/wireguard-go/dns/pull/3336)
+* plugin/forward: Move map to array (https://github.com/inverse-inc/wireguard-go/dns/pull/3339)
+* plugin/kubernetes: Measure and expose DNS programming latency from Kubernetes plugin. (https://github.com/inverse-inc/wireguard-go/dns/pull/3171)
+* plugin/route53: Remove amazon initialization from init (https://github.com/inverse-inc/wireguard-go/dns/pull/3348)
+* plugin/transfer: Zone transfer plugin (https://github.com/inverse-inc/wireguard-go/dns/pull/3223)
+* plugins: Add MustNormalize (https://github.com/inverse-inc/wireguard-go/dns/pull/3385)

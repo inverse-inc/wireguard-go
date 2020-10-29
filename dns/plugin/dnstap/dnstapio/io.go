@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	clog "github.com/coredns/coredns/plugin/pkg/log"
+	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
 
 	tap "github.com/dnstap/golang-dnstap"
 	fs "github.com/farsightsec/golang-framestream"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )
 
 // Config configuration for a single server.

@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/coredns/caddy"
-	"github.com/coredns/coredns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 )
 
 // As we use the filesystem as-is, these files need to exist ON DISK for the readme test to work. This is especially

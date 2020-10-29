@@ -8,7 +8,7 @@ date = "2018-01-18T15:54:29+00:00"
 author = "coredns"
 +++
 
-We are announcing the [release](https://github.com/coredns/coredns/releases/tag/v1.0.4) of CoreDNS-1.0.4!
+We are announcing the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.0.4) of CoreDNS-1.0.4!
 
 This is a release that fixes a vulnerability in the underlying DNS library.
 See <https://github.com/miekg/dns/issues/627> and the (still embargoed) CVE-2017-15133.

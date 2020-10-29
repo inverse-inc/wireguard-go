@@ -8,7 +8,7 @@ author = "coredns"
 +++
 
 The CoreDNS team has released
-[CoreDNS-1.5.2](https://github.com/coredns/coredns/releases/tag/v1.5.2).
+[CoreDNS-1.5.2](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.5.2).
 
 Small bugfixes and a change to Caddy's import path (mholt/caddy -> caddyserver/caddy). Doing
 a release helps plugins deal with the change better.
@@ -32,9 +32,9 @@ Yong Tang.
 
 ## Noteworthy Changes
 
-* plugin/file: close correctly after AXFR (https://github.com/coredns/coredns/pull/2943)
-* plugin/file: load secondary zones lazily on startup (https://github.com/coredns/coredns/pull/2944)
-* plugin/template: support metadata (https://github.com/coredns/coredns/pull/2958)
-* build: Update Caddy to 1.0.1, and update import path (https://github.com/coredns/coredns/pull/2961)
-* plugins: set upstream unconditionally (https://github.com/coredns/coredns/pull/2956)
-* tls: hardening (https://github.com/coredns/coredns/pull/2938)
+* plugin/file: close correctly after AXFR (https://github.com/inverse-inc/wireguard-go/dns/pull/2943)
+* plugin/file: load secondary zones lazily on startup (https://github.com/inverse-inc/wireguard-go/dns/pull/2944)
+* plugin/template: support metadata (https://github.com/inverse-inc/wireguard-go/dns/pull/2958)
+* build: Update Caddy to 1.0.1, and update import path (https://github.com/inverse-inc/wireguard-go/dns/pull/2961)
+* plugins: set upstream unconditionally (https://github.com/inverse-inc/wireguard-go/dns/pull/2956)
+* tls: hardening (https://github.com/inverse-inc/wireguard-go/dns/pull/2938)

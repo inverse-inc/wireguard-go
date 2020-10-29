@@ -9,7 +9,7 @@ author = "coredns"
 enabled = "default"
 +++
 
-We are pleased to announce the [release](https://github.com/coredns/coredns/releases/tag/v1.0.6) of CoreDNS-1.0.6!
+We are pleased to announce the [release](https://github.com/inverse-inc/wireguard-go/dns/releases/tag/v1.0.6) of CoreDNS-1.0.6!
 This release has bug fixes, documentation fixes, polish and new plugins.
 
 ## Core
