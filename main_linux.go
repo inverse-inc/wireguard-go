@@ -18,6 +18,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/tun"
 	"github.com/inverse-inc/wireguard-go/util"
@@ -246,6 +247,8 @@ func main() {
 
 		dnsChange := godnschange.NewDNSChange()
 		dnsChange.Change("127.0.0.69")
+
+		coremain.Run()
 
 		// wait for program to terminate
 

@@ -6,7 +6,9 @@ require (
 	fyne.io/fyne v1.4.0
 	github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa // indirect
 	github.com/davecgh/go-spew v1.1.1
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fullstorydev/grpcurl v1.7.0 // indirect
+	github.com/gavv/httpexpect/v2 v2.1.0 // indirect
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.4.3
@@ -17,6 +19,9 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca // indirect
 	github.com/joho/godotenv v1.3.0
+	github.com/krolaw/dhcp4 v0.0.0-20171222085133-4abfceffa76a // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1
+	github.com/miekg/dns v1.1.34
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/theckman/go-securerandom v0.1.1
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
@@ -27,5 +32,24 @@ require (
 	google.golang.org/grpc v1.33.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1 // indirect
 	google.golang.org/protobuf v1.25.0
+	github.com/opentracing/opentracing-go v1.2.0
+	github.com/openzipkin-contrib/zipkin-go-opentracing v0.4.5
+	github.com/openzipkin/zipkin-go v0.2.2
+	github.com/prometheus/client_golang v1.8.0
+	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/common v0.14.0
+	github.com/xenolf/lego v2.7.2+incompatible // indirect
+	go.etcd.io/etcd v0.5.0-alpha.5.0.20200306183522-221f0cc107cb
+	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
+	golang.org/x/net v0.0.0-20200707034311-ab3426394381
+	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211
+	golang.org/x/text v0.3.3
+	google.golang.org/api v0.29.0
+	google.golang.org/grpc v1.30.0
+	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
 	gortc.io/stun v1.22.2
+	k8s.io/api v0.19.2
+	k8s.io/apimachinery v0.19.2
+	k8s.io/client-go v0.19.2
+	k8s.io/klog v1.0.0
 )

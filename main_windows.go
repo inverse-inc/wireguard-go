@@ -1,3 +1,5 @@
+// +build windows
+
 /* SPDX-License-Identifier: MIT
  *
  * Copyright (C) 2017-2020 WireGuard LLC. All Rights Reserved.
@@ -14,6 +16,7 @@ import (
 	"github.com/inverse-inc/wireguard-go/binutils"
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/outputlog"
 	"github.com/inverse-inc/wireguard-go/tun"
@@ -93,6 +96,9 @@ func main() {
 
 		dnsChange := godnschange.NewDNSChange()
 		dnsChange.Change("127.0.0.69")
+
+
+		coremain.Run()
 
 		// wait for program to terminate
 
