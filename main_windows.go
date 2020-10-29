@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"github.com/inverse-inc/wireguard-go/binutils"
+	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/outputlog"
@@ -90,6 +91,9 @@ func main() {
 
 		startInverse(interfaceName, device)
 
+		dnsChange := godnschange.NewDNSChange()
+		dnsChange.Change("127.0.0.69")
+
 		// wait for program to terminate
 
 		signal.Notify(term, os.Interrupt)
@@ -106,6 +110,7 @@ func main() {
 
 		uapi.Close()
 		device.Close()
+		dnsChange.RestoreDNS("127.0.0.69")
 
 		logger.Info.Println("Shutting down")
 

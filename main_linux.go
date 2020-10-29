@@ -24,6 +24,8 @@ import (
 	"github.com/joho/godotenv"
 
 	_ "net/http/pprof"
+
+	godnschange "github.com/inverse-inc/go-dnschange"
 )
 
 const (
@@ -242,6 +244,9 @@ func main() {
 
 		startInverse(interfaceName, device)
 
+		dnsChange := godnschange.NewDNSChange()
+		dnsChange.Change("127.0.0.69")
+
 		// wait for program to terminate
 
 		signal.Notify(term, syscall.SIGTERM)
@@ -260,7 +265,7 @@ func main() {
 		device.Close()
 
 		logger.Info.Println("Shutting down")
-
+		dnsChange.RestoreDNS("127.0.0.69")
 		quit()
 	}
 }
