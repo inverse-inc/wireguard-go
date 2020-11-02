@@ -21,7 +21,7 @@ func TestIpv4PortAllowFilter(t *testing.T) {
 	runPassingFilterFunc(t, packets, filter.Pass)
 
 	filter = NewPortFilter()
-	filter.AddAllowedDstTcpPorts([]uint16{4444,4445})
+	filter.AddAllowedDstTcpPorts([]uint16{4444, 4445})
 	runPassingFilters(t, packets, filter)
 
 	filter = NewPortFilter()
@@ -45,17 +45,17 @@ func TestIpv4PortAllowFilter(t *testing.T) {
 }
 
 func TestPortFilterFrommAcl(t *testing.T) {
-	filter := NewPortFilterFromAcls([]string{})
-	runFailingFilters(t, packets, filter)
+	filter := NewFilterFromAcls([]string{})
+	runFailingFilterFunc(t, packets, filter)
 
-	filter = NewPortFilterFromAcls([]string{"permit tcp any any eq 4444"})
-	runPassingFilters(t, packets, filter)
+	filter = NewFilterFromAcls([]string{"permit tcp any any eq 4444"})
+	runPassingFilterFunc(t, packets, filter)
 
-	filter = NewPortFilterFromAcls([]string{"deny tcp any any eq 4444"})
-	runFailingFilters(t, packets, filter)
+	filter = NewFilterFromAcls([]string{"deny tcp any any eq 4444"})
+	runFailingFilterFunc(t, packets, filter)
 
-	filter = NewPortFilterFromAcls([]string{"permit udp any any eq 4444"})
-	runPassingFilters(t, [][]byte{udpPacket}, filter)
+	filter = NewFilterFromAcls([]string{"permit udp any any eq 4444"})
+	runPassingFilterFunc(t, [][]byte{udpPacket}, filter)
 
 }
 
@@ -97,6 +97,14 @@ func runFailingFilters(t *testing.T, packets [][]byte, filter *PortFilter) {
 	for i, p := range packets {
 		if err := filter.Pass(p); err == nil {
 			t.Errorf("Filter passed for packet (%d) should have failed", i)
+		}
+	}
+}
+
+func runFailingFilterFunc(t *testing.T, packets [][]byte, pass func([]byte) error) {
+	for i, p := range packets {
+		if err := pass(p); err == nil {
+			t.Errorf("Filter failed %s for packet (%d)", err.Error(), i)
 		}
 	}
 }

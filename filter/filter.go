@@ -2,8 +2,8 @@ package filter
 
 import (
 	"errors"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 const ipv4Version = byte(0x40)
@@ -187,14 +187,14 @@ func (f *PortFilter) AddACL(acl string) {
 			return
 		case "tcp":
 			if len(parts) != 6 {
-				return;
+				return
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddAllowedDstTcpPorts([]uint16{uint16(s)})
 			}
 		case "udp":
 			if len(parts) != 6 {
-				return;
+				return
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddAllowedDstUdpPorts([]uint16{uint16(s)})
@@ -207,14 +207,14 @@ func (f *PortFilter) AddACL(acl string) {
 			return
 		case "tcp":
 			if len(parts) != 6 {
-				return;
+				return
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddDenyDstTcpPorts([]uint16{uint16(s)})
 			}
 		case "udp":
 			if len(parts) != 6 {
-				return;
+				return
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddDenyDstUdpPorts([]uint16{uint16(s)})
@@ -224,16 +224,16 @@ func (f *PortFilter) AddACL(acl string) {
 	}
 }
 
-func NewPortFilterFromAcls(acls []string) *PortFilter {
+func NewFilterFromAcls(acls []string) func([]byte) error {
 	filter := &PortFilter{}
 	if len(acls) == 0 {
 		filter.DenyAll = true
-		return filter
+		return filter.Pass
 	} else {
 		for _, acl := range acls {
 			filter.AddACL(acl)
 		}
 	}
 
-	return filter
+	return filter.Pass
 }
