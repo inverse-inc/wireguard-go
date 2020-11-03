@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"fmt"
 	"errors"
 	"strconv"
 	"strings"
@@ -155,6 +156,10 @@ func (f *PortFilter) AddAllowedICMPType(types []byte) {
 }
 
 func (f *PortFilter) Pass(p []byte) error {
+	if len(p) == 0 {
+		return nil
+	}
+
 	if f.DenyAll {
 		return errors.New("Deny All")
 	}
