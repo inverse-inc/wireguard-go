@@ -38,23 +38,23 @@ func Run() {
 
 	// Reset flag.CommandLine to get rid of unwanted flags for instance from glog (used in kubernetes).
 	// And read the ones we want to keep.
-	flag.VisitAll(func(f *flag.Flag) {
-		if _, ok := flagsBlacklist[f.Name]; ok {
-			return
-		}
-		flagsToKeep = append(flagsToKeep, f)
-	})
+	// flag.VisitAll(func(f *flag.Flag) {
+	// 	if _, ok := flagsBlacklist[f.Name]; ok {
+	// 		return
+	// 	}
+	// 	flagsToKeep = append(flagsToKeep, f)
+	// })
 
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	for _, f := range flagsToKeep {
-		flag.Var(f.Value, f.Name, f.Usage)
-	}
+	// flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	// for _, f := range flagsToKeep {
+	// 	flag.Var(f.Value, f.Name, f.Usage)
+	// }
 
-	flag.Parse()
+	// flag.Parse()
 
-	if len(flag.Args()) > 0 {
-		mustLogFatal(fmt.Errorf("extra command line arguments: %s", flag.Args()))
-	}
+	// if len(flag.Args()) > 0 {
+	// 	mustLogFatal(fmt.Errorf("extra command line arguments: %s", flag.Args()))
+	// }
 
 	log.SetOutput(os.Stdout)
 	log.SetFlags(0) // Set to 0 because we're doing our own time, with timezone
