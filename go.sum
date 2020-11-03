@@ -291,6 +291,7 @@ github.com/imkira/go-interpol v1.0.0/go.mod h1:z0h2/2T3XF8kyEPpRgJ3kmNv+C43p+I/C
 github.com/inconshreveable/log15 v0.0.0-20171019012758-0decfc6c20d9 h1:LmBUkXNSSmEV5hExb65hKje7sDuuDug3xsPAba7x5fw=
 github.com/inconshreveable/log15 v0.0.0-20171019012758-0decfc6c20d9/go.mod h1:cOaXtrgN4ScfRrD9Bre7U1thNq5RtJ8ZoP4iXVGRj6o=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
+github.com/inverse-inc/dhcp4 v0.0.0-20200625173842-2c4d1e50d7ca/go.mod h1:lvc5S3uPg6xat1wRFAA0ru/DfIV6YOmMK6E754FUEuo=
 github.com/inverse-inc/go-ipset v0.0.0-20190925174109-4d5749cc4aa6/go.mod h1:unv1cVDLrlwXyLhg2b+QkK6rZ0GQ6DGbZOkGCfl10/M=
 github.com/inverse-inc/go-radius v0.0.0-20200310093817-85565fe93aa5/go.mod h1:IQmy9DslBZ9lU4/y/MphJ9oY//4r9A9wQwqOjjLmBso=
 github.com/inverse-inc/packetfence v10.1.0+incompatible h1:UK4ytTCgWpk07BIvTuTnSqr27aWRmpQk46VvuFe67G8=
@@ -312,6 +313,8 @@ github.com/inverse-inc/packetfence v10.1.1-0.20200902172018-c4772999cd05+incompa
 github.com/inverse-inc/packetfence v10.1.1-0.20200902172018-c4772999cd05+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.1.1-0.20200902175525-e70bbbb66ca0+incompatible h1:kWmeIxLSHT4XjD5fHU5/3HuSd06HJHXUn4bRex5PJEg=
 github.com/inverse-inc/packetfence v10.1.1-0.20200902175525-e70bbbb66ca0+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
+github.com/inverse-inc/packetfence v10.2.1-0.20201103171141-dc751ffed66c+incompatible h1:hGrbNJw4A7cQlyWhuadh65WsUJhGr6xqefBpYru+oSo=
+github.com/inverse-inc/packetfence v10.2.1-0.20201103171141-dc751ffed66c+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36 h1:6mQM09YcCuLCzLr/hGLmldoT5jHHtM+a7G3v5NNYcY0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36/go.mod h1:WlVGQDgT+HJRzbbMUMJB3tC5VZJnA1WO1GKXgq9lymc=
 github.com/inverse-inc/packetfence/go v0.0.0-20200729120005-d8f9c1cc13a4 h1:3T4SNX5VJeQyjC3YqFY9DefZnbIO3uN9jBADKBDfvPI=
@@ -349,6 +352,8 @@ github.com/inverse-inc/packetfence/go v0.0.0-20200902172018-c4772999cd05 h1:cDTW
 github.com/inverse-inc/packetfence/go v0.0.0-20200902172018-c4772999cd05/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
 github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0 h1:jFSYUc1ye0uSAydnB/dGThiAIefsecjHmdo13tNUom8=
 github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
+github.com/inverse-inc/packetfence/go v0.0.0-20201103171141-dc751ffed66c h1:eDwV/BFWxQ4tKlEIoqh6ccP6JCUKiFmqZHD49jW5658=
+github.com/inverse-inc/packetfence/go v0.0.0-20201103171141-dc751ffed66c/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99 h1:mryb1vMKVirEE14zI1Vak3fcGNyt5jJbfKiEl4pq6Xc=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
 github.com/inverse-inc/wireguard-go v0.0.20200320 h1:1vE6zVeO7fix9cJX1Z9ZQ+ikPIIx7vIyU0o0tLDD88g=
@@ -485,6 +490,7 @@ github.com/prometheus/procfs v0.0.0-20190507164030-5867b95ac084/go.mod h1:TjEm7z
 github.com/prometheus/procfs v0.0.5/go.mod h1:4A/X28fw3Fc593LaREMrKMqOKvUAntwMDaekg4FpcdQ=
 github.com/prometheus/tsdb v0.7.1/go.mod h1:qhTCs0VvXwvX/y3TZrWD7rabWM+ijKTux40TwIPHuXU=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
+github.com/robfig/cron/v3 v3.0.1/go.mod h1:eQICP3HwyT7UooqI/z+Ov+PtYAWygg1TEWWzGIFLtro=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/rogpeppe/fastuuid v1.1.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=

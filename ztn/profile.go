@@ -83,12 +83,9 @@ func (sc *ServerChallenge) Encrypt(privateKey [32]byte, message []byte) ([]byte,
 }
 
 type Profile struct {
-	WireguardIP      net.IP   `json:"wireguard_ip"`
-	WireguardNetmask int      `json:"wireguard_netmask"`
-	PublicKey        string   `json:"public_key"`
-	PrivateKey       string   `json:"private_key"`
-	AllowedPeers     []string `json:"allowed_peers"`
-	logger           *device.Logger
+	remoteclients.Peer
+	PrivateKey string `json:"private_key"`
+	logger     *device.Logger
 }
 
 func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) error {

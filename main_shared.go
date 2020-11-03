@@ -43,10 +43,9 @@ func startInverse(interfaceName string, device *device.Device) {
 
 	privateKey, publicKey := getKeys()
 
-	profile := ztn.Profile{
-		PrivateKey: base64.StdEncoding.EncodeToString(privateKey[:]),
-		PublicKey:  base64.StdEncoding.EncodeToString(publicKey[:]),
-	}
+	profile := ztn.Profile{}
+	profile.PrivateKey = base64.StdEncoding.EncodeToString(privateKey[:])
+	profile.PublicKey = base64.StdEncoding.EncodeToString(publicKey[:])
 	err := profile.FillProfileFromServer(logger)
 	if err != nil {
 		logger.Error.Println("Got error when filling profile from server", err)
