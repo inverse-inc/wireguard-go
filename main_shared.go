@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run dns/directives_generate.go
+
 import (
 	"encoding/base64"
 	"encoding/json"
@@ -15,6 +17,8 @@ import (
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/filter"
+	"github.com/inverse-inc/wireguard-go/util"
+	_ "github.com/inverse-inc/wireguard-go/dns/core/plugin"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
