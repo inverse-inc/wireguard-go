@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
@@ -114,7 +115,21 @@ func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 		return err
 	}
 
-	err = GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/profile?public_key="+url.QueryEscape(b64keyToURLb64(p.PublicKey))+"&auth="+url.QueryEscape(auth)+"&mac="+url.QueryEscape(mac.String()), &p)
+	hostname, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+
+	err = GetAPIClient().Call(
+		APIClientCtx,
+		"GET",
+		"/api/v1/remote_clients/profile?public_key="+
+			url.QueryEscape(b64keyToURLb64(p.PublicKey))+
+			"&auth="+url.QueryEscape(auth)+
+			"&mac="+url.QueryEscape(mac.String())+
+			"&hostname="+url.QueryEscape(hostname),
+		&p,
+	)
 	if err != nil {
 		return err
 	} else {
