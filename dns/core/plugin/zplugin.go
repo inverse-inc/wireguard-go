@@ -12,6 +12,7 @@ import (
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/cancel"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/chaos"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/debug"
+	_ "github.com/inverse-inc/wireguard-go/dns/plugin/dnsredir"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/errors"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/forward"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/hosts"

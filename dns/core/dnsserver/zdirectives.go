@@ -24,5 +24,6 @@ var Directives = []string{
 	"cache",
 	"hosts",
 	"forward",
+	"dnsredir",
 	"on",
 }
