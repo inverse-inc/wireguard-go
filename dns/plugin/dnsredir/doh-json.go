@@ -8,7 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/wireguard-go/dns/request"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 	"github.com/m13253/dns-over-https/json-dns"
 	"github.com/miekg/dns"
 	"io/ioutil"

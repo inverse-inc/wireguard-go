@@ -23,16 +23,16 @@ steps:
     - DNSREDIR_DIR=/go/src/github.com/leiless/dnsredir
     - BIN=$DNSREDIR_DIR/bin
     - mkdir -p $BIN
-    - COREDNS_DIR=/go/src/github.com/wireguard-go/dns
-    - COREDNS_URL=https://github.com/wireguard-go/dns.git
+    - COREDNS_DIR=/go/src/github.com/inverse-inc/wireguard-go/dns
+    - COREDNS_URL=https://github.com/inverse-inc/wireguard-go/dns.git
     # Get the latest tag name
-    - TAG_NAME=$(curl --silent https://api.github.com/repos/wireguard-go/dns/releases/latest | grep '"tag_name":' | cut -d'"' -f4)
+    - TAG_NAME=$(curl --silent https://api.github.com/repos/inverse-inc/wireguard-go/dns/releases/latest | grep '"tag_name":' | cut -d'"' -f4)
     # Do a shallow clone, silent "You are in 'detached HEAD' state..."
     - git clone --branch $TAG_NAME --depth 1 $COREDNS_URL $COREDNS_DIR 2> /dev/null
     - cd $COREDNS_DIR
     - sed -i 's|forward:forward|dnsredir:dnsredir\\\\nforward:forward|g' plugin.cfg
     # Embed plugin HEAD commit
-    - MOD_ADDR=github.com/wireguard-go/dns/plugin/dnsredir
+    - MOD_ADDR=github.com/inverse-inc/wireguard-go/dns/plugin/dnsredir
     - sed -i "s|GITCOMMIT:=|CUSTOM_FLAGS=-X $MOD_ADDR.pluginVersion=$TAG -X $MOD_ADDR.pluginHeadCommit=$HEAD_COMMIT\\\\nGITCOMMIT:=|g" Makefile
     - sed -i 's|$(GITCOMMIT)|$(GITCOMMIT) $(CUSTOM_FLAGS)|g' Makefile
     - git diff
@@ -48,7 +48,7 @@ steps:
     CGO_FFLAGS: -g -O0
     CGO_LDFLAGS: -g -O0
   commands:
-    - cd /go/src/github.com/wireguard-go/dns
+    - cd /go/src/github.com/inverse-inc/wireguard-go/dns
     - make CGO_ENABLED=1 BUILDOPTS="-v -race"
     - mv coredns /go/src/github.com/leiless/dnsredir/bin/coredns_dnsredir-$GOOS-$GOARCH-debug
 - name: build-coredns-linux-amd64
@@ -57,7 +57,7 @@ steps:
     GOOS: linux
     GOARCH: amd64
   commands:
-    - cd /go/src/github.com/wireguard-go/dns
+    - cd /go/src/github.com/inverse-inc/wireguard-go/dns
     - make
     - mv coredns /go/src/github.com/leiless/dnsredir/bin/coredns_dnsredir-$GOOS-$GOARCH
   when:
@@ -68,7 +68,7 @@ steps:
     GOOS: linux
     GOARCH: arm
   commands:
-    - cd /go/src/github.com/wireguard-go/dns
+    - cd /go/src/github.com/inverse-inc/wireguard-go/dns
     - make
     - mv coredns /go/src/github.com/leiless/dnsredir/bin/coredns_dnsredir-$GOOS-$GOARCH
   when:
@@ -79,7 +79,7 @@ steps:
     GOOS: linux
     GOARCH: arm64
   commands:
-    - cd /go/src/github.com/wireguard-go/dns
+    - cd /go/src/github.com/inverse-inc/wireguard-go/dns
     - make
     - mv coredns /go/src/github.com/leiless/dnsredir/bin/coredns_dnsredir-$GOOS-$GOARCH
   when:
@@ -90,7 +90,7 @@ steps:
     GOOS: darwin
     GOARCH: amd64
   commands:
-    - cd /go/src/github.com/wireguard-go/dns
+    - cd /go/src/github.com/inverse-inc/wireguard-go/dns
     - make
     - mv coredns /go/src/github.com/leiless/dnsredir/bin/coredns_dnsredir-$GOOS-$GOARCH
   when:
@@ -101,7 +101,7 @@ steps:
     GOOS: windows
     GOARCH: amd64
   commands:
-    - cd /go/src/github.com/wireguard-go/dns
+    - cd /go/src/github.com/inverse-inc/wireguard-go/dns
     - make
     - mv coredns /go/src/github.com/leiless/dnsredir/bin/coredns_dnsredir-$GOOS-$GOARCH.exe
   when:

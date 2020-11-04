@@ -1,7 +1,7 @@
 package dnsredir
 
 import (
-	"github.com/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )

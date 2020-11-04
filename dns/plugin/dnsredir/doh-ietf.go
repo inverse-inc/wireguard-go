@@ -9,7 +9,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/wireguard-go/dns/request"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 	"github.com/miekg/dns"
 	"io/ioutil"
 	"net/http"

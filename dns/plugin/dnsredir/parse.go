@@ -2,7 +2,7 @@ package dnsredir
 
 import (
 	"fmt"
-	"github.com/wireguard-go/dns/plugin/pkg/transport"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 	"net"
 	"net/url"
 	"strings"

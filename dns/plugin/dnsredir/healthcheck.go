@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/wireguard-go/dns/request"
+	"github.com/inverse-inc/wireguard-go/dns/request"
 	"github.com/miekg/dns"
 	"io"
 	"math/rand"

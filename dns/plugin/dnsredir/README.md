@@ -309,5 +309,5 @@ dnsredir user_custom.conf {
 
 ## LICENSE
 
-*dnsredir* uses the same [LICENSE](LICENSE) as with [CoreDNS](https://github.com/wireguard-go/dns).
+*dnsredir* uses the same [LICENSE](LICENSE) as with [CoreDNS](https://github.com/inverse-inc/wireguard-go/dns).
 

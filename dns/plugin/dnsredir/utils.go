@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 	"golang.org/x/net/html"
 	"hash/fnv"
 	"io"

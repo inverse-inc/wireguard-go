@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 	"golang.org/x/net/idna"
 	"io"
 	"os"

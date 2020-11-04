@@ -2,8 +2,8 @@ package dnsredir
 
 import (
 	"github.com/coredns/caddy"
-	"github.com/wireguard-go/dns/core/dnsserver"
-	"github.com/wireguard-go/dns/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )
 
 func init() { plugin.Register(pluginName, setup) }
