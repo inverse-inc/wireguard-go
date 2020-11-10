@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"os/exec"
 	"regexp"
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
@@ -103,9 +104,16 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) erro
 
 	WGRPCServer.UpdateStatus(wgrpc.STATUS_CONNECTED, nil)
 
-	err = p.SetupRoutes()
-	if err != nil {
-		return err
+	if p.IsGateway {
+		err = p.SetupGateway()
+		if err != nil {
+			return err
+		}
+	} else {
+		err = p.SetupRoutes()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -219,6 +227,35 @@ func (p *Profile) SetupRoutes() error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (p *Profile) SetupGateway() error {
+	out := os.Getenv("WG_GATEWAY_OUTBOUND_INTERFACE")
+	if out == "" {
+		return errors.New("WG_GATEWAY_OUTBOUND_INTERFACE is not defined. Add this to the environment to determine which interface should be used for outbound routing of the gateway")
+	}
+	err := exec.Command("iptables", "-t", "nat", "-F").Run()
+	if err != nil {
+		return err
+	}
+	err = exec.Command("iptables", "-F").Run()
+	if err != nil {
+		return err
+	}
+	err = exec.Command("iptables", "-t", "nat", "-A", "POSTROUTING", "-o", out, "-j", "MASQUERADE").Run()
+	if err != nil {
+		return err
+	}
+	err = exec.Command("iptables", "-A", "FORWARD", "-i", out, "-o", "wg0", "-m", "state", "--state", "RELATED,ESTABLISHED", "-j", "ACCEPT").Run()
+	if err != nil {
+		return err
+	}
+	err = exec.Command("iptables", "-A", "FORWARD", "-i", "wg0", "-o", out, "-j", "ACCEPT").Run()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
