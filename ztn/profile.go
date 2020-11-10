@@ -173,8 +173,7 @@ func (p *Profile) findClientMAC() (net.HardwareAddr, error) {
 }
 
 type PeerProfile struct {
-	WireguardIP net.IP `json:"wireguard_ip"`
-	PublicKey   string `json:"public_key"`
+	remoteclients.Peer
 }
 
 func GetPeerProfile(id string) (PeerProfile, error) {
