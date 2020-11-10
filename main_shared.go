@@ -10,6 +10,7 @@ import (
 	"path"
 	"runtime/debug"
 	"sync"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
@@ -26,13 +27,29 @@ var knownPeers = struct {
 }{peers: map[string]bool{}}
 
 func startInverse(interfaceName string, device *device.Device) {
-	// If our router supports UPNPGID, then we use it
-	if ztn.NewUPNPGID().CheckNet() == nil {
-		logger.Info.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
-		ztn.DefaultBindTechnique = ztn.BindUPNPGID
-	} else if ztn.NewNATPMP().CheckNet() == nil {
-		logger.Info.Println("Router supports NAT PMP, it will be used to create public P2P connections")
-		ztn.DefaultBindTechnique = ztn.BindNATPMP
+	bindTechniqueDone := make(chan bool)
+
+	go func() {
+		if ztn.NewUPNPGID().CheckNet() == nil {
+			logger.Info.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
+			ztn.DefaultBindTechnique = ztn.BindUPNPGID
+			bindTechniqueDone <- true
+		} 
+	}()
+	
+	go func() {
+		if ztn.NewNATPMP().CheckNet() == nil {
+			logger.Info.Println("Router supports NAT PMP, it will be used to create public P2P connections")
+			ztn.DefaultBindTechnique = ztn.BindNATPMP
+			bindTechniqueDone <- true
+		}
+	}()
+
+	select {
+	case <- bindTechniqueDone:
+			logger.Info.Println("Was able to find a bind technique")
+	case <- time.After(5 * time.Second):
+			logger.Info.Println("Timeout trying to find a bind technique")
 	}
 
 	go ztn.StartRPC()
