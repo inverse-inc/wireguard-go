@@ -235,7 +235,11 @@ func (p *Profile) SetupGateway() error {
 	if out == "" {
 		return errors.New("WG_GATEWAY_OUTBOUND_INTERFACE is not defined. Add this to the environment to determine which interface should be used for outbound routing of the gateway")
 	}
-	err := exec.Command("iptables", "-t", "nat", "-F").Run()
+	err := exec.Command("bash", "-c", "echo 1 > /proc/sys/net/ipv4/ip_forward").Run()
+	if err != nil {
+		return err
+	}
+	err = exec.Command("iptables", "-t", "nat", "-F").Run()
 	if err != nil {
 		return err
 	}
