@@ -55,7 +55,8 @@ func DoServerChallenge(profile *Profile) (string, error) {
 
 func GetServerChallenge(profile *Profile) (ServerChallenge, error) {
 	sc := ServerChallenge{}
-	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/server_challenge?public_key="+url.QueryEscape(b64keyToURLb64(profile.PublicKey)), &sc)
+	var err error
+	err = GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/server_challenge?public_key="+url.QueryEscape(b64keyToURLb64(profile.PublicKey)), &sc)
 	if err != nil {
 		return sc, err
 	}
@@ -130,6 +131,7 @@ func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
 			"&hostname="+url.QueryEscape(hostname),
 		&p,
 	)
+
 	if err != nil {
 		return err
 	} else {
@@ -177,7 +179,8 @@ type PeerProfile struct {
 
 func GetPeerProfile(id string) (PeerProfile, error) {
 	var p PeerProfile
-	err := GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &p)
+	var err error
+	err = GetAPIClient().Call(APIClientCtx, "GET", "/api/v1/remote_clients/peer/"+id, &p)
 
 	pkey, err := base64.URLEncoding.DecodeString(p.PublicKey)
 	sharedutils.CheckError(err)
