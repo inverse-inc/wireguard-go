@@ -9,8 +9,8 @@ require (
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.4.2
-	github.com/inverse-inc/packetfence v10.2.1-0.20201110163729-b86915187326+incompatible
-	github.com/inverse-inc/packetfence/go v0.0.0-20201110163729-b86915187326
+	github.com/inverse-inc/packetfence v10.2.1-0.20201110165726-d138c30f50fc+incompatible
+	github.com/inverse-inc/packetfence/go v0.0.0-20201110165726-d138c30f50fc
 	github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99
 	github.com/jackpal/gateway v1.0.6
 	github.com/jackpal/go-nat-pmp v1.0.2

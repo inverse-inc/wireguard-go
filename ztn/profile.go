@@ -7,10 +7,12 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"regexp"
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/routes"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/jackpal/gateway"
 )
@@ -100,6 +102,12 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) erro
 	SetConfig(device, "private_key", keyToHex(p.PrivateKey))
 
 	WGRPCServer.UpdateStatus(wgrpc.STATUS_CONNECTED, nil)
+
+	err = p.SetupRoutes()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -170,6 +178,48 @@ func (p *Profile) findClientMAC() (net.HardwareAddr, error) {
 	}
 
 	return net.HardwareAddr{}, errors.New("Unable to find MAC address")
+}
+
+type RouteInfo struct {
+	Network *net.IPNet
+	Gateway net.IP
+}
+
+var routesRegexp = regexp.MustCompile(`([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}) via ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})`)
+
+func (p *Profile) ParseRoutes() []RouteInfo {
+	info := []RouteInfo{}
+	for _, routeRaw := range p.Routes {
+		ri := RouteInfo{}
+		var err error
+		if match := routesRegexp.FindAllStringSubmatch(routeRaw, 2); len(match) == 1 && len(match[0]) == 3 {
+			_, ri.Network, err = net.ParseCIDR(match[0][1])
+			if err != nil {
+				p.logger.Error.Printf("Invalid network CIDR %s in line %s", match[0][1], routeRaw)
+				continue
+			}
+			ri.Gateway = net.ParseIP(match[0][2])
+			if ri.Gateway == nil {
+				p.logger.Error.Printf("Invalid gateway IP %s in line %s", match[0][2], routeRaw)
+				continue
+			}
+			info = append(info, ri)
+		} else {
+			p.logger.Error.Printf("Ignoring route %s because it doesn't match the known format", routeRaw)
+		}
+	}
+	return info
+}
+
+func (p *Profile) SetupRoutes() error {
+	for _, r := range p.ParseRoutes() {
+		p.logger.Info.Println("Installing route to", r.Network, "via", r.Gateway)
+		err := routes.Add(r.Network, r.Gateway)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type PeerProfile struct {
