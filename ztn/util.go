@@ -63,7 +63,7 @@ func ipv4MaskString(mask int) string {
 }
 
 func RunningInCLI() bool {
-	return sharedutils.EnvOrDefault("WG_CLI", "false") == "true"
+	return sharedutils.EnvOrDefault("WG_CLI", "true") == "true"
 }
 
 var privateIPBlocks []*net.IPNet

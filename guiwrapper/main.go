@@ -25,6 +25,7 @@ var wgenv *os.File
 func main() {
 	fmt.Println("Starting up")
 	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
+	setenv("WG_CLI", "false")
 
 	go startTray()
 	setupExitSignals()
