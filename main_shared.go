@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
@@ -95,43 +94,7 @@ func getKeys() ([32]byte, [32]byte) {
 
 	logger.Info.Println("Using auth file:", authFile)
 
-	auth := struct {
-		PublicKey  string `json:"public_key"`
-		PrivateKey string `json:"private_key"`
-	}{}
-
-	if _, statErr := os.Stat(authFile); statErr == nil {
-		f, err := os.Open(authFile)
-		if err != nil {
-			panic("Unable to open " + authFile + ": " + err.Error())
-		}
-		defer f.Close()
-
-		err = json.NewDecoder(f).Decode(&auth)
-		sharedutils.CheckError(err)
-		priv, err := remoteclients.B64KeyToBytes(auth.PrivateKey)
-		sharedutils.CheckError(err)
-		pub, err := remoteclients.B64KeyToBytes(auth.PublicKey)
-		sharedutils.CheckError(err)
-		return priv, pub
-	} else {
-		f, err := os.Create(authFile)
-		if err != nil {
-			panic("Unable to create " + authFile + ": " + err.Error())
-		}
-		defer f.Close()
-
-		priv, err := remoteclients.GeneratePrivateKey()
-		sharedutils.CheckError(err)
-		pub, err := remoteclients.GeneratePublicKey(priv)
-		sharedutils.CheckError(err)
-		auth.PrivateKey = base64.StdEncoding.EncodeToString(priv[:])
-		auth.PublicKey = base64.StdEncoding.EncodeToString(pub[:])
-		spew.Dump(auth)
-		err = json.NewEncoder(f).Encode(&auth)
-		sharedutils.CheckError(err)
-		return priv, pub
-	}
+	return remoteclients.GetKeysFromFile(authFile)
 }
 
 func listenEvents(device *device.Device, profile ztn.Profile) {
@@ -150,6 +113,7 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 
 	myID := base64.URLEncoding.EncodeToString(pub[:])
 	c := ztn.GLPPrivateClient(priv, pub, serverPub)
+	c.LogErrors = true
 	c.Start(ztn.APIClientCtx)
 	for {
 		select {
