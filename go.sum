@@ -323,6 +323,8 @@ github.com/inverse-inc/packetfence v10.2.1-0.20201110163729-b86915187326+incompa
 github.com/inverse-inc/packetfence v10.2.1-0.20201110163729-b86915187326+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.2.1-0.20201110165726-d138c30f50fc+incompatible h1:DjSdEbl+9RQZFD6hluHjo0jqvL1pIv/aOxWuQ/iVIMk=
 github.com/inverse-inc/packetfence v10.2.1-0.20201110165726-d138c30f50fc+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
+github.com/inverse-inc/packetfence v10.2.1-0.20201111160226-85df328225a7+incompatible h1:qYo+wcDpsvfEDtWgZjMzEGzkoKXQ1JND6k/D7JnJAtw=
+github.com/inverse-inc/packetfence v10.2.1-0.20201111160226-85df328225a7+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36 h1:6mQM09YcCuLCzLr/hGLmldoT5jHHtM+a7G3v5NNYcY0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36/go.mod h1:WlVGQDgT+HJRzbbMUMJB3tC5VZJnA1WO1GKXgq9lymc=
 github.com/inverse-inc/packetfence/go v0.0.0-20200729120005-d8f9c1cc13a4 h1:3T4SNX5VJeQyjC3YqFY9DefZnbIO3uN9jBADKBDfvPI=
@@ -370,6 +372,8 @@ github.com/inverse-inc/packetfence/go v0.0.0-20201110163729-b86915187326 h1:J+ml
 github.com/inverse-inc/packetfence/go v0.0.0-20201110163729-b86915187326/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
 github.com/inverse-inc/packetfence/go v0.0.0-20201110165726-d138c30f50fc h1:eTMme6bgbqWR+KuPacb8LjvxF+VCNAglkOJtTBP/FSE=
 github.com/inverse-inc/packetfence/go v0.0.0-20201110165726-d138c30f50fc/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
+github.com/inverse-inc/packetfence/go v0.0.0-20201111160226-85df328225a7 h1:LEjR+vFzlDwlsR4N3nC8gdhTyyUfOftGGm1yDXALiRs=
+github.com/inverse-inc/packetfence/go v0.0.0-20201111160226-85df328225a7/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
 github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd h1:j+hJYhZwl4Ftq7Mrhsa+SNBPxCHwk7okY5Ojq8Vi6CM=
 github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99 h1:mryb1vMKVirEE14zI1Vak3fcGNyt5jJbfKiEl4pq6Xc=
