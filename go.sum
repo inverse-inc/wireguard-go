@@ -378,6 +378,10 @@ github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd h1:j+hJYhZwl4Ftq7
 github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99 h1:mryb1vMKVirEE14zI1Vak3fcGNyt5jJbfKiEl4pq6Xc=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
+github.com/inverse-inc/upnp v0.0.0-20201111160554-d61e15e330bb h1:yjPRdbaIuz7N81qZYJKRTrfPXZYJjyGAZCcJ2Ai3gXs=
+github.com/inverse-inc/upnp v0.0.0-20201111160554-d61e15e330bb/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
+github.com/inverse-inc/upnp v0.0.0-20201111160826-ebd3ec99879c h1:3wjzOPb8vphR8cqdCuzL6ylPDR0immsaX/a/IGc96iM=
+github.com/inverse-inc/upnp v0.0.0-20201111160826-ebd3ec99879c/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
 github.com/inverse-inc/wireguard-go v0.0.20200320 h1:1vE6zVeO7fix9cJX1Z9ZQ+ikPIIx7vIyU0o0tLDD88g=
 github.com/inverse-inc/wireguard-go v0.0.20200320/go.mod h1:lDian4Sw4poJ04SgHh35nzMVwGSYlPumkdnHcucAQoY=
 github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526/go.mod h1:UQkeMHVoNcyXYq9otUupF7/h/2tmHlhrS2zw7ZVvUqc=

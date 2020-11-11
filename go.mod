@@ -11,7 +11,7 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/inverse-inc/packetfence v10.2.1-0.20201111160226-85df328225a7+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20201111160226-85df328225a7
-	github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99
+	github.com/inverse-inc/upnp v0.0.0-20201111160826-ebd3ec99879c
 	github.com/jackpal/gateway v1.0.6
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca
