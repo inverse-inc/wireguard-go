@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"time"
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
@@ -222,10 +223,14 @@ func (p *Profile) ParseRoutes() []RouteInfo {
 func (p *Profile) SetupRoutes() error {
 	for _, r := range p.ParseRoutes() {
 		p.logger.Info.Println("Installing route to", r.Network, "via", r.Gateway)
-		err := routes.Add(r.Network, r.Gateway)
-		if err != nil {
-			return err
-		}
+		go func(r RouteInfo) {
+			// Sleep to give time to the WG interface to get up
+			time.Sleep(5 * time.Second)
+			err := routes.Add(r.Network, r.Gateway)
+			if err != nil {
+				p.logger.Error.Println("Error while nstalling route to", r.Network, "via", r.Gateway, ":", err)
+			}
+		}(r)
 	}
 	return nil
 }
