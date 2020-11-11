@@ -224,9 +224,11 @@ func (f *PortFilter) Pass(p []byte) error {
 				return errors.New("ICMP type not allowed")
 			}
 
-			if f.DenyICMPType.IsAllowed(icmpType) {
+			if f.DenyICMPType.IsDenied(icmpType) {
 				return errors.New("ICMP type denied")
 			}
+
+			return nil
 		}
 	case ipv6Version:
 		return errors.New("Not Allowed")

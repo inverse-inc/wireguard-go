@@ -61,6 +61,12 @@ func TestPortFilterFromAcl(t *testing.T) {
 	filter = NewFilterFromAcls([]string{"deny icmp any any echo"})
 	runFailingFilterFunc(t, [][]byte{icmpPacket}, filter)
 
+	filter = NewFilterFromAcls([]string{"permit icmp any any echo-reply"})
+	runFailingFilterFunc(t, [][]byte{icmpPacket}, filter)
+
+	filter = NewFilterFromAcls([]string{"permit icmp any any echo"})
+	runPassingFilterFunc(t, [][]byte{icmpPacket}, filter)
+
 }
 
 func TestIpv4PortFilterDeny(t *testing.T) {
