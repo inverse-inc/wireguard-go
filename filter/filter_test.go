@@ -44,9 +44,9 @@ func TestIpv4PortAllowFilter(t *testing.T) {
 
 }
 
-func TestPortFilterFrommAcl(t *testing.T) {
+func TestPortFilterFromAcl(t *testing.T) {
 	filter := NewFilterFromAcls([]string{})
-	runFailingFilterFunc(t, packets, filter)
+	runPassingFilterFunc(t, packets, filter)
 
 	filter = NewFilterFromAcls([]string{"permit tcp any any eq 4444"})
 	runPassingFilterFunc(t, packets, filter)
@@ -104,7 +104,7 @@ func runFailingFilters(t *testing.T, packets [][]byte, filter *PortFilter) {
 func runFailingFilterFunc(t *testing.T, packets [][]byte, pass func([]byte) error) {
 	for i, p := range packets {
 		if err := pass(p); err == nil {
-			t.Errorf("Filter failed %s for packet (%d)", err.Error(), i)
+			t.Errorf("Filter passed for packet (%d) should have failed", i)
 		}
 	}
 }

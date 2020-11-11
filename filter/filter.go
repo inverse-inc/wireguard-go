@@ -227,7 +227,7 @@ func (f *PortFilter) AddACL(acl string) {
 func NewFilterFromAcls(acls []string) func([]byte) error {
 	filter := &PortFilter{}
 	if len(acls) == 0 {
-		filter.DenyAll = true
+		filter.AllowAll = true
 		return filter.Pass
 	} else {
 		for _, acl := range acls {
