@@ -6,13 +6,79 @@ import (
 	"strings"
 )
 
-const ipv4Version = byte(0x40)
-const ipv6Version = byte(0x60)
-const tcpProtocol = byte(6)
-const udpProtocol = byte(17)
-const icmpProtocol = byte(1)
+const (
+	ipv4Version     = byte(0x40)
+	ipv6Version     = byte(0x60)
+	tcpProtocol     = byte(6)
+	udpProtocol     = byte(17)
+	icmpProtocol    = byte(1)
+	icmpEchoReply   = byte(0)
+	icmpEchoRequest = byte(8)
+)
+
+var icmpTypes = map[string]byte{
+	"echo-reply":           0,
+	"source-quench":        4,
+	"redirect":             5,
+	"alternate-address":    6,
+	"echo":                 8,
+	"router-advertisement": 9,
+	"router-solicitation":  10,
+	"time-exceeded":        11,
+	"parameter-problem":    12,
+	"timestamp-request":    13,
+	"timestamp-reply":      14,
+	"information-request":  15,
+	"information-reply":    16,
+	"mask-request":         17,
+	"mask-reply":           18,
+	"traceroute":           30,
+	"conversion-error":     31,
+	"mobile-redirect":      32,
+}
+
+/*
+map[string]byte{
+	"administratively-prohibited": 256,
+	"host-unknown":                256,
+	"host-tos-unreachable":        256,
+	"host-unreachable":            256,
+	"net-tos-unreachable":         256,
+	"net-unreachable":             256,
+	"network-unknown":             256,
+	"unreachable":                 256,
+	"host-precedence-unreachable": 256,
+	"dod-host-prohibited":         256,
+	"dod-net-prohibited":          256,
+	"dscp":                        256,
+	"fragments":                   256,
+	"general-parameter-problem":   256,
+	"host-isolated":               256,
+	"host-redirect":               256,
+	"host-tos-redirect":           256,
+	"log":                         256,
+	"log-input":                   256,
+	"net-redirect":                256,
+	"net-tos-redirect":            256,
+	"no-room-for-option":          256,
+	"option":                      256,
+	"option-missing":              256,
+	"packet-too-big":              256,
+	"port-unreachable":            256,
+	"precedence":                  256,
+	"precedence-unreachable":      256,
+	"protocol-unreachable":        256,
+	"reassembly-timeout":          256,
+	"source-route-failed":         256,
+	"time-range":                  256,
+	"tos":                         256,
+	"ttl":                         256,
+	"ttl-exceeded":                256,
+}
+*/
 
 type portMap map[uint16]struct{}
+type icmpTypeMap map[byte]struct{}
 
 func (m portMap) IsAllowed(port uint16) bool {
 	if m == nil {
@@ -32,15 +98,35 @@ func (m portMap) IsDenied(port uint16) bool {
 	return found
 }
 
+func (m icmpTypeMap) IsAllowed(t uint8) bool {
+	if m == nil {
+		return true
+	}
+
+	_, found := m[t]
+	return found
+}
+
+func (m icmpTypeMap) IsDenied(t uint8) bool {
+	if m == nil {
+		return false
+	}
+
+	_, found := m[t]
+	return found
+}
+
 type PortFilter struct {
 	AllowedDstTCPPorts portMap
 	AllowedSrcTCPPorts portMap
 	AllowedSrcUDPPorts portMap
 	AllowedDstUDPPorts portMap
+	AllowedICMPType    icmpTypeMap
 	DenyDstTCPPorts    portMap
 	DenySrcTCPPorts    portMap
 	DenySrcUDPPorts    portMap
 	DenyDstUDPPorts    portMap
+	DenyICMPType       icmpTypeMap
 	DenyICMP           bool
 	DenyAll            bool
 	AllowAll           bool
@@ -48,6 +134,24 @@ type PortFilter struct {
 
 func NewPortFilter() *PortFilter {
 	return &PortFilter{}
+}
+
+func (f *PortFilter) AddDenyICMPType(types []byte) {
+	if f.DenyICMPType == nil {
+		f.DenyICMPType = make(map[byte]struct{})
+	}
+	for _, t := range types {
+		f.DenyICMPType[t] = struct{}{}
+	}
+}
+
+func (f *PortFilter) AddAllowedICMPType(types []byte) {
+	if f.AllowedICMPType == nil {
+		f.AllowedICMPType = make(map[byte]struct{})
+	}
+	for _, t := range types {
+		f.AllowedICMPType[t] = struct{}{}
+	}
 }
 
 func (f *PortFilter) Pass(p []byte) error {
@@ -102,17 +206,26 @@ func (f *PortFilter) Pass(p []byte) error {
 			}
 
 			if f.DenyDstTCPPorts.IsDenied(dstPort) {
-				return errors.New("TCP DST port not denied")
+				return errors.New("TCP DST port denied")
 			}
 
 			if f.DenySrcTCPPorts.IsDenied(srcPort) {
-				return errors.New("TCP SRC port not denied")
+				return errors.New("TCP SRC port denied")
 			}
 
 			return nil
 		case icmpProtocol:
 			if f.DenyICMP {
 				return errors.New("ICMP denied")
+			}
+
+			icmpType := data[0]
+			if !f.AllowedICMPType.IsAllowed(icmpType) {
+				return errors.New("ICMP type not allowed")
+			}
+
+			if f.DenyICMPType.IsAllowed(icmpType) {
+				return errors.New("ICMP type denied")
 			}
 		}
 	case ipv6Version:
@@ -200,6 +313,14 @@ func (f *PortFilter) AddACL(acl string) {
 				f.AddAllowedDstUdpPorts([]uint16{uint16(s)})
 			}
 		case "icmp":
+			if len(parts) != 5 {
+				return
+			}
+
+			if icmpType, found := icmpTypes[parts[4]]; found {
+				f.AddAllowedICMPType([]byte{icmpType})
+			}
+
 		}
 	case "deny":
 		switch parts[1] {
@@ -220,6 +341,13 @@ func (f *PortFilter) AddACL(acl string) {
 				f.AddDenyDstUdpPorts([]uint16{uint16(s)})
 			}
 		case "icmp":
+			if len(parts) != 5 {
+				return
+			}
+
+			if icmpType, found := icmpTypes[parts[4]]; found {
+				f.AddDenyICMPType([]byte{icmpType})
+			}
 		}
 	}
 }
