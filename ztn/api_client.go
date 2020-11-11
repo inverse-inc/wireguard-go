@@ -104,7 +104,7 @@ func setupAPIClientFromData(username, password, serverName, serverPort, verifySs
 
 func GetAPIClient() *unifiedapiclient.Client {
 	if APIClient == nil {
-		if RunningInCLI() {
+		if RunningInCLI() && (sharedutils.EnvOrDefault("WG_CLI_INTERACTIVE", "true") == "true") {
 			SetupAPIClientCLI()
 		} else {
 			SetupAPIClientEnv()
