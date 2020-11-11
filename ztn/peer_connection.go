@@ -205,13 +205,13 @@ func (pc *PeerConnection) run() {
 					pc.lastKeepalive = time.Now()
 
 				default:
-					pc.lastKeepalive = time.Now()
 					if message.raddr.String() == localWGAddr {
 						pc.connectedOutbound = true
 						n := len(message.message)
 						pc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", pc.peerAddr, n, message.raddr)
 						udpSend(message.message, pc.localPeerConn, pc.peerAddr)
 					} else {
+						pc.lastKeepalive = time.Now()
 						pc.connectedInbound = true
 						n := len(message.message)
 						pc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", pc.wgConn.RemoteAddr(), n, message.raddr)
