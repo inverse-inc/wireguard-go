@@ -398,7 +398,7 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string) {
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
 	conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	conf += "replace_allowed_ips=true\n"
-	if pc.PeerProfile.IsGateway || pc.MyProfile.IsGateway {
+	if pc.PeerProfile.IsGateway {
 		conf += "allowed_ip=0.0.0.0/0\n"
 	} else {
 		conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
