@@ -350,7 +350,7 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 					// Follow what the peer says if he has a bigger key
 					if event.Data["try"] != nil && pc.MyProfile.PublicKey < pc.PeerProfile.PublicKey {
 						pc.try = int(event.Data["try"].(float64))
-						pc.logger.Info.Println("Using peer defined try", pc.try)
+						pc.logger.Info.Println("Using peer defined try ID", pc.try)
 					}
 					if pc.ShouldTryPrivate() {
 						result <- event.Data["private_endpoint"].(string)
