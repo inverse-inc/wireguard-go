@@ -327,6 +327,7 @@ func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 		"id":               pc.MyProfile.PublicKey,
 		"public_endpoint":  pc.myAddr.String(),
 		"private_endpoint": pc.getPrivateAddr(),
+		"try":              pc.try,
 	}}
 }
 
@@ -346,6 +347,11 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 				err := json.Unmarshal(e.Data, &event)
 				sharedutils.CheckError(err)
 				if event.Type == "network_endpoint" && event.Data["id"].(string) != myID {
+					// Follow what the peer says if he has a bigger key
+					if event.Data["try"] != nil && pc.MyProfile.PublicKey < pc.PeerProfile.PublicKey {
+						pc.try = int(event.Data["try"].(float64))
+						pc.logger.Info.Println("Using peer defined try", pc.try)
+					}
 					if pc.ShouldTryPrivate() {
 						result <- event.Data["private_endpoint"].(string)
 						return
