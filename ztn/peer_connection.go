@@ -57,7 +57,7 @@ type PeerConnection struct {
 	connectedInbound  bool
 	connectedOutbound bool
 
-	triedPrivate bool
+	try int
 
 	BindTechnique BindTechnique
 }
@@ -91,9 +91,9 @@ func (pc *PeerConnection) reset() {
 	pc.started = false
 	pc.lastKeepalive = time.Time{}
 
-	// Reset the triedPrivate flag if a connection attempt was already successful so that it retries from scratch next time
+	// Reset the try flag if a connection attempt was already successful so that it retries from scratch next time
 	if pc.Connected() {
-		pc.triedPrivate = false
+		pc.try = 0
 	}
 	pc.connectedInbound = false
 	pc.connectedOutbound = false
@@ -236,7 +236,7 @@ func (pc *PeerConnection) run() {
 				pc.setupPeerConnection(peerStr)
 
 				pc.started = true
-				pc.triedPrivate = true
+				pc.try++
 				foundPeer <- true
 				pc.lastKeepalive = time.Now()
 
@@ -362,7 +362,7 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 }
 
 func (pc *PeerConnection) ShouldTryPrivate() bool {
-	return !pc.triedPrivate
+	return pc.try%2 == 0
 }
 
 func (pc *PeerConnection) Connected() bool {
