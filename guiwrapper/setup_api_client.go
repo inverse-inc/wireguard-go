@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/inverse-inc/wireguard-go/util"
 )
 
 var spacePlaceholder = "                          "
@@ -15,7 +17,15 @@ var statusLabel *widget.Label
 
 func SetupAPIClientGUI(callback func()) {
 	a := app.New()
-	w := a.NewWindow("Wireguard client")
+
+	icon, err := fyne.LoadResourceFromPath("logo.png")
+	if err != nil {
+		fmt.Println("Unable to find the app icon")
+	} else {
+		a.SetIcon(icon)
+	}
+
+	w := a.NewWindow(util.AppName)
 
 	serverEntry := widget.NewEntry()
 	serverEntry.PlaceHolder = "ztn.example.com"

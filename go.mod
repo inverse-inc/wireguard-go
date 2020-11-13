@@ -4,17 +4,18 @@ go 1.13
 
 require (
 	fyne.io/fyne v1.3.3
-	github.com/davecgh/go-spew v1.1.1
+	github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fullstorydev/grpcurl v1.7.0 // indirect
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.4.2
-	github.com/inverse-inc/upnp v0.0.0-20201112135509-c215d3967126
-	github.com/inverse-inc/packetfence v10.2.1-0.20201111170344-f14709997905+incompatible
+	github.com/inverse-inc/packetfence v10.2.1-0.20201111170344-f14709997905+incompatible // indirect
 	github.com/inverse-inc/packetfence/go v0.0.0-20201111170344-f14709997905
+	github.com/inverse-inc/upnp v0.0.0-20201112135509-c215d3967126
 	github.com/jackpal/gateway v1.0.6
 	github.com/jackpal/go-nat-pmp v1.0.2
-	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca
+	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/mitchellh/go-ps v1.0.0
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79

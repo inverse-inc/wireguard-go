@@ -5,14 +5,15 @@ import (
 	"os"
 
 	"github.com/getlantern/systray"
-	"github.com/getlantern/systray/example/icon"
+	"github.com/inverse-inc/wireguard-go/util"
+	"github.com/inverse-inc/wireguard-go/util/icon"
 	"github.com/joho/godotenv"
 )
 
 func setupSystray() {
 	systray.SetIcon(icon.Data)
-	systray.SetTitle("Wireguard client")
-	systray.SetTooltip("Wireguard client")
+	//systray.SetTitle(util.AppName)
+	systray.SetTooltip(util.AppName)
 	mQuit := systray.AddMenuItem("Quit", "Quit")
 
 	// Sets the icon of a menu item. Only available on Mac and Windows.

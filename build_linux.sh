@@ -16,3 +16,5 @@ GOOS=linux \
   TRAYWRAPPER_BIN_OUTPUT=../amd64/traywrapper \
   ./build.sh
 
+cp util/icon/logo.png amd64/
+
