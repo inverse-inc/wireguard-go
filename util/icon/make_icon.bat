@@ -1,6 +1,11 @@
 
 @ECHO OFF
 
+set GOPATH=..\..\.deps\go\
+
+
+echo %GOPATH%
+
 IF "%GOPATH%"=="" GOTO NOGO
 IF NOT EXIST %GOPATH%\bin\2goarray.exe GOTO INSTALL
 :POSTINSTALL
@@ -18,7 +23,7 @@ GOTO DONE
 
 :INSTALL
 ECHO Installing 2goarray...
-go get github.com/cratonica/2goarray
+..\..\.deps\go\bin\go get github.com/cratonica/2goarray
 IF ERRORLEVEL 1 GOTO GETFAIL
 GOTO POSTINSTALL
 

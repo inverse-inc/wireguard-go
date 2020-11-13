@@ -21,10 +21,10 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product
 		Id="*"
-		Name="WireGuard"
+		Name="PacketFence Zero Trust Client"
 		Language="1033"
 		Version="$(var.WIREGUARD_VERSION)"
-		Manufacturer="WireGuard LLC"
+		Manufacturer="Inverse Inc."
 		UpgradeCode="$(var.UpgradeCode)">
 		<Package
 			InstallerVersion="400"
@@ -93,9 +93,13 @@
 				<File Source=".deps\PsExec.exe" KeyPath="yes">
 				</File>
 			</Component>
+			<Component Directory="WireGuardFolder" Id="Logo" Guid="fff43ed4-25c2-11eb-adc1-0242ac120002">
+				<File Source="..\util\icon\logo.png" KeyPath="yes">
+				</File>
+			</Component>
 			<Component Directory="WireGuardFolder" Id="LaunchExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1a70">
 				<File Source="..\$(var.WIREGUARD_PLATFORM)\guiwrapper.exe" KeyPath="yes">
-					<Shortcut Id="WireGuardStartMenuShortcut" Directory="ProgramMenuFolder" Name="WireGuard" Description="WireGuard: Fast, Modern, Secure VPN Tunnel" WorkingDirectory="WireGuardFolder" Advertise="yes" />
+					<Shortcut Id="WireGuardStartMenuShortcut" Directory="ProgramMenuFolder" Name="PacketFence Zero Trust Client" Description="PacketFence Zero Trust Client" WorkingDirectory="WireGuardFolder" Advertise="yes" />
 				</File>
 				<ServiceControl Id="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" Name="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" /><!-- A dummy to make WiX create ServiceControl table for us. -->
 			</Component>
