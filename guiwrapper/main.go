@@ -27,6 +27,8 @@ func main() {
 	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
 	setenv("WG_CLI", "false")
 
+	elevate()
+
 	go startTray()
 	setupExitSignals()
 	SetupAPIClientGUI(func() {
