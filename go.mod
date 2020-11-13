@@ -14,6 +14,12 @@ require (
 	github.com/inverse-inc/packetfence v10.2.1-0.20201118170534-51d28c5194e5+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20201118170534-51d28c5194e5
 	github.com/inverse-inc/upnp v0.0.0-20201112135509-c215d3967126
+	fyne.io/fyne v1.3.3
+	github.com/coredns/caddy v1.1.0
+	github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa // indirect
+	github.com/fullstorydev/grpcurl v1.7.0 // indirect
+	github.com/getlantern/systray v1.0.4
+	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.4.3
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
@@ -22,7 +28,7 @@ require (
 	github.com/inverse-inc/go-radius v0.0.0-20201019132414-82756e2d8d47 // indirect
 	github.com/inverse-inc/packetfence v10.2.1-0.20201113185450-056ed81979e8+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20201113193146-23ba53b55c6a
-	github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99
+	github.com/inverse-inc/upnp v0.0.0-20201112135509-c215d3967126
 	github.com/jackpal/gateway v1.0.6
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca // indirect

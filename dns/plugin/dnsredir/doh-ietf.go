@@ -57,7 +57,7 @@ func (uh *UpstreamHost) ietfDnsExchange(ctx context.Context, state *request.Requ
 
 	APIClient := ztn.GetAPIClient()
 
-	req.Header.Set("Authorization", "Bearer "+APIClient.GetToken())
+	req.Header.Set("Authorization", "Bearer "+APIClient.GetToken(ctx))
 
 	return uh.httpClient.Do(req)
 
