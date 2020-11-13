@@ -60,7 +60,7 @@
 		-->
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="$(var.PlatformProgramFilesFolder)">
-				<Directory Id="WireGuardFolder" Name="WireGuard" />
+				<Directory Id="WireGuardFolder" Name="PacketFence-Zero-Trust-Client" />
 			</Directory>
 			<Directory Id="ProgramMenuFolder" />
 			<Directory Id="SystemFolder" />
