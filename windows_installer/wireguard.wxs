@@ -35,10 +35,10 @@
 
 		<MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
-		<Icon Id="wireguard.ico" SourceFile="..\ui\icon\wireguard.ico" />
+		<Icon Id="logo.ico" SourceFile="..\util\icon\logo.ico" />
 		<Binary Id="customactions.dll" SourceFile="$(var.WIREGUARD_PLATFORM)\customactions.dll" />
 
-		<Property Id="ARPPRODUCTICON" Value="wireguard.ico" />
+		<Property Id="ARPPRODUCTICON" Value="logo.ico" />
 		<Property Id="ARPURLINFOABOUT" Value="https://www.wireguard.com/" />
 		<Property Id="ARPNOMODIFY" Value="yes" />
 		<Property Id="DISABLEADVTSHORTCUTS" Value="yes" />
@@ -93,13 +93,17 @@
 				<File Source=".deps\PsExec.exe" KeyPath="yes">
 				</File>
 			</Component>
-			<Component Directory="WireGuardFolder" Id="Logo" Guid="fff43ed4-25c2-11eb-adc1-0242ac120002">
+			<Component Directory="WireGuardFolder" Id="LogoPNG" Guid="fff43ed4-25c2-11eb-adc1-0242ac120002">
 				<File Source="..\util\icon\logo.png" KeyPath="yes">
+				</File>
+			</Component>
+			<Component Directory="WireGuardFolder" Id="LogoICO" Guid="724cc450-4c0a-4a7b-ba06-106a9fe5f690">
+				<File Source="..\util\icon\logo.ico" KeyPath="yes">
 				</File>
 			</Component>
 			<Component Directory="WireGuardFolder" Id="LaunchExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1a70">
 				<File Source="..\$(var.WIREGUARD_PLATFORM)\guiwrapper.exe" KeyPath="yes">
-					<Shortcut Id="WireGuardStartMenuShortcut" Directory="ProgramMenuFolder" Name="PacketFence Zero Trust Client" Description="PacketFence Zero Trust Client" WorkingDirectory="WireGuardFolder" Advertise="yes" />
+					<Shortcut Id="WireGuardStartMenuShortcut" Directory="ProgramMenuFolder" Name="PacketFence Zero Trust Client" Description="PacketFence Zero Trust Client" WorkingDirectory="WireGuardFolder" Advertise="yes" Icon="logo.ico"/>
 				</File>
 				<ServiceControl Id="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" Name="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" /><!-- A dummy to make WiX create ServiceControl table for us. -->
 			</Component>
