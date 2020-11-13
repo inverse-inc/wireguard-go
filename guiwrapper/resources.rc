@@ -1,0 +1,50 @@
+/* SPDX-License-Identifier: MIT
+ *
+ * Copyright (C) 2019 WireGuard LLC. All Rights Reserved.
+ */
+
+#include <windows.h>
+#include "version/version.h"
+
+#pragma code_page(65001) // UTF-8
+
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST manifest.xml
+$wireguard.ico ICON logo.ico
+
+#define VERSIONINFO_TEMPLATE(block_id, lang_id, codepage_id, file_desc, comments) \
+VS_VERSION_INFO VERSIONINFO \
+FILEVERSION    WIREGUARD_WINDOWS_VERSION_ARRAY \
+PRODUCTVERSION WIREGUARD_WINDOWS_VERSION_ARRAY \
+FILEOS         VOS_NT_WINDOWS32 \
+FILETYPE       VFT_APP \
+FILESUBTYPE    VFT2_UNKNOWN \
+BEGIN \
+  BLOCK "StringFileInfo" \
+  BEGIN \
+    BLOCK block_id \
+    BEGIN \
+      VALUE "CompanyName", "Inverse Inc." \
+      VALUE "FileDescription", file_desc \
+      VALUE "FileVersion", WIREGUARD_WINDOWS_VERSION_STRING \
+      VALUE "InternalName", "packetfence-zero-trust-client-windows" \
+      VALUE "LegalCopyright", "Copyright © 2015-2020 Inverse Inc. All Rights Reserved." \
+      VALUE "OriginalFilename", "guiwrapper.exe" \
+      VALUE "ProductName", "PacketFence Zero Trust Client" \
+      VALUE "ProductVersion", WIREGUARD_WINDOWS_VERSION_STRING \
+      VALUE "Comments", comments \
+    END \
+  END \
+  BLOCK "VarFileInfo" \
+  BEGIN \
+    VALUE "Translation", lang_id, codepage_id \
+  END \
+END
+
+LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
+VERSIONINFO_TEMPLATE(
+  "040904b0", 0x409, 0x4b0,
+  "PacketFence Zero Trust Client",
+  "https://www.packetfence.org/"
+)
+

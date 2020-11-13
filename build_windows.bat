@@ -77,17 +77,22 @@ if exist .deps\prepared goto :render
 	set CC=%~2-w64-mingw32-gcc
 	set GOARCH=%~3
 	mkdir %1 >NUL 2>&1
-	rem echo [+] Assembling resources %1
-	rem windres -i resources.rc -o resources.syso -O coff || exit /b %errorlevel%
+
+	echo [+] Assembling resources %1
+	copy util\icon\logo.ico guiwrapper\logo.ico /Y
+	cd guiwrapper
+	windres -i resources.rc -o resources.syso -O coff || exit /b %errorlevel%
+	del /f logo.ico
+    cd ..
+
 	echo [+] Building program %1
-	rem go build -ldflags="-H windowsgui -s -w" -tags walk_use_cgo -trimpath -v -o "%~1\wireguard.exe" || exit /b 1
 
 	cd guiwrapper
-	go build -v -o "..\%~1\guiwrapper.exe" || exit /b 1
+	go build -tags walk_use_cgo -trimpath -v -o "..\%~1\guiwrapper.exe" || exit /b 1
 	cd ..
 
 	cd traywrapper
-	go build -v -o "..\%~1\traywrapper.exe" || exit /b 1
+	go build -tags walk_use_cgo -trimpath -v -o "..\%~1\traywrapper.exe" || exit /b 1
 	cd ..
 	
 	go build -tags walk_use_cgo -trimpath -v -o "%~1\wireguard.exe" || exit /b 1
