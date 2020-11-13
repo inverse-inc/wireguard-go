@@ -88,11 +88,11 @@ if exist .deps\prepared goto :render
 	echo [+] Building program %1
 
 	cd guiwrapper
-	go build -tags walk_use_cgo -trimpath -v -o "..\%~1\guiwrapper.exe" || exit /b 1
+	go build -tags walk_use_cgo -trimpath -ldflags="-H windowsgui -s -w" -v -o "..\%~1\guiwrapper.exe" || exit /b 1
 	cd ..
 
 	cd traywrapper
-	go build -tags walk_use_cgo -trimpath -v -o "..\%~1\traywrapper.exe" || exit /b 1
+	go build -tags walk_use_cgo -trimpath -ldflags="-H windowsgui -s -w" -v -o "..\%~1\traywrapper.exe" || exit /b 1
 	cd ..
 	
 	go build -tags walk_use_cgo -trimpath -v -o "%~1\wireguard.exe" || exit /b 1

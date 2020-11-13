@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"syscall"
 )
 
 func CheckPIDIsAlive(pid int) bool {
 	cmd := exec.Command("tasklist")
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	output, err := cmd.Output()
 	if err != nil {
 		fmt.Println("Unable to run tasklist: ", err, string(output))

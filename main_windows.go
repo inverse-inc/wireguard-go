@@ -13,6 +13,7 @@ import (
 
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
+	"github.com/inverse-inc/wireguard-go/outputlog"
 	"github.com/inverse-inc/wireguard-go/tun"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/joho/godotenv"
@@ -26,6 +27,8 @@ const (
 var logger *device.Logger
 
 func main() {
+	outputlog.RedirectOutputToFilePrefix("C:\\Program Files\\PacketFence-Zero-Trust-Client\\wireguard")
+
 	godotenv.Load(os.Args[1])
 
 	//for _, pair := range os.Environ() {

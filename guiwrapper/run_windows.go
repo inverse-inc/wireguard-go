@@ -8,12 +8,14 @@ import (
 	"strings"
 
 	"golang.org/x/sys/windows"
+	"github.com/inverse-inc/wireguard-go/outputlog"
 )
 
 func run() {
 
 	//TODO: get rid of run.bat since this elevates by itself now
 	cmd := exec.Command("C:\\Program Files\\PacketFence-Zero-Trust-Client\\run.bat", wgenv.Name())
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	fmt.Println(cmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -24,6 +26,7 @@ func run() {
 
 func elevate() {
 	if amAdmin() {
+		outputlog.RedirectOutputToFilePrefix("C:\\Program Files\\PacketFence-Zero-Trust-Client\\guiwrapper")
 		return
 	}
 
