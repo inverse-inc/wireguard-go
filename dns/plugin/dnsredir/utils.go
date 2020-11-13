@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/inverse-inc/wireguard-go/dns/plugin"
-	"golang.org/x/net/html"
 	"hash/fnv"
 	"io"
 	"io/ioutil"
@@ -15,19 +13,22 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	"golang.org/x/net/html"
 )
 
 const pluginName = "dnsredir"
 
 var (
-	pluginVersion = "?"
+	pluginVersion    = "?"
 	pluginHeadCommit = "?"
 )
 
 var userAgent = fmt.Sprintf("coredns-%v %v %v", pluginName, pluginVersion, pluginHeadCommit)
 
 const (
-	mimeTypeDohAny           = "?/?"	// Dummy MIME type
+	mimeTypeDohAny           = "?/?" // Dummy MIME type
 	mimeTypeJson             = "application/json"
 	mimeTypeDnsJson          = "application/dns-json"
 	mimeTypeDnsMessage       = "application/dns-message"
@@ -81,7 +82,7 @@ func isDomainName(s string) bool {
 			}
 		}
 
-		if seg[0] == '-' || seg[n - 1] == '-' {
+		if seg[0] == '-' || seg[n-1] == '-' {
 			return false
 		}
 	}
@@ -119,7 +120,7 @@ func SplitByByte(s string, c byte) (string, string) {
 
 func isContentType(contentType string, h *http.Header) bool {
 	t := h.Get("Content-Type")
-	return t == contentType || strings.Contains(t, contentType + ";")
+	return t == contentType || strings.Contains(t, contentType+";")
 }
 
 // bootstrap: Bootstrap DNS to resolve domain names(empty array to use system defaults)
@@ -141,7 +142,7 @@ func getUrlContent(url, contentType string, bootstrap []string, timeout time.Dur
 			},
 		}
 		dialer := &net.Dialer{
-			Timeout: timeout,
+			Timeout:  timeout,
 			Resolver: resolver,
 		}
 		// see: http.DefaultTransport
@@ -166,8 +167,8 @@ func getUrlContent(url, contentType string, bootstrap []string, timeout time.Dur
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0")
 
 	c := &http.Client{
-		Transport: transport,	// [sic] If nil, DefaultTransport is used.
-		Timeout:   timeout,		// Q: Should be omit this field if transport isn't nil?
+		Transport: transport, // [sic] If nil, DefaultTransport is used.
+		Timeout:   timeout,   // Q: Should be omit this field if transport isn't nil?
 	}
 	resp, err := c.Do(req)
 	if err != nil {
@@ -215,7 +216,7 @@ func tcnFix(url string, r io.Reader) (string, error) {
 	fixFunc = func(n *html.Node) (string, bool) {
 		if n.Type == html.ElementNode && n.Data == "p" {
 			for _, a := range n.Attr {
-				if a.Key =="class" && a.Val == "link" {
+				if a.Key == "class" && a.Val == "link" {
 					if n.FirstChild != nil {
 						if u := strings.ToLower(n.FirstChild.Data); strings.HasPrefix(u, "https://") {
 							return n.FirstChild.Data, true
@@ -260,4 +261,3 @@ func hostPortIsIpPort(hostport string) bool {
 	i := strings.IndexByte(host, '%')
 	return i > 0 && net.ParseIP(host[:i]) != nil
 }
-

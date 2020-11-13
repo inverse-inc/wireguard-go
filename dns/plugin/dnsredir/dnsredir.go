@@ -7,15 +7,16 @@ package dnsredir
 import (
 	"context"
 	"errors"
+	"strconv"
+	"sync/atomic"
+	"time"
+
 	"github.com/inverse-inc/wireguard-go/dns/plugin"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/debug"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/metrics"
 	clog "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/log"
 	"github.com/inverse-inc/wireguard-go/dns/request"
 	"github.com/miekg/dns"
-	"strconv"
-	"sync/atomic"
-	"time"
 )
 
 var log = clog.NewWithPlugin(pluginName)
@@ -30,7 +31,7 @@ type Dnsredir struct {
 // see: github.com/coredns/proxy#proxy.go
 type Upstream interface {
 	// Check if given domain name should be routed to this upstream zone
-	Match(name string) bool
+	Match(state *request.Request) bool
 	// Select an upstream host to be routed to, nil if no available host
 	Select() *UpstreamHost
 
@@ -66,7 +67,7 @@ func (r *Dnsredir) ServeDNS(ctx context.Context, w dns.ResponseWriter, req *dns.
 	name := state.Name()
 
 	server := metrics.WithServer(ctx)
-	upstream0, t := r.match(server, name)
+	upstream0, t := r.match(server, state)
 	if upstream0 == nil {
 		log.Debugf("%q not found in name list, t: %v", name, t)
 		return plugin.NextOrFailure(r.Name(), r.Next, ctx, w, req)
@@ -117,10 +118,6 @@ func (r *Dnsredir) ServeDNS(ctx context.Context, w dns.ResponseWriter, req *dns.
 			return dns.RcodeSuccess, nil
 		}
 
-		// Add resolved IPs to ipset/pf before write response to DNS resolver
-		// 	thus the rule based routing can take effect immediately
-		ipsetAddIP(upstream, reply)
-		pfAddIP(upstream, reply)
 		_ = w.WriteMsg(reply)
 
 		RequestDuration.WithLabelValues(server, host.Name()).Observe(float64(time.Since(start).Milliseconds()))
@@ -153,7 +150,7 @@ func healthCheck(r *reloadableUpstream, uh *UpstreamHost) {
 		// Failure count may go negative here, should be rectified by HC eventually
 		atomic.AddInt32(&uh.fails, -1)
 		// Kick off health check on every failureCheck failure
-		if fails % failureCheck == 0 {
+		if fails%failureCheck == 0 {
 			_ = uh.Check()
 		}
 	}(uh)
@@ -161,7 +158,7 @@ func healthCheck(r *reloadableUpstream, uh *UpstreamHost) {
 
 func (r *Dnsredir) Name() string { return pluginName }
 
-func (r *Dnsredir) match(server, name string) (Upstream, time.Duration) {
+func (r *Dnsredir) match(server string, state *request.Request) (Upstream, time.Duration) {
 	t1 := time.Now()
 
 	if r.Upstreams == nil {
@@ -169,14 +166,14 @@ func (r *Dnsredir) match(server, name string) (Upstream, time.Duration) {
 	}
 
 	// Don't check validity of domain name, delegate to upstream host
-	if len(name) > 1 {
-		name = removeTrailingDot(name)
-	}
+	// if len(state.Name()) > 1 {
+	// 	name = removeTrailingDot(name)
+	// }
 
 	for _, up := range *r.Upstreams {
 		// For maximum performance, we search the first matched item and return directly
 		// Unlike proxy plugin, which try to find longest match
-		if up.Match(name) {
+		if up.Match(state) {
 			t2 := time.Since(t1)
 			NameLookupDuration.WithLabelValues(server, "1").Observe(float64(t2.Milliseconds()))
 			return up, t2
@@ -189,13 +186,12 @@ func (r *Dnsredir) match(server, name string) (Upstream, time.Duration) {
 }
 
 var (
-	errNoHealthy = errors.New("no healthy upstream host")
+	errNoHealthy        = errors.New("no healthy upstream host")
 	errCachedConnClosed = errors.New("cached connection was closed by peer")
 )
 
 const (
-	defaultTimeout = 15 * time.Second
+	defaultTimeout     = 15 * time.Second
 	defaultFailTimeout = 2000 * time.Millisecond
-	failureCheck = 3
+	failureCheck       = 3
 )
-

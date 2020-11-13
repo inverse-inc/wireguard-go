@@ -2,10 +2,11 @@ package dnsredir
 
 import (
 	"fmt"
-	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 	"net"
 	"net/url"
 	"strings"
+
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 )
 
 // Strips trailing IP zone and/or TLS server name
@@ -21,8 +22,8 @@ func stripZoneAndTlsName(host string) string {
 	return host
 }
 
-var knownTrans = []string {
-	"dns",	// Use protocol specified in incoming DNS requests, i.e. it may UDP, TCP.
+var knownTrans = []string{
+	"dns", // Use protocol specified in incoming DNS requests, i.e. it may UDP, TCP.
 	"udp",
 	"tcp",
 	"tls",
@@ -34,8 +35,8 @@ var knownTrans = []string {
 func SplitTransportHost(s string) (trans string, addr string) {
 	s = strings.ToLower(s)
 	for _, trans := range knownTrans {
-		if strings.HasPrefix(s, trans + "://") {
-			return trans, s[len(trans + "://"):]
+		if strings.HasPrefix(s, trans+"://") {
+			return trans, s[len(trans+"://"):]
 		}
 	}
 	// Have no proceeding transport? assume it's classic DNS protocol
@@ -87,8 +88,7 @@ func HostPort(servers []string) ([]string, error) {
 		if _, ok := stringToDomain(addr); !ok && net.ParseIP(stripZoneAndTlsName(addr)) == nil {
 			return nil, fmt.Errorf("#2 not a domain name or an IP address: %q", host)
 		}
-		list = append(list, trans + "://" + host)
+		list = append(list, trans+"://"+host)
 	}
 	return list, nil
 }
-

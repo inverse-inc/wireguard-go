@@ -8,58 +8,72 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/coredns/caddy"
-	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
-	"github.com/inverse-inc/wireguard-go/dns/plugin"
-	pkgtls "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/tls"
-	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
-	"github.com/miekg/dns"
 	"net"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/coredns/caddy"
+	"github.com/inverse-inc/wireguard-go/dns/plugin"
+	pkgtls "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/tls"
+	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
+	"github.com/inverse-inc/wireguard-go/dns/request"
+	"github.com/miekg/dns"
 )
 
 type reloadableUpstream struct {
 	// Flag indicate match any request, i.e. the root zone "."
 	matchAny bool
+	from     string
 	*NameList
-	inline domainSet
-	ignored domainSet
+	inline  domainSet
+	ignored []string
 	*HealthCheck
 	// Bootstrap DNS in IP:Port combo
-	bootstrap []string
-	ipset     interface{}
-	pf        interface{}
-	noIPv6    bool
+	bootstrap     []string
+	noIPv6        bool
+	sourceNetwork net.IPNet
 }
 
 // reloadableUpstream implements Upstream interface
 
 // Check if given name in upstream name list
 // `name' is lower cased and without trailing dot(except for root zone)
-func (u *reloadableUpstream) Match(name string) bool {
+func (u *reloadableUpstream) Match(state *request.Request) bool {
+
+	network := u.sourceNetwork
+
+	name := state.Name()
+
+	if len(state.Name()) > 1 {
+		name = removeTrailingDot(state.Name())
+	}
+
 	if u.matchAny {
-		if !plugin.Name(".").Matches(name) {
-			panic(fmt.Sprintf("Why %q doesn't match %q?!", name, "."))
+		if network.Contains(net.ParseIP(state.IP())) {
+			return true
 		}
-
-		ignored := u.ignored.Match(name)
-		if ignored {
-			log.Debugf("#0 Skip %q since it's ignored", name)
-		}
-		return !ignored
 	}
-
-	if !u.NameList.Match(name) && !u.inline.Match(name) {
+	if !plugin.Name(u.from).Matches(name) || !u.isAllowedDomain(name) {
 		return false
 	}
 
-	if u.ignored.Match(name) {
-		log.Debugf("#1 Skip %q since it's ignored", name)
+	if network.Contains(net.ParseIP(state.IP())) {
+		return true
+	} else {
 		return false
+	}
+}
+
+func (u *reloadableUpstream) isAllowedDomain(name string) bool {
+	if dns.Name(name) == dns.Name(u.from) {
+		return true
+	}
+
+	for _, ignore := range u.ignored {
+		if plugin.Name(ignore).Matches(name) {
+			return false
+		}
 	}
 	return true
 }
@@ -67,12 +81,6 @@ func (u *reloadableUpstream) Match(name string) bool {
 func (u *reloadableUpstream) Start() error {
 	u.periodicUpdate(u.bootstrap)
 	u.HealthCheck.Start()
-	if err := ipsetSetup(u); err != nil {
-		return err
-	}
-	if err := pfSetup(u); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -80,12 +88,6 @@ func (u *reloadableUpstream) Stop() error {
 	close(u.stopPathReload)
 	close(u.stopUrlReload)
 	u.HealthCheck.Stop()
-	if err := ipsetShutdown(u); err != nil {
-		return err
-	}
-	if err := pfShutdown(u); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -124,18 +126,18 @@ func newReloadableUpstream(c *caddy.Controller) (Upstream, error) {
 			urlReadTimeout: defaultUrlReadTimeout,
 			stopUrlReload:  make(chan struct{}),
 		},
-		ignored: make(domainSet),
 		inline: make(domainSet),
 		HealthCheck: &HealthCheck{
 			stop:          make(chan struct{}),
 			maxFails:      defaultMaxFails,
 			checkInterval: defaultHcInterval,
 			transport: &Transport{
-				expire: defaultConnExpire,
-				tlsConfig: new(tls.Config),
+				expire:           defaultConnExpire,
+				tlsConfig:        new(tls.Config),
 				recursionDesired: true,
 			},
 		},
+		sourceNetwork: net.IPNet{IP: []byte{0, 0, 0, 0}, Mask: []byte{0, 0, 0, 0}},
 	}
 
 	if err := parseFrom(c, u); err != nil {
@@ -164,6 +166,7 @@ func newReloadableUpstream(c *caddy.Controller) (Upstream, error) {
 			host.transport.tlsConfig = new(tls.Config)
 			host.transport.tlsConfig.Certificates = u.transport.tlsConfig.Certificates
 			host.transport.tlsConfig.RootCAs = u.transport.tlsConfig.RootCAs
+
 			// Don't set TLS server name if addr host part is already a domain name
 			if hostPortIsIpPort(addr) {
 				host.transport.tlsConfig.ServerName = u.transport.tlsConfig.ServerName
@@ -195,8 +198,10 @@ func newReloadableUpstream(c *caddy.Controller) (Upstream, error) {
 
 	if err := u.inline.ForEachDomain(func(name string) error {
 		// except takes precedence over INLINE
-		if u.ignored.Match(name) {
-			return c.Errf("%q %v is conflict with %q", "INLINE", name, "except")
+		for _, ignore := range u.ignored {
+			if plugin.Name(ignore).Matches(name) {
+				return c.Errf("%q %v is conflict with %q", "INLINE", name, "except")
+			}
 		}
 		return nil
 	}); err != nil {
@@ -256,37 +261,12 @@ func parseFrom(c *caddy.Controller, u *reloadableUpstream) error {
 		u.matchAny = true
 		log.Infof("Match any")
 		return nil
+	} else {
+		u.from = forms[0]
+		log.Infof("FROM...: %v", forms)
+		return nil
 	}
 
-	config := dnsserver.GetConfig(c)
-	for _, from := range forms {
-		if strings.Index(from, "://") > 0 {
-			continue
-		}
-
-		if !filepath.IsAbs(from) && config.Root != "" {
-			from = filepath.Join(config.Root, from)
-		}
-
-		st, err := os.Stat(from)
-		if err != nil {
-			if os.IsNotExist(err) {
-				log.Warningf("File %q doesn't exist", from)
-			} else {
-				return err
-			}
-		} else if st != nil && !st.Mode().IsRegular() {
-			log.Warningf("File %q isn't a regular file", from)
-		}
-	}
-
-	items, err := NewNameItemsWithForms(forms)
-	if err != nil {
-		return err
-	}
-	u.items = items
-	log.Infof("FROM...: %v", forms)
-	return nil
 }
 
 func parseBlock(c *caddy.Controller, u *reloadableUpstream) error {
@@ -327,17 +307,14 @@ func parseBlock(c *caddy.Controller, u *reloadableUpstream) error {
 		u.urlReload = dur
 		log.Infof("%v: %v %v", dir, u.urlReload, u.urlReadTimeout)
 	case "except":
-		// Multiple "except"s will be merged together
-		args := c.RemainingArgs()
-		if len(args) == 0 {
+		ignore := c.RemainingArgs()
+		if len(ignore) == 0 {
 			return c.ArgErr()
 		}
-		for _, name := range args {
-			if !u.ignored.Add(name) {
-				log.Warningf("%q isn't a domain name", name)
-			}
+		for i := 0; i < len(ignore); i++ {
+			ignore[i] = plugin.Host(ignore[i]).Normalize()
 		}
-		log.Infof("%v: %v", dir, u.ignored)
+		u.ignored = ignore
 	case "spray":
 		if len(c.RemainingArgs()) != 0 {
 			return c.ArgErr()
@@ -424,14 +401,6 @@ func parseBlock(c *caddy.Controller, u *reloadableUpstream) error {
 		if err := parseBootstrap(c, u); err != nil {
 			return err
 		}
-	case "ipset":
-		if err := ipsetParse(c, u); err != nil {
-			return err
-		}
-	case "pf":
-		if err := pfParse(c, u); err != nil {
-			return err
-		}
 	case "no_ipv6":
 		args := c.RemainingArgs()
 		if len(args) != 0 {
@@ -439,12 +408,18 @@ func parseBlock(c *caddy.Controller, u *reloadableUpstream) error {
 		}
 		u.noIPv6 = true
 		log.Infof("%v: %v", dir, u.noIPv6)
-	default:
-		if len(c.RemainingArgs()) != 0 ||!u.inline.Add(dir) {
-			return c.Errf("unknown property: %q", dir)
+	case "network_source":
+		if !c.NextArg() {
+			return c.ArgErr()
 		}
-		if u.ignored.Len() != 0 {
-			return c.Errf("%q must comes before %q", "INLINE", "except")
+		_, ipNet, err := net.ParseCIDR(c.Val())
+		if err != nil {
+			return c.Err("Unable to parse network_source configuration parameter")
+		}
+		u.sourceNetwork = *ipNet
+	default:
+		if len(c.RemainingArgs()) != 0 || !u.inline.Add(dir) {
+			return c.Errf("unknown property: %q", dir)
 		}
 	}
 	return nil
@@ -516,7 +491,7 @@ func parseTo(c *caddy.Controller, u *reloadableUpstream) error {
 		uh := &UpstreamHost{
 			proto: trans,
 			// Not an error, host and tls server name will be separated later
-			addr: addr,
+			addr:     addr,
 			downFunc: checkDownFunc(u),
 		}
 		u.hosts = append(u.hosts, uh)
@@ -547,7 +522,7 @@ func parseBootstrap(c *caddy.Controller, u *reloadableUpstream) error {
 		} else {
 			if port, err := strconv.Atoi(port); err != nil || port <= 0 {
 				if err == nil {
-					err =  fmt.Errorf("non-positive port %v", port)
+					err = fmt.Errorf("non-positive port %v", port)
 				}
 				return c.Errf("%v: %v", dir, err)
 			}
@@ -558,7 +533,7 @@ func parseBootstrap(c *caddy.Controller, u *reloadableUpstream) error {
 				panic(fmt.Sprintf("Why %q doesn't have close bracket?!", host))
 			}
 			// Strip the brackets
-			host = host[1:len(host)-1]
+			host = host[1 : len(host)-1]
 		}
 
 		// XXX: Doesn't support IPv6 with zone
@@ -584,20 +559,20 @@ func parseBootstrap(c *caddy.Controller, u *reloadableUpstream) error {
 }
 
 const (
-	defaultMaxFails       = 3
+	defaultMaxFails = 3
 
 	defaultPathReloadInterval = 2 * time.Second
 	defaultUrlReloadInterval  = 30 * time.Minute
-	defaultUrlReadTimeout = 30 * time.Second
+	defaultUrlReadTimeout     = 30 * time.Second
 
-	defaultHcInterval     = 2000 * time.Millisecond
-	defaultHcTimeout      = 5000 * time.Millisecond
+	defaultHcInterval = 2000 * time.Millisecond
+	defaultHcTimeout  = 5000 * time.Millisecond
 )
 
 const (
 	minPathReloadInterval = 1 * time.Second
 	minUrlReloadInterval  = 15 * time.Second
-	minUrlReadTimeout = 3 * time.Second
+	minUrlReadTimeout     = 3 * time.Second
 
 	minHcInterval     = 1 * time.Second
 	minExpireInterval = 1 * time.Second

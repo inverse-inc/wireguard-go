@@ -9,10 +9,13 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/inverse-inc/wireguard-go/dns/request"
-	"github.com/miekg/dns"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/inverse-inc/wireguard-go/dns/request"
+	"github.com/inverse-inc/wireguard-go/ztn"
+	"github.com/miekg/dns"
 )
 
 func (uh *UpstreamHost) ietfDnsExchange(ctx context.Context, state *request.Request, requestContentType string) (*http.Response, error) {
@@ -49,8 +52,16 @@ func (uh *UpstreamHost) ietfDnsExchange(ctx context.Context, state *request.Requ
 	if err != nil {
 		return nil, err
 	}
+
 	req.Header.Set("Accept", headerAccept)
 	req.Header.Set("User-Agent", userAgent)
+
+	// var APIClientCtx context.Context
+	APIClient := ztn.GetAPIClient()
+	spew.Dump(APIClient)
+
+	// APIClient = unifiedapiclient.New(APIClientCtx, username, password, "https", serverName, serverPort)
+
 	return uh.httpClient.Do(req)
 }
 
@@ -80,4 +91,3 @@ func (uh *UpstreamHost) ietfDnsParseResponse(state *request.Request, resp *http.
 	}
 	return reply, nil
 }
-

@@ -531,6 +531,7 @@ github.com/inverse-inc/packetfence v10.1.1-0.20200902172018-c4772999cd05+incompa
 github.com/inverse-inc/packetfence v10.1.1-0.20200902172018-c4772999cd05+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.1.1-0.20200902175525-e70bbbb66ca0+incompatible h1:kWmeIxLSHT4XjD5fHU5/3HuSd06HJHXUn4bRex5PJEg=
 github.com/inverse-inc/packetfence v10.1.1-0.20200902175525-e70bbbb66ca0+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
+github.com/inverse-inc/packetfence v10.2.0+incompatible h1:UPUXdIiToyhDa8GxAa76yJV5NOOSBxuYd+vy7t9w5IU=
 github.com/inverse-inc/packetfence v10.2.1-0.20201103171141-dc751ffed66c+incompatible h1:hGrbNJw4A7cQlyWhuadh65WsUJhGr6xqefBpYru+oSo=
 github.com/inverse-inc/packetfence v10.2.1-0.20201103171141-dc751ffed66c+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.2.1-0.20201110143320-246263799276+incompatible h1:DT1oOaN+dMM9jS5G8IUJ+SYavWR+FkAVk83LwuQNSmM=
@@ -549,6 +550,8 @@ github.com/inverse-inc/packetfence v10.2.1-0.20201116190944-3456614186f6+incompa
 github.com/inverse-inc/packetfence v10.2.1-0.20201116190944-3456614186f6+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.2.1-0.20201118170534-51d28c5194e5+incompatible h1:g3ZMJVky4u4L84aW7r/lvt/9q2BwAZtPiEHgtJLb8D4=
 github.com/inverse-inc/packetfence v10.2.1-0.20201118170534-51d28c5194e5+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
+github.com/inverse-inc/packetfence v10.2.1-0.20201104165344-f0b35854b6e8+incompatible h1:aSiw8u8cC1puh/EvkH5Q8NpJwnT2wC9jCr4vkMHNE6Q=
+github.com/inverse-inc/packetfence v10.2.1-0.20201104165344-f0b35854b6e8+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36 h1:6mQM09YcCuLCzLr/hGLmldoT5jHHtM+a7G3v5NNYcY0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36/go.mod h1:WlVGQDgT+HJRzbbMUMJB3tC5VZJnA1WO1GKXgq9lymc=
 github.com/inverse-inc/packetfence/go v0.0.0-20200729120005-d8f9c1cc13a4 h1:3T4SNX5VJeQyjC3YqFY9DefZnbIO3uN9jBADKBDfvPI=
@@ -606,6 +609,10 @@ github.com/inverse-inc/packetfence/go v0.0.0-20201118170534-51d28c5194e5 h1:QWjH
 github.com/inverse-inc/packetfence/go v0.0.0-20201118170534-51d28c5194e5/go.mod h1:gMMqivTOplnPuAz3SMu8p1Fwjrsfvg5yl34DlorQwS4=
 github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd h1:j+hJYhZwl4Ftq7Mrhsa+SNBPxCHwk7okY5Ojq8Vi6CM=
 github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104165344-f0b35854b6e8 h1:yyXajx0FZVxOMvVnK0M+q1vM3+ufBXHmNc7ll4k+lvU=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104165344-f0b35854b6e8/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104180934-0d0cf304b9f0 h1:NtPVuEd2/R1o390fmnx/P+ZXSpPh0+cF0iksIv0/goM=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104180934-0d0cf304b9f0/go.mod h1:48YFoRxUXmfKfF5nfMCk+T5T2HJDPB5KP1OQoDK5OXE=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99 h1:mryb1vMKVirEE14zI1Vak3fcGNyt5jJbfKiEl4pq6Xc=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
 github.com/inverse-inc/upnp v0.0.0-20201111160554-d61e15e330bb h1:yjPRdbaIuz7N81qZYJKRTrfPXZYJjyGAZCcJ2Ai3gXs=

@@ -2,14 +2,15 @@ package dnsredir
 
 import (
 	"fmt"
-	"github.com/coredns/caddy"
 	"strings"
 	"testing"
+
+	"github.com/coredns/caddy"
 )
 
 type testCase struct {
-	input string
-	shouldErr bool
+	input       string
+	shouldErr   bool
 	expectedErr string
 }
 
@@ -41,7 +42,7 @@ func (t *testCase) Pass(err error) bool {
 }
 
 func TestSetupTo(t *testing.T) {
-	tests := []testCase {
+	tests := []testCase{
 		// Negative
 		{"dnsredir", true, `missing mandatory property: "to"`},
 		{"dnsredir .", true, `missing mandatory property: "to"`},
@@ -77,4 +78,3 @@ func TestSetupTo(t *testing.T) {
 		}
 	}
 }
-
