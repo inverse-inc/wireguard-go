@@ -17,9 +17,9 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
-	github.com/inverse-inc/go-dnschange v0.0.0-20201029190506-5ab960a4feac
+	github.com/inverse-inc/go-dnschange v0.0.0-20201030170812-9a70f8803b20
 	github.com/inverse-inc/go-radius v0.0.0-20201019132414-82756e2d8d47 // indirect
-	github.com/inverse-inc/packetfence v10.2.1-0.20201103171141-dc751ffed66c+incompatible
+	github.com/inverse-inc/packetfence v10.2.1-0.20201113185450-056ed81979e8+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20201103171141-dc751ffed66c
 	github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99
 	github.com/jackpal/gateway v1.0.6

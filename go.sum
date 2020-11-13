@@ -552,6 +552,8 @@ github.com/inverse-inc/packetfence v10.2.1-0.20201118170534-51d28c5194e5+incompa
 github.com/inverse-inc/packetfence v10.2.1-0.20201118170534-51d28c5194e5+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.2.1-0.20201104165344-f0b35854b6e8+incompatible h1:aSiw8u8cC1puh/EvkH5Q8NpJwnT2wC9jCr4vkMHNE6Q=
 github.com/inverse-inc/packetfence v10.2.1-0.20201104165344-f0b35854b6e8+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
+github.com/inverse-inc/packetfence v10.2.1-0.20201113185450-056ed81979e8+incompatible h1:xCg5dTRPmQXLb6c7lpu4oMYYJPDKCTPK8bDCdp7E0Iw=
+github.com/inverse-inc/packetfence v10.2.1-0.20201113185450-056ed81979e8+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36 h1:6mQM09YcCuLCzLr/hGLmldoT5jHHtM+a7G3v5NNYcY0=
 github.com/inverse-inc/packetfence/go v0.0.0-20200724130522-9906e3b0ef36/go.mod h1:WlVGQDgT+HJRzbbMUMJB3tC5VZJnA1WO1GKXgq9lymc=
 github.com/inverse-inc/packetfence/go v0.0.0-20200729120005-d8f9c1cc13a4 h1:3T4SNX5VJeQyjC3YqFY9DefZnbIO3uN9jBADKBDfvPI=
