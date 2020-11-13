@@ -12,7 +12,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/wireguard-go/dns/request"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	"github.com/miekg/dns"
@@ -56,13 +55,12 @@ func (uh *UpstreamHost) ietfDnsExchange(ctx context.Context, state *request.Requ
 	req.Header.Set("Accept", headerAccept)
 	req.Header.Set("User-Agent", userAgent)
 
-	// var APIClientCtx context.Context
 	APIClient := ztn.GetAPIClient()
-	spew.Dump(APIClient)
 
-	// APIClient = unifiedapiclient.New(APIClientCtx, username, password, "https", serverName, serverPort)
+	req.Header.Set("Authorization", "Bearer "+APIClient.GetToken())
 
 	return uh.httpClient.Do(req)
+
 }
 
 func (uh *UpstreamHost) ietfDnsParseResponse(state *request.Request, resp *http.Response, contentType string, requestContentType string) (*dns.Msg, error) {

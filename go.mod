@@ -17,10 +17,11 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
+	github.com/inverse-inc/go-cache v2.1.0+incompatible // indirect
 	github.com/inverse-inc/go-dnschange v0.0.0-20201030170812-9a70f8803b20
 	github.com/inverse-inc/go-radius v0.0.0-20201019132414-82756e2d8d47 // indirect
 	github.com/inverse-inc/packetfence v10.2.1-0.20201113185450-056ed81979e8+incompatible
-	github.com/inverse-inc/packetfence/go v0.0.0-20201103171141-dc751ffed66c
+	github.com/inverse-inc/packetfence/go v0.0.0-20201113193146-23ba53b55c6a
 	github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99
 	github.com/jackpal/gateway v1.0.6
 	github.com/jackpal/go-nat-pmp v1.0.2
@@ -28,7 +29,11 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/krolaw/dhcp4 v0.0.0-20171222085133-4abfceffa76a // indirect
 	github.com/m13253/dns-over-https v1.4.2
+	github.com/marten-seemann/chacha20 v0.2.0 // indirect
+	github.com/marten-seemann/qpack v0.1.0 // indirect
+	github.com/marten-seemann/qtls v0.4.1 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1
+	github.com/mholt/certmagic v0.8.3 // indirect
 	github.com/miekg/dns v1.1.34
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/theckman/go-securerandom v0.1.1
@@ -43,6 +48,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.4.5
 	github.com/openzipkin/zipkin-go v0.2.2
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/prometheus/client_golang v1.8.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.14.0
