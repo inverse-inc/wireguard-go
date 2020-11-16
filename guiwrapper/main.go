@@ -14,7 +14,7 @@ import (
 )
 
 var messages = map[string]string{
-	ztn.STATUS_CONNECTED: "Connected",
+	ztn.STATUS_CONNECTED: "Ready to connect to peers",
 	ztn.STATUS_ERROR:     "An error has occured",
 	ztn.STATUS_NOT_READY: "Starting tunnel",
 }

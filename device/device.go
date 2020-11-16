@@ -11,12 +11,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"golang.org/x/net/ipv4"
-	"golang.org/x/net/ipv6"
 	"github.com/inverse-inc/wireguard-go/conn"
 	"github.com/inverse-inc/wireguard-go/ratelimiter"
 	"github.com/inverse-inc/wireguard-go/rwcancel"
 	"github.com/inverse-inc/wireguard-go/tun"
+	"golang.org/x/net/ipv4"
+	"golang.org/x/net/ipv6"
 )
 
 type Device struct {
@@ -251,6 +251,12 @@ func (device *Device) SetPrivateKey(sk NoisePrivateKey) error {
 	}
 
 	return nil
+}
+
+func (d *Device) WithPeers(f func(map[NoisePublicKey]*Peer)) {
+	d.peers.Lock()
+	defer d.peers.Unlock()
+	f(d.peers.keyMap)
 }
 
 func NewDevice(tunDevice tun.Device, logger *Logger) *Device {

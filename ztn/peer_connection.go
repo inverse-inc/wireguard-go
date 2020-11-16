@@ -22,6 +22,8 @@ const pingMsg = "ping"
 
 const stunServer = "srv.semaan.ca:3478"
 
+const connectionLivenessTolerance = 10 * time.Second
+
 type BindTechnique string
 
 const (
@@ -54,8 +56,14 @@ type PeerConnection struct {
 	started       bool
 	lastKeepalive time.Time
 
+	lastRX uint64
+	lastTX uint64
+
+	lastInboundPacket time.Time
 	connectedInbound  bool
-	connectedOutbound bool
+
+	lastOutboundPacket time.Time
+	connectedOutbound  bool
 
 	try int
 
@@ -100,7 +108,9 @@ func (pc *PeerConnection) reset() {
 		pc.try = 0
 	}
 	pc.connectedInbound = false
+	pc.lastInboundPacket = time.Time{}
 	pc.connectedOutbound = false
+	pc.lastOutboundPacket = time.Time{}
 
 	pc.Status = "Initiating connection"
 }
@@ -213,12 +223,14 @@ func (pc *PeerConnection) run() {
 				default:
 					if message.raddr.String() == localWGAddr {
 						pc.connectedOutbound = true
+						pc.lastOutboundPacket = time.Now()
 						n := len(message.message)
 						pc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", pc.peerAddr, n, message.raddr)
 						udpSend(message.message, pc.localPeerConn, pc.peerAddr)
 					} else {
 						pc.lastKeepalive = time.Now()
 						pc.connectedInbound = true
+						pc.lastInboundPacket = time.Now()
 						n := len(message.message)
 						pc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", pc.wgConn.RemoteAddr(), n, message.raddr)
 						if !pc.Connected() && message.raddr.String() != pc.peerAddr.String() {
@@ -249,8 +261,8 @@ func (pc *PeerConnection) run() {
 				pc.lastKeepalive = time.Now()
 
 			case <-keepalive:
-				if pc.Connected() {
-					pc.Status = "Connected"
+				if !pc.CheckConnectionLiveness() {
+					return false
 				}
 
 				// Keep NAT binding alive using STUN server or the peer once it's known
@@ -273,7 +285,9 @@ func (pc *PeerConnection) run() {
 					pc.logger.Error.Println("keepalive:", err)
 				}
 
-				if pc.started && pc.lastKeepalive.Before(time.Now().Add(-5*time.Second)) {
+				if pc.Connected() {
+					pc.Status = "Connected"
+				} else if pc.started && pc.lastKeepalive.Before(time.Now().Add(-5*time.Second)) {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
 					return false
 				}
@@ -425,4 +439,39 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string) {
 
 	SetConfigMulti(pc.device, conf)
 
+}
+
+func (pc *PeerConnection) CheckConnectionLiveness() bool {
+	result := true
+	pc.device.WithPeers(func(peers map[device.NoisePublicKey]*device.Peer) {
+		for _, peer := range peers {
+			if pc.peerID == peer.GetPublicKey() {
+				stats := peer.GetStats()
+				if stats.TX != pc.lastTX {
+					pc.connectedOutbound = true
+					pc.lastOutboundPacket = time.Now()
+					pc.lastTX = stats.TX
+				} else if time.Since(pc.lastOutboundPacket) > connectionLivenessTolerance {
+					if pc.connectedOutbound {
+						pc.logger.Error.Println("Outbound connection lost to", pc.peerID)
+						result = false
+					}
+					pc.connectedOutbound = false
+				}
+
+				if stats.RX != pc.lastRX {
+					pc.connectedInbound = true
+					pc.lastInboundPacket = time.Now()
+					pc.lastRX = stats.RX
+				} else if time.Since(pc.lastInboundPacket) > connectionLivenessTolerance {
+					if pc.connectedInbound {
+						pc.logger.Error.Println("Inbound connection lost to", pc.peerID)
+						result = false
+					}
+					pc.connectedInbound = false
+				}
+			}
+		}
+	})
+	return result
 }

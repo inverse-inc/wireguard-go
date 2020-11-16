@@ -300,3 +300,19 @@ func (peer *Peer) SetEndpointFromPacket(endpoint conn.Endpoint) {
 	peer.endpoint = endpoint
 	peer.Unlock()
 }
+
+func (peer *Peer) GetPublicKey() string {
+	return base64.StdEncoding.EncodeToString(peer.handshake.remoteStatic[:])
+}
+
+type PublicStats struct {
+	RX uint64
+	TX uint64
+}
+
+func (peer *Peer) GetStats() PublicStats {
+	return PublicStats{
+		RX: peer.stats.rxBytes,
+		TX: peer.stats.txBytes,
+	}
+}
