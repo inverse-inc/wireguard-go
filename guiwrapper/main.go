@@ -14,6 +14,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var rpc = wgrpc.WGRPCClient()
+
 var messages = map[string]string{
 	ztn.STATUS_CONNECTED: "Ready to connect to peers",
 	ztn.STATUS_ERROR:     "An error has occured",
@@ -31,9 +33,11 @@ func main() {
 	go binutils.CheckParentIsAlive(quit)
 
 	setupExitSignals()
-	SetupAPIClientGUI(func() {
+	SetupAPIClientGUI(func(runTunnel bool) {
 		go checkTunnelStatus()
-		binutils.RunTunnel()
+		if runTunnel {
+			binutils.RunTunnel()
+		}
 		postRun()
 		quit()
 	})
@@ -48,10 +52,6 @@ func postRun() {
 }
 
 func quit() {
-	if binutils.Wgenv != nil {
-		fmt.Println("Cleaning up environment file:", binutils.Wgenv.Name())
-		os.Remove(binutils.Wgenv.Name())
-	}
 	os.Exit(0)
 }
 
@@ -67,7 +67,6 @@ func setupExitSignals() {
 func checkTunnelStatus() {
 	maxRpcFails := 5
 	ctx := context.Background()
-	rpc := wgrpc.WGRPCClient()
 	started := time.Now()
 	status := ""
 	fails := 0

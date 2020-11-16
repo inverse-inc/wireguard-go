@@ -20,7 +20,7 @@ var spacePlaceholder = "                          "
 var statusLabel *widget.Label
 var peersTable *widget.Card
 
-func SetupAPIClientGUI(callback func()) {
+func SetupAPIClientGUI(callback func(bool)) {
 	a := app.New()
 
 	icon, err := fyne.LoadResourceFromPath("logo.png")
@@ -32,13 +32,24 @@ func SetupAPIClientGUI(callback func()) {
 
 	w := a.NewWindow(util.AppName)
 
+	_, err = rpc.GetStatus(context.Background(), &wgrpc.StatusRequest{})
+	if err != nil {
+		PromptCredentials(w, callback)
+	} else {
+		PostConnect(w)
+		go checkTunnelStatus()
+	}
+
+	w.ShowAndRun()
+}
+
+func PromptCredentials(w fyne.Window, callback func(bool)) {
 	serverEntry := widget.NewEntry()
 	serverEntry.PlaceHolder = "ztn.example.com"
 	serverEntry.Text = sharedutils.EnvOrDefault("WG_SERVER", "")
 
 	serverPortEntry := widget.NewEntry()
-	serverPortEntry.Text = "9999"
-	serverEntry.Text = sharedutils.EnvOrDefault("WG_SERVER_PORT", "")
+	serverPortEntry.Text = sharedutils.EnvOrDefault("WG_SERVER_PORT", "9999")
 
 	verifyServerEntry := widget.NewCheck("Verify server identity", func(bool) {})
 	verifyServerEntry.Checked = (sharedutils.EnvOrDefault("WG_SERVER_VERIFY_TLS", "true") == "true")
@@ -86,7 +97,7 @@ func SetupAPIClientGUI(callback func()) {
 		binutils.Setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
 
 		PostConnect(w)
-		callback()
+		callback(true)
 	}
 
 	passwordEntry.onEnter = connect
@@ -114,8 +125,6 @@ func SetupAPIClientGUI(callback func()) {
 		),
 		widget.NewButton("Connect", connect),
 	))
-
-	w.ShowAndRun()
 }
 
 func PostConnect(w fyne.Window) {

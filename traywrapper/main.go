@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
+	"syscall"
 
 	"github.com/getlantern/systray"
 	"github.com/inverse-inc/wireguard-go/binutils"
@@ -12,9 +14,12 @@ import (
 )
 
 func setupSystray() {
+	setupExitSignals()
+
 	systray.SetIcon(icon.Data)
 	//systray.SetTitle(util.AppName)
 	systray.SetTooltip(util.AppName)
+	mOpen := systray.AddMenuItem("Open", "Open")
 	mQuit := systray.AddMenuItem("Quit", "Quit")
 
 	// Sets the icon of a menu item. Only available on Mac and Windows.
@@ -23,6 +28,8 @@ func setupSystray() {
 	go func() {
 		for {
 			select {
+			case <-mOpen.ClickedCh:
+				startGUI()
 			case <-mQuit.ClickedCh:
 				quit()
 			}
@@ -52,8 +59,21 @@ func startGUI() {
 	binutils.RunCmd(cmd)
 }
 
+func setupExitSignals() {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		quit()
+	}()
+}
+
 func quit() {
 	fmt.Println("Tray is exiting")
+	if binutils.Wgenv != nil {
+		fmt.Println("Cleaning up environment file:", binutils.Wgenv.Name())
+		os.Remove(binutils.Wgenv.Name())
+	}
 	systray.Quit()
 	os.Exit(0)
 }
