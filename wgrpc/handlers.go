@@ -31,7 +31,11 @@ func (s *WGServiceServerHandler) GetPeers(ctx context.Context, in *PeersRequest)
 	peerReplies := []*PeerReply{}
 	for _, pc := range s.connection.Peers {
 		if pc != nil {
-			peerReplies = append(peerReplies, &PeerReply{IpAddress: pc.PeerProfile.WireguardIP.String(), Status: pc.Status})
+			peerReplies = append(peerReplies, &PeerReply{
+				IpAddress: pc.PeerProfile.WireguardIP.String(),
+				Hostname:  pc.PeerProfile.Hostname,
+				Status:    pc.Status,
+			})
 		}
 	}
 	return &PeersReply{Peers: peerReplies}, nil

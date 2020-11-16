@@ -128,16 +128,16 @@ func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 	}
 
 	sort.Slice(peers.Peers, func(i, j int) bool {
-		return peers.Peers[i].IpAddress < peers.Peers[j].IpAddress
+		return peers.Peers[i].Hostname < peers.Peers[j].Hostname
 	})
 
 	peersInfos := [][]string{}
 	for _, peer := range peers.Peers {
-		peersInfos = append(peersInfos, []string{peer.IpAddress, peer.Status})
+		peersInfos = append(peersInfos, []string{peer.Hostname, peer.IpAddress, peer.Status})
 	}
 
 	peersTable.SetContent(makeTable(
-		[]string{"IP address", "State"},
+		[]string{"Host", "IP address", "State"},
 		peersInfos,
 	))
 }

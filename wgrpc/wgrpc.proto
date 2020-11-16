@@ -18,6 +18,7 @@ message StatusReply {
 message PeerReply {
   string ipAddress = 1;
   string status = 2;
+  string hostname = 3;
 }
 
 message PeersRequest {
