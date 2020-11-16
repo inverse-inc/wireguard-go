@@ -17,9 +17,10 @@ import (
 var rpc = wgrpc.WGRPCClient()
 
 var messages = map[string]string{
-	ztn.STATUS_CONNECTED: "Ready to connect to peers",
-	ztn.STATUS_ERROR:     "An error has occured",
-	ztn.STATUS_NOT_READY: "Starting tunnel",
+	ztn.STATUS_CONNECTED:      "Ready to connect to peers",
+	ztn.STATUS_ERROR:          "An error has occured",
+	ztn.STATUS_FETCHING_PEERS: "Obtaining list of peers from central server",
+	ztn.STATUS_NOT_READY:      "Starting tunnel",
 }
 
 func main() {
@@ -74,7 +75,7 @@ func checkTunnelStatus() {
 		statusReply, err := rpc.GetStatus(ctx, &wgrpc.StatusRequest{})
 		if err != nil {
 			if status == "" {
-				fmt.Println("Failed to contact tunnel for initial status")
+				fmt.Println("Failed to contact tunnel for initial status", err)
 				if time.Since(started) > 1*time.Minute {
 					statusLabel.SetText("Failed to start tunnel process")
 				}

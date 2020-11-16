@@ -68,6 +68,11 @@ func startInverse(interfaceName string, device *device.Device) {
 		})
 	}
 
+	connection.Update(func() {
+		connection.Status = ztn.STATUS_FETCHING_PEERS
+		connection.LastError = err
+	})
+
 	err = profile.SetupWireguard(device, interfaceName)
 	if err != nil {
 		logger.Error.Println("Got error when setting up wireguard interface", err)
