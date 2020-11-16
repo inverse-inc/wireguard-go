@@ -15,6 +15,11 @@ const (
 	STATUS_CONNECTED = "CONNECTED"
 	STATUS_ERROR     = "ERROR"
 	STATUS_NOT_READY = ""
+
+	PEER_STATUS_CONNECTED             = "Connected"
+	PEER_STATUS_INITIATING_CONNECTION = "Waiting for peer to register"
+	PEER_STATUS_CONNECT_PRIVATE       = "Attempting to connect to peer via local area network"
+	PEER_STATUS_CONNECT_PUBLIC        = "Attempting to connect to peer via the Internet"
 )
 
 func udpSend(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {

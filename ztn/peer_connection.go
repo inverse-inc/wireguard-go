@@ -86,7 +86,7 @@ func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profil
 }
 
 func (pc *PeerConnection) Start() {
-	pc.Status = "Initiating connection"
+	pc.Status = PEER_STATUS_INITIATING_CONNECTION
 
 	for {
 		pc.run()
@@ -112,7 +112,7 @@ func (pc *PeerConnection) reset() {
 	pc.connectedOutbound = false
 	pc.lastOutboundPacket = time.Time{}
 
-	pc.Status = "Initiating connection"
+	pc.Status = PEER_STATUS_INITIATING_CONNECTION
 }
 
 func (pc *PeerConnection) run() {
@@ -244,10 +244,10 @@ func (pc *PeerConnection) run() {
 			case peerStr := <-peerAddrChan:
 				if pc.ShouldTryPrivate() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
-					pc.Status = fmt.Sprintf("Attempting to connect to private IP (%s)", peerStr)
+					pc.Status = PEER_STATUS_CONNECT_PRIVATE
 				} else {
 					pc.logger.Info.Println("Connecting to public IP address of peer", peerStr, "for peer", pc.peerID, ".")
-					fmt.Sprintf("Attempting to connect to public IP (%s)", peerStr)
+					pc.Status = PEER_STATUS_CONNECT_PUBLIC
 				}
 
 				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
@@ -286,7 +286,7 @@ func (pc *PeerConnection) run() {
 				}
 
 				if pc.Connected() {
-					pc.Status = "Connected"
+					pc.Status = PEER_STATUS_CONNECTED
 				} else if pc.started && pc.lastKeepalive.Before(time.Now().Add(-5*time.Second)) {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
 					return false
