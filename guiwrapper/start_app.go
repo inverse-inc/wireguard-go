@@ -46,12 +46,49 @@ func SetupAPIClientGUI(callback func()) {
 	usernameEntry.PlaceHolder = spacePlaceholder
 	usernameEntry.Text = sharedutils.EnvOrDefault("WG_USERNAME", "")
 
-	passwordEntry := widget.NewEntry()
-	passwordEntry.Password = true
-	passwordEntry.PlaceHolder = spacePlaceholder
-
 	formError := widget.NewLabelWithStyle("", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	formError.Hide()
+
+	passwordEntry := NewPasswordField()
+	passwordEntry.PlaceHolder = spacePlaceholder
+
+	connect := func() {
+
+		showFormError := func(msg string) {
+			formError.SetText(msg)
+			formError.Show()
+		}
+
+		if usernameEntry.Text == "" {
+			showFormError("You must enter a username")
+			return
+		}
+
+		if passwordEntry.Text == "" {
+			showFormError("You must enter a password")
+			return
+		}
+
+		if serverEntry.Text == "" {
+			showFormError("You must enter a server to connect to")
+			return
+		}
+
+		setenv("WG_USERNAME", usernameEntry.Text)
+		setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
+		setenv("WG_SERVER", serverEntry.Text)
+		setenv("WG_SERVER_PORT", serverPortEntry.Text)
+		verifySslStr := "y"
+		if !verifyServerEntry.Checked {
+			verifySslStr = "n"
+		}
+		setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
+
+		PostConnect(w)
+		callback()
+	}
+
+	passwordEntry.onEnter = connect
 
 	w.SetContent(widget.NewVBox(
 		formError,
@@ -74,41 +111,7 @@ func SetupAPIClientGUI(callback func()) {
 			widget.NewLabel("Password"),
 			passwordEntry,
 		),
-		widget.NewButton("Connect", func() {
-
-			showFormError := func(msg string) {
-				formError.SetText(msg)
-				formError.Show()
-			}
-
-			if usernameEntry.Text == "" {
-				showFormError("You must enter a username")
-				return
-			}
-
-			if passwordEntry.Text == "" {
-				showFormError("You must enter a password")
-				return
-			}
-
-			if serverEntry.Text == "" {
-				showFormError("You must enter a server to connect to")
-				return
-			}
-
-			setenv("WG_USERNAME", usernameEntry.Text)
-			setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
-			setenv("WG_SERVER", serverEntry.Text)
-			setenv("WG_SERVER_PORT", serverPortEntry.Text)
-			verifySslStr := "y"
-			if !verifyServerEntry.Checked {
-				verifySslStr = "n"
-			}
-			setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
-
-			PostConnect(w)
-			callback()
-		}),
+		widget.NewButton("Connect", connect),
 	))
 
 	w.ShowAndRun()
