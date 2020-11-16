@@ -1,6 +1,6 @@
 // +build windows
 
-package main
+package binutils
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
 
-func setenv(k, v string) {
+func Setenv(k, v string) {
 	if wgenv == nil {
 		var err error
 		tmp := os.Getenv("TMP")

@@ -1,6 +1,6 @@
-// +build linux
+// +build darwin
 
-package main
+package binutils
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ func init() {
 	sharedutils.CheckError(err)
 }
 
-func setenv(k, v string) {
+func Setenv(k, v string) {
 	_, err := wgenv.WriteString(fmt.Sprintf("%s=%s\n", k, v))
 	sharedutils.CheckError(err)
 }

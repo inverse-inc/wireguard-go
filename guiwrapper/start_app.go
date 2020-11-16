@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 )
@@ -74,15 +75,15 @@ func SetupAPIClientGUI(callback func()) {
 			return
 		}
 
-		setenv("WG_USERNAME", usernameEntry.Text)
-		setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
-		setenv("WG_SERVER", serverEntry.Text)
-		setenv("WG_SERVER_PORT", serverPortEntry.Text)
+		binutils.Setenv("WG_USERNAME", usernameEntry.Text)
+		binutils.Setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
+		binutils.Setenv("WG_SERVER", serverEntry.Text)
+		binutils.Setenv("WG_SERVER_PORT", serverPortEntry.Text)
 		verifySslStr := "y"
 		if !verifyServerEntry.Checked {
 			verifySslStr = "n"
 		}
-		setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
+		binutils.Setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
 
 		PostConnect(w)
 		callback()

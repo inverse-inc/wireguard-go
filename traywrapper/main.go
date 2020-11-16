@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/getlantern/systray"
+	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/util/icon"
-	"github.com/joho/godotenv"
 )
 
 func setupSystray() {
@@ -31,12 +32,24 @@ func setupSystray() {
 
 func main() {
 	systray.Run(func() {
+		fmt.Println("Starting up")
+		binutils.Setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
+
+		binutils.Elevate()
+		go startGUI()
+
 		setupSystray()
-		if len(os.Args) > 1 {
-			godotenv.Load(os.Args[1])
-		}
-		go checkParentIsAlive()
 	}, func() {})
+}
+
+func startGUI() {
+	var cmd *exec.Cmd
+	if binutils.Wgenv != nil {
+		cmd = exec.Command(binutils.BinPath("guiwrapper"), binutils.Wgenv.Name())
+	} else {
+		cmd = exec.Command(binutils.BinPath("guiwrapper"))
+	}
+	binutils.RunCmd(cmd)
 }
 
 func quit() {

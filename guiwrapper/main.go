@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
 	"syscall"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
+	"github.com/joho/godotenv"
 )
 
 var messages = map[string]string{
@@ -20,17 +20,16 @@ var messages = map[string]string{
 	ztn.STATUS_NOT_READY: "Starting tunnel",
 }
 
-var wgenv *os.File
-
 func main() {
+	if len(os.Args) > 1 {
+		godotenv.Load(os.Args[1])
+	}
 
-	fmt.Println("Starting up")
-	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
-	setenv("WG_CLI", "false")
+	binutils.Setenv("WG_GUI_PID", os.Getenv("WG_GUI_PID"))
+	binutils.Setenv("WG_CLI", "false")
 
-	binutils.Elevate()
+	go binutils.CheckParentIsAlive(quit)
 
-	go startTray()
 	setupExitSignals()
 	SetupAPIClientGUI(func() {
 		go checkTunnelStatus()
@@ -48,22 +47,10 @@ func postRun() {
 	}
 }
 
-func startTray() {
-	var cmd *exec.Cmd
-	if wgenv != nil {
-		cmd = exec.Command(binutils.BinPath("traywrapper"), wgenv.Name())
-	} else {
-		cmd = exec.Command(binutils.BinPath("traywrapper"))
-	}
-	binutils.RunCmd(cmd)
-	fmt.Println("Tray has exited, exiting")
-	quit()
-}
-
 func quit() {
-	if wgenv != nil {
-		fmt.Println("Cleaning up environment file:", wgenv.Name())
-		os.Remove(wgenv.Name())
+	if binutils.Wgenv != nil {
+		fmt.Println("Cleaning up environment file:", binutils.Wgenv.Name())
+		os.Remove(binutils.Wgenv.Name())
 	}
 	os.Exit(0)
 }
