@@ -11,6 +11,12 @@ import (
 	"gortc.io/stun"
 )
 
+const (
+	STATUS_CONNECTED = "CONNECTED"
+	STATUS_ERROR     = "ERROR"
+	STATUS_NOT_READY = ""
+)
+
 func udpSend(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {
 	_, err := conn.WriteToUDP(msg, addr)
 	if err != nil {

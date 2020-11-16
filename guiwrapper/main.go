@@ -14,9 +14,9 @@ import (
 )
 
 var messages = map[string]string{
-	wgrpc.STATUS_CONNECTED: "Connected",
-	wgrpc.STATUS_ERROR:     "An error has occured",
-	wgrpc.STATUS_NOT_READY: "Starting tunnel",
+	ztn.STATUS_CONNECTED: "Connected",
+	ztn.STATUS_ERROR:     "An error has occured",
+	ztn.STATUS_NOT_READY: "Starting tunnel",
 }
 
 var wireguardCmd *exec.Cmd
@@ -80,7 +80,7 @@ func setupExitSignals() {
 func checkTunnelStatus() {
 	maxRpcFails := 5
 	ctx := context.Background()
-	rpc := ztn.WGRPCClient()
+	rpc := wgrpc.WGRPCClient()
 	started := time.Now()
 	status := ""
 	fails := 0
@@ -102,11 +102,11 @@ func checkTunnelStatus() {
 		} else {
 			fails = 0
 			status = statusReply.Status
-			if status == wgrpc.STATUS_ERROR {
+			if status == ztn.STATUS_ERROR {
 				statusLabel.SetText(messages[status] + ": " + statusReply.LastError)
 			} else {
 				statusLabel.SetText(messages[status])
-				UpdatePeers()
+				UpdatePeers(ctx, rpc)
 			}
 		}
 

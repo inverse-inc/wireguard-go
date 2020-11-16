@@ -4,6 +4,7 @@ option go_package = "wgrpc";
 
 service WGService {
   rpc GetStatus (StatusRequest) returns (StatusReply) {}
+  rpc GetPeers (PeersRequest) returns (PeersReply) {}
 }
 
 message StatusRequest {
@@ -12,4 +13,16 @@ message StatusRequest {
 message StatusReply {
   string status = 1;
   string lastError = 2;
+}
+
+message PeerReply {
+  string ipAddress = 1;
+  string status = 2;
+}
+
+message PeersRequest {
+}
+
+message PeersReply {
+  repeated PeerReply peers = 1;
 }

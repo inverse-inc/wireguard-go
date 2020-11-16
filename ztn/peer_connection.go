@@ -59,6 +59,8 @@ type PeerConnection struct {
 
 	try int
 
+	Status string
+
 	BindTechnique BindTechnique
 }
 
@@ -76,6 +78,8 @@ func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profil
 }
 
 func (pc *PeerConnection) Start() {
+	pc.Status = "Initiating connection"
+
 	for {
 		pc.run()
 		pc.reset()
@@ -97,6 +101,8 @@ func (pc *PeerConnection) reset() {
 	}
 	pc.connectedInbound = false
 	pc.connectedOutbound = false
+
+	pc.Status = "Initiating connection"
 }
 
 func (pc *PeerConnection) run() {
@@ -226,8 +232,10 @@ func (pc *PeerConnection) run() {
 			case peerStr := <-peerAddrChan:
 				if pc.ShouldTryPrivate() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
+					pc.Status = fmt.Sprintf("Attempting to connect to private IP (%s)", peerStr)
 				} else {
 					pc.logger.Info.Println("Connecting to public IP address of peer", peerStr, "for peer", pc.peerID, ".")
+					fmt.Sprintf("Attempting to connect to public IP (%s)", peerStr)
 				}
 
 				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
@@ -241,6 +249,10 @@ func (pc *PeerConnection) run() {
 				pc.lastKeepalive = time.Now()
 
 			case <-keepalive:
+				if pc.Connected() {
+					pc.Status = "Connected"
+				}
+
 				// Keep NAT binding alive using STUN server or the peer once it's known
 				if pc.peerAddr == nil {
 					pc.logger.Debug.Println("Using", pc.BindTechnique, "binding technique")

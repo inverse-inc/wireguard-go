@@ -4,12 +4,8 @@
 package wgrpc
 
 import (
-	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -102,9 +98,129 @@ func (m *StatusReply) GetLastError() string {
 	return ""
 }
 
+type PeerReply struct {
+	IpAddress            string   `protobuf:"bytes,1,opt,name=ipAddress,proto3" json:"ipAddress,omitempty"`
+	Status               string   `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PeerReply) Reset()         { *m = PeerReply{} }
+func (m *PeerReply) String() string { return proto.CompactTextString(m) }
+func (*PeerReply) ProtoMessage()    {}
+func (*PeerReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2fb1742ce9418ce3, []int{2}
+}
+
+func (m *PeerReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PeerReply.Unmarshal(m, b)
+}
+func (m *PeerReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PeerReply.Marshal(b, m, deterministic)
+}
+func (m *PeerReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PeerReply.Merge(m, src)
+}
+func (m *PeerReply) XXX_Size() int {
+	return xxx_messageInfo_PeerReply.Size(m)
+}
+func (m *PeerReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_PeerReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PeerReply proto.InternalMessageInfo
+
+func (m *PeerReply) GetIpAddress() string {
+	if m != nil {
+		return m.IpAddress
+	}
+	return ""
+}
+
+func (m *PeerReply) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+type PeersRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PeersRequest) Reset()         { *m = PeersRequest{} }
+func (m *PeersRequest) String() string { return proto.CompactTextString(m) }
+func (*PeersRequest) ProtoMessage()    {}
+func (*PeersRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2fb1742ce9418ce3, []int{3}
+}
+
+func (m *PeersRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PeersRequest.Unmarshal(m, b)
+}
+func (m *PeersRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PeersRequest.Marshal(b, m, deterministic)
+}
+func (m *PeersRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PeersRequest.Merge(m, src)
+}
+func (m *PeersRequest) XXX_Size() int {
+	return xxx_messageInfo_PeersRequest.Size(m)
+}
+func (m *PeersRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_PeersRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PeersRequest proto.InternalMessageInfo
+
+type PeersReply struct {
+	Peers                []*PeerReply `protobuf:"bytes,1,rep,name=peers,proto3" json:"peers,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
+}
+
+func (m *PeersReply) Reset()         { *m = PeersReply{} }
+func (m *PeersReply) String() string { return proto.CompactTextString(m) }
+func (*PeersReply) ProtoMessage()    {}
+func (*PeersReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2fb1742ce9418ce3, []int{4}
+}
+
+func (m *PeersReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PeersReply.Unmarshal(m, b)
+}
+func (m *PeersReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PeersReply.Marshal(b, m, deterministic)
+}
+func (m *PeersReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PeersReply.Merge(m, src)
+}
+func (m *PeersReply) XXX_Size() int {
+	return xxx_messageInfo_PeersReply.Size(m)
+}
+func (m *PeersReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_PeersReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PeersReply proto.InternalMessageInfo
+
+func (m *PeersReply) GetPeers() []*PeerReply {
+	if m != nil {
+		return m.Peers
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*StatusRequest)(nil), "StatusRequest")
 	proto.RegisterType((*StatusReply)(nil), "StatusReply")
+	proto.RegisterType((*PeerReply)(nil), "PeerReply")
+	proto.RegisterType((*PeersRequest)(nil), "PeersRequest")
+	proto.RegisterType((*PeersReply)(nil), "PeersReply")
 }
 
 func init() {
@@ -112,94 +228,20 @@ func init() {
 }
 
 var fileDescriptor_2fb1742ce9418ce3 = []byte{
-	// 143 bytes of a gzipped FileDescriptorProto
+	// 228 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xe2, 0xe2, 0x2e, 0x4f, 0x2f, 0x2a,
 	0x48, 0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x57, 0xe2, 0xe7, 0xe2, 0x0d, 0x2e, 0x49, 0x2c, 0x29,
 	0x2d, 0x0e, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x51, 0x72, 0xe6, 0xe2, 0x86, 0x09, 0x14, 0xe4,
 	0x54, 0x0a, 0x89, 0x71, 0xb1, 0x15, 0x83, 0xb9, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x50,
 	0x9e, 0x90, 0x0c, 0x17, 0x67, 0x4e, 0x62, 0x71, 0x89, 0x6b, 0x51, 0x51, 0x7e, 0x91, 0x04, 0x13,
-	0x58, 0x0a, 0x21, 0x60, 0x64, 0xc1, 0xc5, 0x19, 0xee, 0x1e, 0x9c, 0x5a, 0x54, 0x96, 0x99, 0x9c,
-	0x2a, 0xa4, 0xcd, 0xc5, 0xe9, 0x9e, 0x5a, 0x02, 0x31, 0x54, 0x88, 0x4f, 0x0f, 0xc5, 0x3a, 0x29,
-	0x1e, 0x3d, 0x24, 0xdb, 0x94, 0x18, 0x9c, 0xd8, 0xa3, 0x58, 0xc1, 0xce, 0x4b, 0x62, 0x03, 0xbb,
-	0xcf, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0x38, 0xf4, 0x8b, 0x1f, 0xae, 0x00, 0x00, 0x00,
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConnInterface
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
-
-// WGServiceClient is the client API for WGService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type WGServiceClient interface {
-	GetStatus(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusReply, error)
-}
-
-type wGServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewWGServiceClient(cc grpc.ClientConnInterface) WGServiceClient {
-	return &wGServiceClient{cc}
-}
-
-func (c *wGServiceClient) GetStatus(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusReply, error) {
-	out := new(StatusReply)
-	err := c.cc.Invoke(ctx, "/WGService/GetStatus", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// WGServiceServer is the server API for WGService service.
-type WGServiceServer interface {
-	GetStatus(context.Context, *StatusRequest) (*StatusReply, error)
-}
-
-// UnimplementedWGServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedWGServiceServer struct {
-}
-
-func (*UnimplementedWGServiceServer) GetStatus(ctx context.Context, req *StatusRequest) (*StatusReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStatus not implemented")
-}
-
-func RegisterWGServiceServer(s *grpc.Server, srv WGServiceServer) {
-	s.RegisterService(&_WGService_serviceDesc, srv)
-}
-
-func _WGService_GetStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WGServiceServer).GetStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/WGService/GetStatus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WGServiceServer).GetStatus(ctx, req.(*StatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _WGService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "WGService",
-	HandlerType: (*WGServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetStatus",
-			Handler:    _WGService_GetStatus_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "wgrpc.proto",
+	0x58, 0x0a, 0x21, 0xa0, 0xe4, 0xc8, 0xc5, 0x19, 0x90, 0x9a, 0x5a, 0x04, 0x31, 0x02, 0xa8, 0x34,
+	0xb3, 0xc0, 0x31, 0x25, 0xa5, 0x28, 0xb5, 0x18, 0x66, 0x0a, 0x42, 0x00, 0xc9, 0x02, 0x26, 0x64,
+	0x0b, 0x94, 0xf8, 0xb8, 0x78, 0x40, 0x46, 0xc0, 0xdd, 0xa5, 0xc7, 0xc5, 0x05, 0xe5, 0x83, 0xcc,
+	0x54, 0xe0, 0x62, 0x2d, 0x00, 0xf1, 0x80, 0xe6, 0x31, 0x6b, 0x70, 0x1b, 0x71, 0xe9, 0xc1, 0xad,
+	0x0b, 0x82, 0x48, 0x18, 0x25, 0x71, 0x71, 0x86, 0xbb, 0x07, 0xa7, 0x16, 0x95, 0x65, 0x26, 0xa7,
+	0x0a, 0x69, 0x73, 0x71, 0xba, 0xa7, 0x96, 0x40, 0xfc, 0x25, 0xc4, 0xa7, 0x87, 0xe2, 0x63, 0x29,
+	0x1e, 0x3d, 0x24, 0x0f, 0x2b, 0x31, 0x08, 0x69, 0x70, 0x71, 0x00, 0x15, 0x83, 0x2d, 0x13, 0xe2,
+	0xd5, 0x43, 0x76, 0x84, 0x14, 0xb7, 0x1e, 0xc2, 0x0d, 0x4a, 0x0c, 0x4e, 0xec, 0x51, 0xac, 0xe0,
+	0xb0, 0x4c, 0x62, 0x03, 0x07, 0xa6, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0xe7, 0xe5, 0x83, 0xe0,
+	0x5b, 0x01, 0x00, 0x00,
 }

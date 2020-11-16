@@ -8,8 +8,6 @@ import (
 	"os"
 	"os/user"
 	"path"
-	"runtime/debug"
-	"sync"
 	"time"
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
@@ -20,12 +18,11 @@ import (
 	ps "github.com/mitchellh/go-ps"
 )
 
-var knownPeers = struct {
-	sync.Mutex
-	peers map[string]bool
-}{peers: map[string]bool{}}
+var connection *ztn.Connection
 
 func startInverse(interfaceName string, device *device.Device) {
+	connection = ztn.NewConnection(logger)
+
 	bindTechniqueDone := make(chan bool)
 
 	go func() {
@@ -51,7 +48,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		logger.Info.Println("Timeout trying to find a bind technique")
 	}
 
-	go ztn.StartRPC()
+	go wgrpc.StartRPC(connection)
 
 	if !ztn.RunningInCLI() {
 		go checkParentIsAlive()
@@ -62,20 +59,26 @@ func startInverse(interfaceName string, device *device.Device) {
 	profile := ztn.Profile{}
 	profile.PrivateKey = base64.StdEncoding.EncodeToString(privateKey[:])
 	profile.PublicKey = base64.StdEncoding.EncodeToString(publicKey[:])
-	err := profile.FillProfileFromServer(logger)
+	err := profile.FillProfileFromServer(connection, logger)
 	if err != nil {
 		logger.Error.Println("Got error when filling profile from server", err)
-		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+		connection.Update(func() {
+			connection.Status = ztn.STATUS_ERROR
+			connection.LastError = err
+		})
 	}
 
 	err = profile.SetupWireguard(device, interfaceName)
 	if err != nil {
 		logger.Error.Println("Got error when setting up wireguard interface", err)
-		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+		connection.Update(func() {
+			connection.Status = ztn.STATUS_ERROR
+			connection.LastError = err
+		})
 	}
 
 	for _, peerID := range profile.AllowedPeers {
-		startPeer(device, profile, peerID)
+		connection.StartPeer(device, profile, peerID)
 	}
 
 	go listenEvents(device, profile)
@@ -101,7 +104,10 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 	chal, err := ztn.GetServerChallenge(&profile)
 	if err != nil {
 		logger.Error.Println("Got an error while starting to listen events", err)
-		ztn.WGRPCServer.UpdateStatus(wgrpc.STATUS_ERROR, err)
+		connection.Update(func() {
+			connection.Status = ztn.STATUS_ERROR
+			connection.LastError = err
+		})
 	}
 
 	priv, err := remoteclients.B64KeyToBytes(profile.PrivateKey)
@@ -123,42 +129,9 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 			sharedutils.CheckError(err)
 			if event.Type == "new_peer" && event.Data["id"].(string) != myID {
 				logger.Info.Println("Received new peer from pub/sub", event.Data["id"].(string))
-				startPeer(device, profile, event.Data["id"].(string))
+				connection.StartPeer(device, profile, event.Data["id"].(string))
 			}
 		}
-	}
-}
-
-func startPeer(device *device.Device, profile ztn.Profile, peerID string) {
-	knownPeers.Lock()
-	if knownPeers.peers[peerID] {
-		logger.Debug.Println("Not starting", peerID, "since its already in the known peers")
-		return
-	} else {
-		knownPeers.peers[peerID] = true
-	}
-	knownPeers.Unlock()
-
-	peerProfile, err := ztn.GetPeerProfile(peerID)
-	if err != nil {
-		logger.Error.Println("Unable to fetch profile for peer", peerID, ". Error:", err)
-		logger.Error.Println(debug.Stack())
-	} else {
-		logger.Info.Println("Starting connection to peer", peerID)
-		go func(peerID string, peerProfile ztn.PeerProfile) {
-			for {
-				func() {
-					defer func() {
-						if r := recover(); r != nil {
-							logger.Error.Println("Recovered error", r, "while handling peer", peerProfile.PublicKey, ". Will attempt to connect to it again.")
-							debug.PrintStack()
-						}
-					}()
-					pc := ztn.NewPeerConnection(device, logger, profile, peerProfile)
-					pc.Start()
-				}()
-			}
-		}(peerID, peerProfile)
 	}
 }
 

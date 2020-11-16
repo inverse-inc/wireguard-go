@@ -15,7 +15,6 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/routes"
-	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/jackpal/gateway"
 )
 
@@ -92,6 +91,7 @@ type Profile struct {
 	remoteclients.Peer
 	PrivateKey string `json:"private_key"`
 	logger     *device.Logger
+	connection *Connection
 }
 
 func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) error {
@@ -103,7 +103,10 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) erro
 	SetConfig(device, "listen_port", fmt.Sprintf("%d", localWGPort))
 	SetConfig(device, "private_key", keyToHex(p.PrivateKey))
 
-	WGRPCServer.UpdateStatus(wgrpc.STATUS_CONNECTED, nil)
+	p.connection.Update(func() {
+		p.connection.Status = STATUS_CONNECTED
+		p.connection.LastError = nil
+	})
 
 	if p.IsGateway {
 		err = p.SetupGateway()
@@ -120,8 +123,9 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) erro
 	return nil
 }
 
-func (p *Profile) FillProfileFromServer(logger *device.Logger) error {
+func (p *Profile) FillProfileFromServer(connection *Connection, logger *device.Logger) error {
 	p.logger = logger
+	p.connection = connection
 
 	auth, err := DoServerChallenge(p)
 	if err != nil {

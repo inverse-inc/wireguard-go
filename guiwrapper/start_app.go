@@ -1,15 +1,17 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
-	"time"
+	"sort"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/util"
+	"github.com/inverse-inc/wireguard-go/wgrpc"
 )
 
 var spacePlaceholder = "                          "
@@ -115,17 +117,27 @@ func SetupAPIClientGUI(callback func()) {
 func PostConnect(w fyne.Window) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
 	peersTable = widget.NewCard("Peers", "", widget.NewVBox())
-	UpdatePeers()
 	w.SetContent(widget.NewVBox(statusLabel, peersTable))
 }
 
-func UpdatePeers() {
+func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
+	peers, err := rpc.GetPeers(ctx, &wgrpc.PeersRequest{})
+	if err != nil {
+		peersTable.SetContent(widget.NewLabel("Failed to obtain peers from local wireguard server: " + err.Error()))
+		return
+	}
+
+	sort.Slice(peers.Peers, func(i, j int) bool {
+		return peers.Peers[i].IpAddress < peers.Peers[j].IpAddress
+	})
+
+	peersInfos := [][]string{}
+	for _, peer := range peers.Peers {
+		peersInfos = append(peersInfos, []string{peer.IpAddress, peer.Status})
+	}
+
 	peersTable.SetContent(makeTable(
 		[]string{"IP address", "State"},
-		[][]string{
-			[]string{"192.168.69.1", fmt.Sprint("bouzin", time.Now().Unix())},
-			[]string{"a", "bouzin"},
-			[]string{"192.168.69.100", "bouzinsadf,asfosaidfpo sadifopsa dfiosaidopf394583i4u"},
-		},
+		peersInfos,
 	))
 }
