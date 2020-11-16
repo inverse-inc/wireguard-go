@@ -90,6 +90,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DataDog/datadog-go v3.5.0+incompatible h1:AShr9cqkF+taHjyQgcBcQUt/ZNK+iPq4ROaZwSX5c/U=
 github.com/DataDog/datadog-go v3.5.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
+github.com/DataDog/datadog-go v4.2.0+incompatible h1:Q73jzyKHwyA04Gf4SSukRF+KR4wJEimU6tAuU0B8Y4Y=
+github.com/DataDog/datadog-go v4.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20191009163259-e802c2cb94ae/go.mod h1:mjwGPas4yKduTyubHvD1Atl9r1rUq8DfVy+gkVvZ+oo=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9/go.mod h1:7uhhqiBaR4CpN0k9rMjOtjpcfGd6DG2m04zQxKnWQ0I=
@@ -122,6 +124,7 @@ github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20190307165228-86c17b95fcd5/go.mod h1
 github.com/apache/thrift v0.12.0 h1:pODnxUFNcjP9UTLZGTdeh+j16A8lJbRvD3rOtrk/7bs=
 github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190808125512-07798873deee/go.mod h1:myCDvQSzCW+wB1WAlocEru4wMGJxy+vlxHdhegi1CDQ=
 github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20190307165228-86c17b95fcd5/go.mod h1:T/Aws4fEfogEE9v+HPhhw+CntffsBHJ8nXQCwKr0/g8=
+github.com/apache/thrift v0.12.0 h1:pODnxUFNcjP9UTLZGTdeh+j16A8lJbRvD3rOtrk/7bs=
 github.com/apache/thrift v0.12.0/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
 github.com/apache/thrift v0.13.0 h1:5hryIiq9gtn+MiLVn0wP37kb/uTeRZgN08WoCsAhIhI=
 github.com/apache/thrift v0.13.0/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
@@ -218,6 +221,7 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/decker502/dnspod-go v0.2.0/go.mod h1:qsurYu1FgxcDwfSwXJdLt4kRsBLZeosEb9uq4Sy+08g=
 github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3 h1:tkum0XDgfR0jcVVXuTsYv/erY2NnEDqwRojbxR1rBYA=
 github.com/decker502/dnspod-go v0.2.0/go.mod h1:qsurYu1FgxcDwfSwXJdLt4kRsBLZeosEb9uq4Sy+08g=
+github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3 h1:tkum0XDgfR0jcVVXuTsYv/erY2NnEDqwRojbxR1rBYA=
 github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3/go.mod h1:zAg7JM8CkOJ43xKXIj7eRO9kmWm/TW578qo+oDO6tuM=
 github.com/devigned/tab v0.1.1/go.mod h1:XG9mPq0dFghrYvoBF3xdRrJzSTX1b7IQrvaL9mzjeJY=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
@@ -229,6 +233,7 @@ github.com/digineo/go-ipset/v2 v2.2.1/go.mod h1:wBsNzJlZlABHUITkesrggFnZQtgW5wkq
 github.com/dimchansky/utfbom v1.1.0/go.mod h1:rO41eb7gLfo8SF1jd9F8HplJm1Fewwi4mQvIirEdv+8=
 github.com/dnaeon/go-vcr v0.0.0-20180814043457-aafff18a5cc2/go.mod h1:aBB1+wY4s93YsC3HHjMBMrwTj2R9FHDzUr9KyGc8n1E=
 github.com/dnsimple/dnsimple-go v0.30.0/go.mod h1:O5TJ0/U6r7AfT8niYNlmohpLbCSG+c71tQlGr9SeGrg=
+github.com/dnstap/golang-dnstap v0.0.0-20170829151710-2cf77a2b5e11 h1:m8nX8hsUghn853BJ5qB0lX+VvS6LTJPksWyILFZRYN4=
 github.com/dnstap/golang-dnstap v0.0.0-20170829151710-2cf77a2b5e11/go.mod h1:s1PfVYYVmTMgCSPtho4LKBDecEHJWtiVDPNv78Z985U=
 github.com/dnstap/golang-dnstap v0.2.2 h1:H2PCf5R92SRSsXuSM9P4ToqRkzaRLwtS8UPwauHLPf8=
 github.com/dnstap/golang-dnstap v0.2.2/go.mod h1:JIH+8jjV4pSEZCGPfPgFfuwyzmAuTLrEnk0BxtrF/5w=
@@ -254,6 +259,7 @@ github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 h1:Yzb9+7DP
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5/go.mod h1:a2zkGnVExMxdzMo3M0Hi/3sEU+cWnZpSni0O6/Yb/P0=
 github.com/evanphx/json-patch v4.9.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/exoscale/egoscale v0.18.1/go.mod h1:Z7OOdzzTOz1Q1PjQXumlz9Wn/CddH0zSYdCF3rnBKXE=
+github.com/farsightsec/golang-framestream v0.0.0-20180124174429-c06a5734334d h1:gD/JsQfPlh2UK5vSWTKt9e9AUpD/qdghdtfPZ/NyCCM=
 github.com/farsightsec/golang-framestream v0.0.0-20180124174429-c06a5734334d/go.mod h1:eNde4IQyEiA5br02AouhEHCu3p3UzrCdFR4LuQHklMI=
 github.com/farsightsec/golang-framestream v0.2.0/go.mod h1:eNde4IQyEiA5br02AouhEHCu3p3UzrCdFR4LuQHklMI=
 github.com/farsightsec/golang-framestream v0.0.0-20180124174429-c06a5734334d/go.mod h1:eNde4IQyEiA5br02AouhEHCu3p3UzrCdFR4LuQHklMI=
@@ -341,6 +347,7 @@ github.com/go-openapi/jsonpointer v0.0.0-20160704185906-46af16f9f7b1/go.mod h1:+
 github.com/go-openapi/jsonreference v0.0.0-20160704190145-13c6e3589ad9/go.mod h1:W3Z9FmVs9qj+KR4zFKmDPGiLdk1D9Rlm7cyMvf57TTg=
 github.com/go-openapi/spec v0.0.0-20160808142527-6aced65f8501/go.mod h1:J8+jY1nAiCcj+friV/PDoE1/3eeccG9LYBs0tYvLOWc=
 github.com/go-openapi/swag v0.0.0-20160704191624-1d0bd113de87/go.mod h1:DXUve3Dpr1UfpPtxFw+EFuQ41HhCWZfha5jSVRG7C7I=
+github.com/go-playground/assert/v2 v2.0.1 h1:MsBgLAaY856+nPRTKrp3/OZK38U/wa0CcBYNjji3q3A=
 github.com/go-playground/assert/v2 v2.0.1/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/locales v0.13.0 h1:HyWk6mgj5qFqCT5fjGBuRArbVDfE4hi8+e8ceBS/t7Q=
 github.com/go-playground/locales v0.13.0/go.mod h1:taPMhCMXrRLJO55olJkUXHZBHCxTMfnGwq/HNwmWNS8=
@@ -543,6 +550,8 @@ github.com/inverse-inc/packetfence v10.1.1-0.20200902175525-e70bbbb66ca0+incompa
 github.com/inverse-inc/packetfence v10.2.0+incompatible h1:UPUXdIiToyhDa8GxAa76yJV5NOOSBxuYd+vy7t9w5IU=
 github.com/inverse-inc/packetfence v10.2.1-0.20201103171141-dc751ffed66c+incompatible h1:hGrbNJw4A7cQlyWhuadh65WsUJhGr6xqefBpYru+oSo=
 github.com/inverse-inc/packetfence v10.2.1-0.20201103171141-dc751ffed66c+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
+github.com/inverse-inc/packetfence v10.2.1-0.20201104165344-f0b35854b6e8+incompatible h1:aSiw8u8cC1puh/EvkH5Q8NpJwnT2wC9jCr4vkMHNE6Q=
+github.com/inverse-inc/packetfence v10.2.1-0.20201104165344-f0b35854b6e8+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.2.1-0.20201110143320-246263799276+incompatible h1:DT1oOaN+dMM9jS5G8IUJ+SYavWR+FkAVk83LwuQNSmM=
 github.com/inverse-inc/packetfence v10.2.1-0.20201110143320-246263799276+incompatible/go.mod h1:RWR1ck6w1QYjFQuI9JeWJ5sTGAeg9hBBMDFX2/TGeL0=
 github.com/inverse-inc/packetfence v10.2.1-0.20201110143902-ecb900ea5ff7+incompatible h1:KuxzzTv2kxWEO8dnLz/FA91OKLm7I9wJEqBuvzikxrU=
@@ -602,6 +611,10 @@ github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0 h1:jFSY
 github.com/inverse-inc/packetfence/go v0.0.0-20200902175525-e70bbbb66ca0/go.mod h1:k17tSGeBxZyDa56+IfiwVQLz71rKzDZ0yRpEEFp2b84=
 github.com/inverse-inc/packetfence/go v0.0.0-20201103171141-dc751ffed66c h1:eDwV/BFWxQ4tKlEIoqh6ccP6JCUKiFmqZHD49jW5658=
 github.com/inverse-inc/packetfence/go v0.0.0-20201103171141-dc751ffed66c/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104165344-f0b35854b6e8 h1:yyXajx0FZVxOMvVnK0M+q1vM3+ufBXHmNc7ll4k+lvU=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104165344-f0b35854b6e8/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104180934-0d0cf304b9f0 h1:NtPVuEd2/R1o390fmnx/P+ZXSpPh0+cF0iksIv0/goM=
+github.com/inverse-inc/packetfence/go v0.0.0-20201104180934-0d0cf304b9f0/go.mod h1:48YFoRxUXmfKfF5nfMCk+T5T2HJDPB5KP1OQoDK5OXE=
 github.com/inverse-inc/packetfence/go v0.0.0-20201110143320-246263799276 h1:JpvnQn1EZJE/2U7dNhdRQrPmGCY/Xcp+wXacS2Q1nEA=
 github.com/inverse-inc/packetfence/go v0.0.0-20201110143320-246263799276/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
 github.com/inverse-inc/packetfence/go v0.0.0-20201110143902-ecb900ea5ff7 h1:r+DEQ7P15JJD1mICA2FIpfSQQzIXpzt5TXkYXe8t4ng=
@@ -629,6 +642,8 @@ github.com/inverse-inc/packetfence/go v0.0.0-20201113185450-056ed81979e8 h1:j6Tw
 github.com/inverse-inc/packetfence/go v0.0.0-20201113185450-056ed81979e8/go.mod h1:tIMYqv6yDXbOT+QgtaG7ieLytumOP0VZvjVLBa0iy3Y=
 github.com/inverse-inc/packetfence/go v0.0.0-20201113193146-23ba53b55c6a h1:W8DmumXpGhF82pNYDvtbCS5FcIBzLznn1T2qTawHpx0=
 github.com/inverse-inc/packetfence/go v0.0.0-20201113193146-23ba53b55c6a/go.mod h1:CvPXNaBWZcO2mHyybiyTDCaYrd+3YCxm0ISLY4D7i+Y=
+github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd h1:j+hJYhZwl4Ftq7Mrhsa+SNBPxCHwk7okY5Ojq8Vi6CM=
+github.com/inverse-inc/upnp v0.0.0-20161226025956-82caf20da2dd/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99 h1:mryb1vMKVirEE14zI1Vak3fcGNyt5jJbfKiEl4pq6Xc=
 github.com/inverse-inc/upnp v0.0.0-20200914135446-a6f28b1c4c99/go.mod h1:T3Dbxbxjg8EHW72Z8oegSpfY9CbiK3bMx0o1lTbJGCU=
 github.com/inverse-inc/upnp v0.0.0-20201111160554-d61e15e330bb h1:yjPRdbaIuz7N81qZYJKRTrfPXZYJjyGAZCcJ2Ai3gXs=
@@ -681,6 +696,7 @@ github.com/json-iterator/go v1.1.5/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCV
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/json-iterator/go v1.1.7/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/json-iterator/go v1.1.8/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
+github.com/json-iterator/go v1.1.9 h1:9yzud/Ht36ygwatGx56VwCZtlI/2AD15T1X2sjSuGns=
 github.com/json-iterator/go v1.1.9/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/json-iterator/go v1.1.10 h1:Kz6Cvnvv2wGdaG/V8yMvfkmNiXq9Ya2KUv4rouJJr68=
 github.com/json-iterator/go v1.1.10/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
@@ -883,6 +899,8 @@ github.com/performancecopilot/speed v3.0.0+incompatible/go.mod h1:/CLtqpZ5gBg1M9
 github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
 github.com/philhofer/fwd v1.0.0 h1:UbZqGr5Y38ApvM/V/jEljVxwocdweyH+vmYvRPBnbqQ=
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
+github.com/philhofer/fwd v1.1.0 h1:PAdZw9+/BCf4gc/kA2L/PbGPkFe72Kl2GLZXTG8HpU8=
+github.com/philhofer/fwd v1.1.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
 github.com/pierrec/lz4 v1.0.2-0.20190131084431-473cd7ce01a1/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pierrec/lz4 v2.2.6+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
@@ -894,6 +912,7 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/profile v1.2.1/go.mod h1:hJw3o1OdXxsrSjjVksARp5W95eeEaEfptyVZyv6JUPA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pkg/profile v1.2.1/go.mod h1:hJw3o1OdXxsrSjjVksARp5W95eeEaEfptyVZyv6JUPA=
+github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=

@@ -397,6 +397,9 @@ func (uh *UpstreamHost) dohExchange(ctx context.Context, state *request.Request)
 	defer Close(resp.Body)
 
 	contentType := strings.SplitN(resp.Header.Get("Content-Type"), ";", 2)[0]
+	// Hack force content-type
+	contentType = mimeTypeDnsMessage
+
 	switch contentType {
 	case mimeTypeJson:
 		fallthrough

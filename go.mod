@@ -15,8 +15,13 @@ require (
 	github.com/inverse-inc/packetfence/go v0.0.0-20201118170534-51d28c5194e5
 	github.com/inverse-inc/upnp v0.0.0-20201112135509-c215d3967126
 	fyne.io/fyne v1.3.3
+	github.com/DataDog/datadog-go v4.2.0+incompatible // indirect
+	github.com/cenkalti/backoff/v4 v4.1.0
 	github.com/coredns/caddy v1.1.0
 	github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa // indirect
+	github.com/davecgh/go-spew v1.1.1
+	github.com/dnstap/golang-dnstap v0.0.0-20170829151710-2cf77a2b5e11
+	github.com/farsightsec/golang-framestream v0.0.0-20180124174429-c06a5734334d
 	github.com/fullstorydev/grpcurl v1.7.0 // indirect
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
@@ -55,6 +60,7 @@ require (
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.4.5
 	github.com/openzipkin/zipkin-go v0.2.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	github.com/philhofer/fwd v1.1.0 // indirect
 	github.com/prometheus/client_golang v1.8.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.14.0

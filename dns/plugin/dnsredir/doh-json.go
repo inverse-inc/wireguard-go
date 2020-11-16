@@ -8,13 +8,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/inverse-inc/wireguard-go/dns/request"
-	"github.com/m13253/dns-over-https/json-dns"
-	"github.com/miekg/dns"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/inverse-inc/wireguard-go/dns/request"
+	jsonDNS "github.com/m13253/dns-over-https/json-dns"
+	"github.com/miekg/dns"
 )
 
 func (uh *UpstreamHost) jsonDnsExchange(ctx context.Context, state *request.Request, requestContentType string) (*http.Response, error) {
@@ -121,4 +122,3 @@ func fixEmptyNames(respJSON *jsonDNS.Response) {
 		}
 	}
 }
-
