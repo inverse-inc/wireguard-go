@@ -29,7 +29,7 @@ func setupSystray() {
 		for {
 			select {
 			case <-mOpen.ClickedCh:
-				startGUI()
+				go startGUI()
 			case <-mQuit.ClickedCh:
 				quit()
 			}
