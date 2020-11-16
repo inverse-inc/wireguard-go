@@ -11,10 +11,10 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-func run() {
+func RunTunnel() {
 
 	//TODO: get rid of run.bat since this elevates by itself now
-	cmd := exec.Command("C:\\Program Files\\PacketFence-Zero-Trust-Client\\run.bat", wgenv.Name())
+	cmd := exec.Command("C:\\Program Files\\PacketFence-Zero-Trust-Client\\run.bat", Wgenv.Name())
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	fmt.Println(cmd)
 	cmd.Stdout = os.Stdout
@@ -24,7 +24,7 @@ func run() {
 	cmd.Wait()
 }
 
-func elevate() {
+func Elevate() {
 	if amAdmin() {
 		outputlog.RedirectOutputToFilePrefix("C:\\Program Files\\PacketFence-Zero-Trust-Client\\guiwrapper")
 		return

@@ -79,8 +79,8 @@ if exist .deps\prepared goto :render
 	mkdir %1 >NUL 2>&1
 
 	echo [+] Assembling resources %1
-	copy util\icon\logo.ico guiwrapper\logo.ico /Y
-	cd guiwrapper
+	copy util\icon\logo.ico traywrapper\logo.ico /Y
+	cd traywrapper
 	windres -i resources.rc -o resources.syso -O coff || exit /b %errorlevel%
 	del /f logo.ico
     cd ..
@@ -88,11 +88,11 @@ if exist .deps\prepared goto :render
 	echo [+] Building program %1
 
 	cd guiwrapper
-	go build -tags walk_use_cgo -trimpath -ldflags="-H windowsgui -s -w" -v -o "..\%~1\packetfence-zero-trust-client.exe" || exit /b 1
+	go build -tags walk_use_cgo -trimpath -ldflags="-H windowsgui -s -w" -v -o "..\%~1\guiwrapper.exe" || exit /b 1
 	cd ..
 
 	cd traywrapper
-	go build -tags walk_use_cgo -trimpath -ldflags="-H windowsgui -s -w" -v -o "..\%~1\traywrapper.exe" || exit /b 1
+	go build -tags walk_use_cgo -trimpath -ldflags="-H windowsgui -s -w" -v -o "..\%~1\packetfence-zero-trust-client.exe" || exit /b 1
 	cd ..
 	
 	go build -tags walk_use_cgo -trimpath -v -o "%~1\wireguard.exe" || exit /b 1

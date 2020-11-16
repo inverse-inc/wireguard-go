@@ -12,12 +12,12 @@ import (
 )
 
 func Setenv(k, v string) {
-	if wgenv == nil {
+	if Wgenv == nil {
 		var err error
 		tmp := os.Getenv("TMP")
-		wgenv, err = os.Create(path.Join(tmp, fmt.Sprintf("wgenv-%d", time.Now().Unix())))
+		Wgenv, err = os.Create(path.Join(tmp, fmt.Sprintf("wgenv-%d", time.Now().Unix())))
 		sharedutils.CheckError(err)
 	}
-	_, err := wgenv.WriteString(fmt.Sprintf("%s=%s\n", k, v))
+	_, err := Wgenv.WriteString(fmt.Sprintf("%s=%s\n", k, v))
 	sharedutils.CheckError(err)
 }
