@@ -29,7 +29,7 @@ BEGIN \
       VALUE "FileVersion", WIREGUARD_WINDOWS_VERSION_STRING \
       VALUE "InternalName", "packetfence-zero-trust-client-windows" \
       VALUE "LegalCopyright", "Copyright © 2015-2020 Inverse Inc. All Rights Reserved." \
-      VALUE "OriginalFilename", "guiwrapper.exe" \
+      VALUE "OriginalFilename", "packetfence-zero-trust-client.exe" \
       VALUE "ProductName", "PacketFence Zero Trust Client" \
       VALUE "ProductVersion", WIREGUARD_WINDOWS_VERSION_STRING \
       VALUE "Comments", comments \

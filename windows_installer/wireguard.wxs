@@ -102,7 +102,7 @@
 				</File>
 			</Component>
 			<Component Directory="WireGuardFolder" Id="LaunchExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1a70">
-				<File Source="..\$(var.WIREGUARD_PLATFORM)\guiwrapper.exe" KeyPath="yes">
+				<File Source="..\$(var.WIREGUARD_PLATFORM)\packetfence-zero-trust-client.exe" KeyPath="yes">
 					<Shortcut Id="WireGuardStartMenuShortcut" Directory="ProgramMenuFolder" Name="PacketFence Zero Trust Client" Description="PacketFence Zero Trust Client" WorkingDirectory="WireGuardFolder" Advertise="yes" Icon="logo.ico"/>
 				</File>
 				<ServiceControl Id="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" Name="DummyService.3AA0C492_29F4_4342_B608_DB95B2DECB13" /><!-- A dummy to make WiX create ServiceControl table for us. -->
@@ -161,7 +161,7 @@
 		<!--
 			Launch wireguard.exe after setup complete
 		
-		<CustomAction Id="LaunchApplication" HideTarget="yes" Impersonate="no" Execute="deferred" FileKey="guiwrapper.exe" ExeCommand="" Return="asyncNoWait" />
+		<CustomAction Id="LaunchApplication" HideTarget="yes" Impersonate="no" Execute="deferred" FileKey="packetfence-zero-trust-client.exe" ExeCommand="" Return="asyncNoWait" />
 		<InstallExecuteSequence>
 			<Custom Action="LaunchApplication" Before="InstallFinalize">(&amp;WireGuardFeature = 3) AND NOT DO_NOT_LAUNCH</Custom>
 		</InstallExecuteSequence>
@@ -169,7 +169,7 @@
 
 		<!--
 			Launch wireguard.exe on product reconfiguration (starting same MSI again)
-		<CustomAction Id="LaunchApplicationAsOrdinaryUser" HideTarget="yes" FileKey="guiwrapper.exe" ExeCommand="" Return="asyncNoWait" />
+		<CustomAction Id="LaunchApplicationAsOrdinaryUser" HideTarget="yes" FileKey="packetfence-zero-trust-client.exe" ExeCommand="" Return="asyncNoWait" />
 		<InstallExecuteSequence>
 			<Custom Action="LaunchApplicationAsOrdinaryUser" After="InstallFinalize">(&amp;WireGuardFeature = -1) AND (!WireGuardFeature = 3) AND NOT DO_NOT_LAUNCH</Custom>
 		</InstallExecuteSequence>
