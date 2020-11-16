@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -14,6 +15,7 @@ import (
 var spacePlaceholder = "                          "
 
 var statusLabel *widget.Label
+var peersTable *widget.Card
 
 func SetupAPIClientGUI(callback func()) {
 	a := app.New()
@@ -102,12 +104,28 @@ func SetupAPIClientGUI(callback func()) {
 			}
 			setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
 
-			statusLabel = widget.NewLabel("Opening tunnel process")
-			w.SetContent(statusLabel)
+			PostConnect(w)
 			callback()
-			//TODO implement check on a localhost running HTTP API that the wireguard agent should run
 		}),
 	))
 
 	w.ShowAndRun()
+}
+
+func PostConnect(w fyne.Window) {
+	statusLabel = widget.NewLabel("Opening tunnel process")
+	peersTable = widget.NewCard("Peers", "", widget.NewVBox())
+	UpdatePeers()
+	w.SetContent(widget.NewVBox(statusLabel, peersTable))
+}
+
+func UpdatePeers() {
+	peersTable.SetContent(makeTable(
+		[]string{"IP address", "State"},
+		[][]string{
+			[]string{"192.168.69.1", fmt.Sprint("bouzin", time.Now().Unix())},
+			[]string{"a", "bouzin"},
+			[]string{"192.168.69.100", "bouzinsadf,asfosaidfpo sadifopsa dfiosaidopf394583i4u"},
+		},
+	))
 }

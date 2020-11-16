@@ -106,6 +106,7 @@ func checkTunnelStatus() {
 				statusLabel.SetText(messages[status] + ": " + statusReply.LastError)
 			} else {
 				statusLabel.SetText(messages[status])
+				UpdatePeers()
 			}
 		}
 
