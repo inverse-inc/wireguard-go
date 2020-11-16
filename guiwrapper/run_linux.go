@@ -1,20 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
+	"path"
 )
 
 func run() {
-	cmd := exec.Command("sudo", "echo", "Granted root access")
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println("Failed to obtain root access")
-		os.Exit(1)
-	}
+	home := os.Getenv("HOME")
+	env := path.Join(home, ".wgenv")
 
-	cmd = exec.Command("sudo", "-E", binPath("wireguard"), "-f", "wg0")
+	cmd := exec.Command("pkexec", binPath("wireguard"), env)
 	wireguardCmd = cmd
 	runCmd(cmd)
+}
+
+func elevate() {
+
 }
