@@ -1,4 +1,4 @@
-package main
+package binutils
 
 import (
 	"os"
@@ -6,15 +6,15 @@ import (
 	"path"
 )
 
-func run() {
+func RunTunnel() {
 	home := os.Getenv("HOME")
 	env := path.Join(home, ".wgenv")
 
-	cmd := exec.Command("pkexec", binPath("wireguard"), env)
+	cmd := exec.Command("pkexec", BinPath("wireguard"), env)
 	wireguardCmd = cmd
-	runCmd(cmd)
+	RunCmd(cmd)
 }
 
-func elevate() {
+func Elevate() {
 
 }

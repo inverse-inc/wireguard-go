@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
@@ -19,7 +20,6 @@ var messages = map[string]string{
 	ztn.STATUS_NOT_READY: "Starting tunnel",
 }
 
-var wireguardCmd *exec.Cmd
 var wgenv *os.File
 
 func main() {
@@ -28,13 +28,13 @@ func main() {
 	setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
 	setenv("WG_CLI", "false")
 
-	elevate()
+	binutils.Elevate()
 
 	go startTray()
 	setupExitSignals()
 	SetupAPIClientGUI(func() {
 		go checkTunnelStatus()
-		run()
+		binutils.RunTunnel()
 		postRun()
 		quit()
 	})
@@ -51,11 +51,11 @@ func postRun() {
 func startTray() {
 	var cmd *exec.Cmd
 	if wgenv != nil {
-		cmd = exec.Command(binPath("traywrapper"), wgenv.Name())
+		cmd = exec.Command(binutils.BinPath("traywrapper"), wgenv.Name())
 	} else {
-		cmd = exec.Command(binPath("traywrapper"))
+		cmd = exec.Command(binutils.BinPath("traywrapper"))
 	}
-	runCmd(cmd)
+	binutils.RunCmd(cmd)
 	fmt.Println("Tray has exited, exiting")
 	quit()
 }
