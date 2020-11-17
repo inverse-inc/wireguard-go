@@ -225,16 +225,20 @@ func (p *Profile) ParseRoutes() []RouteInfo {
 }
 
 func (p *Profile) SetupRoutes() error {
-	for _, r := range p.ParseRoutes() {
-		p.logger.Info.Println("Installing route to", r.Network, "via", r.Gateway)
-		go func(r RouteInfo) {
-			// Sleep to give time to the WG interface to get up
-			time.Sleep(5 * time.Second)
-			err := routes.Add(r.Network, r.Gateway)
-			if err != nil {
-				p.logger.Error.Println("Error while nstalling route to", r.Network, "via", r.Gateway, ":", err)
-			}
-		}(r)
+	if sharedutils.EnvOrDefault("WG_HONOR_ROUTES", "true") == "true" {
+		for _, r := range p.ParseRoutes() {
+			p.logger.Info.Println("Installing route to", r.Network, "via", r.Gateway)
+			go func(r RouteInfo) {
+				// Sleep to give time to the WG interface to get up
+				time.Sleep(5 * time.Second)
+				err := routes.Add(r.Network, r.Gateway)
+				if err != nil {
+					p.logger.Error.Println("Error while nstalling route to", r.Network, "via", r.Gateway, ":", err)
+				}
+			}(r)
+		}
+	} else {
+		p.logger.Info.Println("Not installing routes as the configuration of this local agent specifies to ignore them")
 	}
 	return nil
 }

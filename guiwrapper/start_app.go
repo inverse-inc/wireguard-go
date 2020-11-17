@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
@@ -20,6 +21,12 @@ var spacePlaceholder = "                          "
 var statusLabel *widget.Label
 var peersTable *widget.Card
 
+var w fyne.Window
+
+func Refresh() {
+	w.Content().Refresh()
+}
+
 func SetupAPIClientGUI(callback func(bool)) {
 	a := app.New()
 
@@ -30,20 +37,29 @@ func SetupAPIClientGUI(callback func(bool)) {
 		a.SetIcon(icon)
 	}
 
-	w := a.NewWindow(util.AppName)
+	w = a.NewWindow(util.AppName)
+	tab1 := container.NewTabItem("Connection", widget.NewHBox())
+	tab2 := container.NewTabItem("Settings", widget.NewHBox())
+	tabs := container.NewAppTabs(tab1)
 
 	_, err = rpc.GetStatus(context.Background(), &wgrpc.StatusRequest{})
 	if err != nil {
-		PromptCredentials(w, callback)
+		tabs.Append(tab2)
+		PromptCredentials(tabs, callback)
 	} else {
-		PostConnect(w)
+		PostConnect(tabs)
 		go checkTunnelStatus()
 	}
+
+	w.SetContent(tabs)
 
 	w.ShowAndRun()
 }
 
-func PromptCredentials(w fyne.Window, callback func(bool)) {
+func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
+	connectionTab := tabs.Items[0]
+	settingsTab := tabs.Items[1]
+
 	serverEntry := widget.NewEntry()
 	serverEntry.PlaceHolder = "ztn.example.com"
 	serverEntry.Text = sharedutils.EnvOrDefault("WG_SERVER", "")
@@ -63,6 +79,9 @@ func PromptCredentials(w fyne.Window, callback func(bool)) {
 
 	passwordEntry := NewPasswordField()
 	passwordEntry.PlaceHolder = spacePlaceholder
+
+	installRoutesFromServerEntry := widget.NewCheck("Install routes from server", func(bool) {})
+	installRoutesFromServerEntry.Checked = true
 
 	connect := func() {
 
@@ -96,13 +115,19 @@ func PromptCredentials(w fyne.Window, callback func(bool)) {
 		}
 		binutils.Setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
 
-		PostConnect(w)
+		honorRoutesStr := "true"
+		if !installRoutesFromServerEntry.Checked {
+			honorRoutesStr = "false"
+		}
+		binutils.Setenv("WG_HONOR_ROUTES", honorRoutesStr)
+
+		PostConnect(tabs)
 		callback(true)
 	}
 
 	passwordEntry.onEnter = connect
 
-	w.SetContent(widget.NewVBox(
+	connectionTab.Content = widget.NewVBox(
 		formError,
 		widget.NewHBox(
 			widget.NewLabel("Server"),
@@ -124,13 +149,25 @@ func PromptCredentials(w fyne.Window, callback func(bool)) {
 			passwordEntry,
 		),
 		widget.NewButton("Connect", connect),
-	))
+	)
+
+	settingsTab.Content = widget.NewVBox(
+		widget.NewHBox(
+			installRoutesFromServerEntry,
+		),
+	)
+
+	Refresh()
 }
 
-func PostConnect(w fyne.Window) {
+func PostConnect(tabs *container.AppTabs) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
 	peersTable = widget.NewCard("Peers", "", widget.NewVBox())
-	w.SetContent(widget.NewVBox(statusLabel, peersTable))
+	tabs.Items[0].Content = widget.NewVBox(statusLabel, peersTable)
+	if len(tabs.Items) > 1 {
+		tabs.RemoveIndex(1)
+	}
+	Refresh()
 }
 
 func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
