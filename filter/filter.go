@@ -1,8 +1,8 @@
 package filter
 
 import (
-	"fmt"
 	"errors"
+	"github.com/inverse-inc/wireguard-go/services"
 	"strconv"
 	"strings"
 )
@@ -311,6 +311,10 @@ func (f *PortFilter) AddACL(acl string) {
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddAllowedDstTcpPorts([]uint16{uint16(s)})
+			} else {
+				if s, found := services.SERVICE_MAP[parts[5]]["tcp"]; found {
+					f.AddAllowedDstTcpPorts([]uint16{uint16(s.Port)})
+				}
 			}
 		case "udp":
 			if len(parts) != 6 {
@@ -318,6 +322,10 @@ func (f *PortFilter) AddACL(acl string) {
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddAllowedDstUdpPorts([]uint16{uint16(s)})
+			} else {
+				if s, found := services.SERVICE_MAP[parts[5]]["udp"]; found {
+					f.AddAllowedDstUdpPorts([]uint16{uint16(s.Port)})
+				}
 			}
 		case "icmp":
 			if len(parts) != 5 {
@@ -339,6 +347,10 @@ func (f *PortFilter) AddACL(acl string) {
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddDenyDstTcpPorts([]uint16{uint16(s)})
+			} else {
+				if s, found := services.SERVICE_MAP[parts[5]]["tcp"]; found {
+					f.AddDenyDstTcpPorts([]uint16{uint16(s.Port)})
+				}
 			}
 		case "udp":
 			if len(parts) != 6 {
@@ -346,6 +358,10 @@ func (f *PortFilter) AddACL(acl string) {
 			}
 			if s, err := strconv.ParseUint(parts[5], 10, 16); err == nil {
 				f.AddDenyDstUdpPorts([]uint16{uint16(s)})
+			} else {
+				if s, found := services.SERVICE_MAP[parts[5]]["udp"]; found {
+					f.AddDenyDstUdpPorts([]uint16{uint16(s.Port)})
+				}
 			}
 		case "icmp":
 			if len(parts) != 5 {
