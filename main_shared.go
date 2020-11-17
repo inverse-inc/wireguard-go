@@ -13,6 +13,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
@@ -66,6 +67,7 @@ func startInverse(interfaceName string, device *device.Device) {
 			connection.Status = ztn.STATUS_ERROR
 			connection.LastError = err
 		})
+		util.Pause()
 	}
 
 	connection.Update(func() {
@@ -80,6 +82,7 @@ func startInverse(interfaceName string, device *device.Device) {
 			connection.Status = ztn.STATUS_ERROR
 			connection.LastError = err
 		})
+		util.Pause()
 	}
 
 	for _, peerID := range profile.AllowedPeers {

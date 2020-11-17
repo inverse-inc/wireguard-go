@@ -33,3 +33,7 @@ func CheckGUIIsAliveWindows(quit func()) {
 		time.Sleep(1 * time.Second)
 	}
 }
+
+func Pause() {
+	time.Sleep(365 * 24 * time.Hour)
+}
