@@ -35,6 +35,7 @@ const (
 var DefaultBindTechnique = BindSTUN
 
 type pkt struct {
+	conn    *net.UDPConn
 	raddr   *net.UDPAddr
 	message []byte
 }

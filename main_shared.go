@@ -85,9 +85,12 @@ func startInverse(interfaceName string, device *device.Device) {
 		util.Pause()
 	}
 
-	for _, peerID := range profile.AllowedPeers {
-		connection.StartPeer(device, profile, peerID)
-	}
+	//for _, peerID := range profile.AllowedPeers {
+	//	connection.StartPeer(device, profile, peerID)
+	//}
+
+	networkConnection := ztn.NewNetworkConnection(logger)
+	networkConnection.Start()
 
 	go listenEvents(device, profile)
 
