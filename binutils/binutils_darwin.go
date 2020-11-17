@@ -4,8 +4,12 @@ import (
 	"os/exec"
 )
 
-func run() {
-	cmd := exec.Command("/usr/bin/open", "-a", "Terminal.app", binPath("wrapper"))
+func RunTunnel() {
+	cmd := exec.Command("/usr/bin/osascript", "-e", `do shell script "'`+BinPath("wireguard-go")+`' `+Wgenv.Name()+` 2>&1 etc" with administrator privileges`)
 	wireguardCmd = cmd
-	runCmd(cmd)
+	RunCmd(cmd)
+}
+
+func Elevate() {
+
 }

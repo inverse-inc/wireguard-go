@@ -18,6 +18,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
+	"github.com/inverse-inc/wireguard-go/outputlog"
 	"github.com/inverse-inc/wireguard-go/tun"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/joho/godotenv"
@@ -64,6 +65,8 @@ func warning() {
 
 func main() {
 	godotenv.Load(os.Args[1])
+
+	outputlog.RedirectOutputToFilePrefix("/tmp/wireguard")
 
 	warning()
 

@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleGetInfoString</key>
-  <string>Wireguard</string>
+  <string>PacketFence Zero Trust Client</string>
   <key>CFBundleExecutable</key>
-  <string>Wireguard</string>
+  <string>PacketFenceZeroTrustClient</string>
   <key>CFBundleIdentifier</key>
-  <string>ca.inverse.wireguard</string>
+  <string>ca.inverse.packetfence-zero-trust-client</string>
   <key>CFBundleName</key>
-  <string>Wireguard</string>
+  <string>PacketFence Zero Trust Client</string>
   <key>CFBundleIconFile</key>
-  <string>wireguard.icns</string>
+  <string>packetfence-zero-trust-client.icns</string>
   <key>CFBundleShortVersionString</key>
   <string>0.01</string>
   <key>CFBundleInfoDictionaryVersion</key>

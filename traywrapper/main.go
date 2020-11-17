@@ -22,9 +22,6 @@ func setupSystray() {
 	mOpen := systray.AddMenuItem("Open", "Open")
 	mQuit := systray.AddMenuItem("Quit", "Quit")
 
-	// Sets the icon of a menu item. Only available on Mac and Windows.
-	mQuit.SetIcon(icon.Data)
-
 	go func() {
 		for {
 			select {
