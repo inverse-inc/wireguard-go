@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-
 func main() {
 	s, _ := GetServices()
 	fmt.Printf("%v", s)
@@ -56,19 +55,18 @@ func GetServices() (ServiceMap, error) {
 			panic(err)
 		}
 		proto := portproto[1]
-        proto_map := service_map[name]
-        if proto_map == nil {
-            proto_map = make(map[string]Service)
-            service_map[name] = proto_map
-        }
-        
-        proto_map[proto] = Service{
-				Name:  name,
-				Proto: proto,
-				Port:  uint16(port),
-        }
+		proto_map := service_map[name]
+		if proto_map == nil {
+			proto_map = make(map[string]Service)
+			service_map[name] = proto_map
+		}
+
+		proto_map[proto] = Service{
+			Name:  name,
+			Proto: proto,
+			Port:  uint16(port),
+		}
 	}
 
 	return service_map, nil
 }
-
