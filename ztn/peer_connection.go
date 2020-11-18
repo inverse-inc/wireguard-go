@@ -141,7 +141,7 @@ func (pc *PeerConnection) run() {
 				}
 
 				if pc.networkConnection.publicAddr != nil && peerAddrChan == nil {
-					pc.logger.Info.Println("Got a public IP address", pc.networkConnection.publicAddr, "for peer", pc.peerID)
+					pc.logger.Info.Println("Got a public IP address", pc.networkConnection.publicAddr, "for peer", pc.peerID, ". Obtained via", pc.networkConnection.BindTechnique)
 					peerAddrChan = pc.StartConnection(foundPeer)
 				}
 
@@ -294,7 +294,7 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
 func (pc *PeerConnection) setupPeerConnection(peerStr string) {
 	conf := ""
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-	if pc.MyTurnPublicConnect() {
+	if pc.ShouldTryPrivate() || pc.MyTurnPublicConnect() {
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	}
 	conf += "replace_allowed_ips=true\n"

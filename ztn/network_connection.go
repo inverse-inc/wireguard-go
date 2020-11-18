@@ -31,11 +31,16 @@ type bridge struct {
 }
 
 func NewNetworkConnection(logger *device.Logger) *NetworkConnection {
-	return &NetworkConnection{
+	nc := &NetworkConnection{
 		logger:          logger,
-		BindTechnique:   DefaultBindTechnique,
 		peerConnections: map[string]*bridge{},
 	}
+	if bt := sharedutils.EnvOrDefault("WG_BIND_TECHNIQUE", ""); bt != "" {
+		nc.BindTechnique = BindTechnique(bt)
+	} else {
+		nc.BindTechnique = DefaultBindTechnique
+	}
+	return nc
 }
 
 func (nc *NetworkConnection) Start() {
@@ -127,14 +132,14 @@ func (nc *NetworkConnection) Start() {
 				default:
 					if writeBack := nc.findBridge(message.conn.LocalAddr()); writeBack != nil {
 						n := len(message.message)
-						nc.logger.Info.Printf("send to peer WG server: [%s]: %d bytes from %s\n", writeBack.raddr.String(), n, message.raddr)
+						nc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", writeBack.raddr.String(), n, message.raddr)
 						writeBack.conn.Write(message.message)
 						udpSend(message.message, writeBack.conn, writeBack.raddr)
 					} else {
 						n := len(message.message)
 						localWGAddr := &net.UDPAddr{IP: localWGIP, Port: localWGPort}
 						writeBack := nc.setupBridge(message.conn, message.raddr, localWGAddr, messageChan)
-						nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes %s\n", localWGAddr.String(), n, message.raddr)
+						nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", localWGAddr.String(), n, message.raddr)
 						writeBack.conn.Write(message.message)
 					}
 				}

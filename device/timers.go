@@ -78,37 +78,17 @@ func (peer *Peer) timersActive() bool {
 }
 
 func expiredRetransmitHandshake(peer *Peer) {
-	if atomic.LoadUint32(&peer.timers.handshakeAttempts) > MaxTimerHandshakes {
-		peer.device.log.Debug.Printf("%s - Handshake did not complete after %d attempts, giving up\n", peer, MaxTimerHandshakes+2)
+	atomic.AddUint32(&peer.timers.handshakeAttempts, 1)
+	peer.device.log.Info.Printf("%s - Handshake did not complete after %d seconds, retrying (try %d)\n", peer, int(RekeyTimeout.Seconds()), atomic.LoadUint32(&peer.timers.handshakeAttempts)+1)
 
-		if peer.timersActive() {
-			peer.timers.sendKeepalive.Del()
-		}
-
-		/* We drop all packets without a keypair and don't try again,
-		 * if we try unsuccessfully for too long to make a handshake.
-		 */
-		peer.FlushNonceQueue()
-
-		/* We set a timer for destroying any residue that might be left
-		 * of a partial exchange.
-		 */
-		if peer.timersActive() && !peer.timers.zeroKeyMaterial.IsPending() {
-			peer.timers.zeroKeyMaterial.Mod(RejectAfterTime * 3)
-		}
-	} else {
-		atomic.AddUint32(&peer.timers.handshakeAttempts, 1)
-		peer.device.log.Debug.Printf("%s - Handshake did not complete after %d seconds, retrying (try %d)\n", peer, int(RekeyTimeout.Seconds()), atomic.LoadUint32(&peer.timers.handshakeAttempts)+1)
-
-		/* We clear the endpoint address src address, in case this is the cause of trouble. */
-		peer.Lock()
-		if peer.endpoint != nil {
-			peer.endpoint.ClearSrc()
-		}
-		peer.Unlock()
-
-		peer.SendHandshakeInitiation(true)
+	/* We clear the endpoint address src address, in case this is the cause of trouble. */
+	peer.Lock()
+	if peer.endpoint != nil {
+		peer.endpoint.ClearSrc()
 	}
+	peer.Unlock()
+
+	peer.SendHandshakeInitiation(true)
 }
 
 func expiredSendKeepalive(peer *Peer) {
