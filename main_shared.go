@@ -85,14 +85,14 @@ func startInverse(interfaceName string, device *device.Device) {
 		util.Pause()
 	}
 
-	//for _, peerID := range profile.AllowedPeers {
-	//	connection.StartPeer(device, profile, peerID)
-	//}
-
 	networkConnection := ztn.NewNetworkConnection(logger)
-	networkConnection.Start()
+	go networkConnection.Start()
 
-	go listenEvents(device, profile)
+	for _, peerID := range profile.AllowedPeers {
+		connection.StartPeer(device, profile, peerID, networkConnection)
+	}
+
+	go listenEvents(device, profile, networkConnection)
 
 	go func() {
 		//PPROF
@@ -111,7 +111,7 @@ func getKeys() ([32]byte, [32]byte) {
 	return remoteclients.GetKeysFromFile(authFile)
 }
 
-func listenEvents(device *device.Device, profile ztn.Profile) {
+func listenEvents(device *device.Device, profile ztn.Profile, networkConnection *ztn.NetworkConnection) {
 	chal, err := ztn.GetServerChallenge(&profile)
 	if err != nil {
 		logger.Error.Println("Got an error while starting to listen events", err)
@@ -140,7 +140,7 @@ func listenEvents(device *device.Device, profile ztn.Profile) {
 			sharedutils.CheckError(err)
 			if event.Type == "new_peer" && event.Data["id"].(string) != myID {
 				logger.Info.Println("Received new peer from pub/sub", event.Data["id"].(string))
-				connection.StartPeer(device, profile, event.Data["id"].(string))
+				connection.StartPeer(device, profile, event.Data["id"].(string), networkConnection)
 			}
 		}
 	}

@@ -20,15 +20,21 @@ type NetworkConnection struct {
 
 	BindTechnique BindTechnique
 
-	peerConnections map[string]*net.UDPConn
+	peerConnections map[string]*bridge
 
 	logger *device.Logger
 }
 
+type bridge struct {
+	conn  *net.UDPConn
+	raddr *net.UDPAddr
+}
+
 func NewNetworkConnection(logger *device.Logger) *NetworkConnection {
 	return &NetworkConnection{
-		logger:        logger,
-		BindTechnique: DefaultBindTechnique,
+		logger:          logger,
+		BindTechnique:   DefaultBindTechnique,
+		peerConnections: map[string]*bridge{},
 	}
 }
 
@@ -121,23 +127,22 @@ func (nc *NetworkConnection) Start() {
 				default:
 					if writeBack := nc.findBridge(message.conn.LocalAddr()); writeBack != nil {
 						n := len(message.message)
-						nc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", writeBack.RemoteAddr().String(), n, message.raddr)
-						writeBack.Write(message.message)
+						nc.logger.Info.Printf("send to peer WG server: [%s]: %d bytes from %s\n", writeBack.raddr.String(), n, message.raddr)
+						writeBack.conn.Write(message.message)
+						udpSend(message.message, writeBack.conn, writeBack.raddr)
 					} else {
 						n := len(message.message)
-						writeBack := nc.setupBridge(message.conn, &net.UDPAddr{IP: localWGIP, Port: localWGPort}, messageChan)
+						writeBack := nc.setupBridge(message.conn, message.raddr, &net.UDPAddr{IP: localWGIP, Port: localWGPort}, messageChan)
 						//if !pc.Connected() && message.raddr.String() != pc.peerAddr.String() {
 						//	pc.logger.Info.Println("Peer address changed from", pc.peerAddr.String(), "to", message.raddr.String())
 						//	pc.setupPeerConnection(message.raddr.String())
 						//}
-						nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", writeBack.RemoteAddr().String(), n, message.raddr)
-						writeBack.Write(message.message)
+						nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes %s\n", writeBack.conn.RemoteAddr().String(), n, message.raddr)
+						writeBack.conn.Write(message.message)
 					}
 				}
 			case <-keepalive:
 				nc.logger.Debug.Println("Using", nc.BindTechnique, "binding technique")
-
-				fmt.Println("keepalive", nc.publicAddr)
 
 				// Keep NAT binding alive using STUN server
 				if nc.BindTechnique == BindSTUN {
@@ -185,17 +190,17 @@ func (nc *NetworkConnection) listen(conn *net.UDPConn, messages chan *pkt) {
 	}()
 }
 
-func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, toAddr *net.UDPAddr, messages chan *pkt) *net.UDPConn {
-	if nc.peerConnections[fromConn.RemoteAddr().String()] == nil {
+func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAddr, toAddr *net.UDPAddr, messages chan *pkt) *bridge {
+	if nc.peerConnections[raddr.String()] == nil {
 		conn, err := net.DialUDP("udp4", nil, toAddr)
 		sharedutils.CheckError(err)
-		nc.peerConnections[fromConn.RemoteAddr().String()] = conn
-		nc.peerConnections[conn.LocalAddr().String()] = fromConn
+		nc.peerConnections[raddr.String()] = &bridge{conn: conn, raddr: raddr}
+		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr}
 		nc.listen(conn, messages)
 	}
-	return nc.peerConnections[fromConn.RemoteAddr().String()]
+	return nc.peerConnections[raddr.String()]
 }
 
-func (nc *NetworkConnection) findBridge(addr net.Addr) *net.UDPConn {
+func (nc *NetworkConnection) findBridge(addr net.Addr) *bridge {
 	return nc.peerConnections[addr.String()]
 }

@@ -3,18 +3,15 @@ package ztn
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
-	"gortc.io/stun"
 )
 
 const udp = "udp"
@@ -46,13 +43,8 @@ type PeerConnection struct {
 	MyProfile   Profile
 	PeerProfile PeerProfile
 
-	wgConn        *net.UDPConn
-	localPeerConn *net.UDPConn
-	device        *device.Device
-	logger        *device.Logger
-
-	myAddr   *net.UDPAddr
-	peerAddr *net.UDPAddr
+	device *device.Device
+	logger *device.Logger
 
 	started       bool
 	lastKeepalive time.Time
@@ -71,17 +63,20 @@ type PeerConnection struct {
 	Status string
 
 	BindTechnique BindTechnique
+
+	networkConnection *NetworkConnection
 }
 
-func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profile, peerProfile PeerProfile) *PeerConnection {
+func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profile, peerProfile PeerProfile, networkConnection *NetworkConnection) *PeerConnection {
 	pc := &PeerConnection{
-		device:        d,
-		logger:        logger,
-		myID:          myProfile.PublicKey,
-		peerID:        peerProfile.PublicKey,
-		MyProfile:     myProfile,
-		PeerProfile:   peerProfile,
-		BindTechnique: DefaultBindTechnique,
+		device:            d,
+		logger:            logger,
+		myID:              myProfile.PublicKey,
+		peerID:            peerProfile.PublicKey,
+		MyProfile:         myProfile,
+		PeerProfile:       peerProfile,
+		BindTechnique:     DefaultBindTechnique,
+		networkConnection: networkConnection,
 	}
 	return pc
 }
@@ -97,10 +92,6 @@ func (pc *PeerConnection) Start() {
 }
 
 func (pc *PeerConnection) reset() {
-	pc.wgConn = nil
-	pc.localPeerConn = nil
-	pc.myAddr = nil
-	pc.peerAddr = nil
 	pc.started = false
 	pc.lastKeepalive = time.Time{}
 
@@ -117,131 +108,15 @@ func (pc *PeerConnection) reset() {
 }
 
 func (pc *PeerConnection) run() {
-	var err error
-	pc.wgConn, err = net.DialUDP("udp4", nil, &net.UDPAddr{IP: localWGIP, Port: localWGPort})
-	sharedutils.CheckError(err)
-
-	stunAddr, err := net.ResolveUDPAddr(udp, stunServer)
-	sharedutils.CheckError(err)
-
-	pc.localPeerConn, err = net.ListenUDP(udp, nil)
-	sharedutils.CheckError(err)
-
-	pc.logger.Debug.Printf("Listening on %s for peer %s\n", pc.localPeerConn.LocalAddr(), pc.peerID)
-
-	var stunPublicAddr stun.XORMappedAddress
-
-	peerupnpgid := NewUPNPGID()
-
-	peernatpmp := NewNATPMP()
-
-	messageChan := make(chan *pkt)
-	pc.listen(pc.localPeerConn, messageChan)
-	pc.listen(pc.wgConn, messageChan)
 	var peerAddrChan chan string
 
 	keepalive := time.Tick(500 * time.Millisecond)
-	keepaliveMsg := pingMsg
 
 	foundPeer := make(chan bool)
 
-	a := strings.Split(pc.localPeerConn.LocalAddr().String(), ":")
-	localPeerPort, err := strconv.Atoi(a[len(a)-1])
-	sharedutils.CheckError(err)
-	//var localPeerAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localPeerPort)
-	var localWGAddr = fmt.Sprintf("%s:%d", localWGIP.String(), localWGPort)
-
 	for {
 		res := func() bool {
-			var message *pkt
-			var ok bool
-
-			defer func() {
-				if message != nil {
-					defaultBufferPool.Put(message.message)
-				}
-			}()
-
 			select {
-			case message, ok = <-messageChan:
-				if !ok {
-					return false
-				}
-
-				switch {
-				case peerupnpgid.IsMessage(message.message):
-					externalIP, externalPort, err := peerupnpgid.ParseBindRequestPkt(message.message)
-					if err != nil {
-						pc.logger.Error.Println("Unable to decode UPNP GID message:", err)
-						break
-					}
-
-					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
-					sharedutils.CheckError(err)
-					if newaddr.String() != pc.myAddr.String() {
-						pc.myAddr = newaddr
-						peerAddrChan = pc.StartConnection(foundPeer)
-					}
-				case peernatpmp.IsMessage(message.message):
-					externalIP, externalPort, err := peernatpmp.ParseBindRequestPkt(message.message)
-					if err != nil {
-						pc.logger.Error.Println("Unable to decode UPNP GID message:", err)
-						break
-					}
-
-					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
-					sharedutils.CheckError(err)
-					if newaddr.String() != pc.myAddr.String() {
-						pc.myAddr = newaddr
-						peerAddrChan = pc.StartConnection(foundPeer)
-					}
-				case stun.IsMessage(message.message):
-					m := new(stun.Message)
-					m.Raw = message.message
-					decErr := m.Decode()
-					if decErr != nil {
-						pc.logger.Error.Println("Unable to decode STUN message:", decErr)
-						break
-					}
-					var xorAddr stun.XORMappedAddress
-					if getErr := xorAddr.GetFrom(m); getErr != nil {
-						pc.logger.Error.Println("Unable to get STUN XOR address:", getErr)
-						break
-					}
-
-					if stunPublicAddr.String() != xorAddr.String() {
-						stunPublicAddr = xorAddr
-						pc.myAddr, err = net.ResolveUDPAddr("udp4", xorAddr.String())
-						sharedutils.CheckError(err)
-
-						peerAddrChan = pc.StartConnection(foundPeer)
-					}
-
-				case string(message.message) == pingMsg:
-					pc.logger.Debug.Println("Received ping from", pc.peerAddr)
-					pc.lastKeepalive = time.Now()
-
-				default:
-					if message.raddr.String() == localWGAddr {
-						pc.connectedOutbound = true
-						pc.lastOutboundPacket = time.Now()
-						n := len(message.message)
-						pc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", pc.peerAddr, n, message.raddr)
-						udpSend(message.message, pc.localPeerConn, pc.peerAddr)
-					} else {
-						pc.lastKeepalive = time.Now()
-						pc.connectedInbound = true
-						pc.lastInboundPacket = time.Now()
-						n := len(message.message)
-						pc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", pc.wgConn.RemoteAddr(), n, message.raddr)
-						if !pc.Connected() && message.raddr.String() != pc.peerAddr.String() {
-							pc.logger.Info.Println("Peer address changed from", pc.peerAddr.String(), "to", message.raddr.String())
-							pc.setupPeerConnection(message.raddr.String())
-						}
-						pc.wgConn.Write(message.message)
-					}
-				}
-
 			case peerStr := <-peerAddrChan:
 				if pc.ShouldTryPrivate() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
@@ -266,24 +141,9 @@ func (pc *PeerConnection) run() {
 					return false
 				}
 
-				// Keep NAT binding alive using STUN server or the peer once it's known
-				if pc.peerAddr == nil {
-					pc.logger.Debug.Println("Using", pc.BindTechnique, "binding technique")
-					if pc.BindTechnique == BindSTUN {
-						err = sendBindingRequest(pc.localPeerConn, stunAddr)
-					} else if pc.BindTechnique == BindUPNPGID {
-						err = peerupnpgid.BindRequest(pc.localPeerConn, localPeerPort, messageChan)
-					} else if pc.BindTechnique == BindNATPMP {
-						err = peernatpmp.BindRequest(pc.localPeerConn, localPeerPort, messageChan)
-					} else {
-						err = errors.New("Unknown bind technique")
-					}
-				} else {
-					err = udpSendStr(keepaliveMsg, pc.localPeerConn, pc.peerAddr)
-				}
-
-				if err != nil {
-					pc.logger.Error.Println("keepalive:", err)
+				if pc.networkConnection.publicAddr != nil && peerAddrChan == nil {
+					pc.logger.Info.Println("Got a public IP address", pc.networkConnection.publicAddr, "for peer", pc.peerID)
+					peerAddrChan = pc.StartConnection(foundPeer)
 				}
 
 				if pc.Connected() {
@@ -345,14 +205,14 @@ func (pc *PeerConnection) getPrivateAddr() string {
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
-	a := strings.Split(pc.localPeerConn.LocalAddr().String(), ":")
+	a := strings.Split(pc.networkConnection.publicAddr.String(), ":")
 	return localAddr.IP.String() + ":" + a[len(a)-1]
 }
 
 func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 	return Event{Type: "network_endpoint", Data: gin.H{
 		"id":               pc.MyProfile.PublicKey,
-		"public_endpoint":  pc.myAddr.String(),
+		"public_endpoint":  pc.networkConnection.publicAddr.String(),
 		"private_endpoint": pc.getPrivateAddr(),
 		"try":              pc.try,
 	}}
@@ -403,8 +263,6 @@ func (pc *PeerConnection) Connected() bool {
 }
 
 func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
-	pc.logger.Info.Printf("My public address for peer %s: %s. Obtained via %s\n", pc.peerID, pc.myAddr, pc.BindTechnique)
-
 	go func() {
 		for {
 			select {
@@ -422,11 +280,6 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
 }
 
 func (pc *PeerConnection) setupPeerConnection(peerStr string) {
-	var err error
-	pc.peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
-	if err != nil {
-		log.Fatalln("resolve peeraddr:", err)
-	}
 	conf := ""
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
 	conf += fmt.Sprintf("endpoint=%s\n", peerStr)

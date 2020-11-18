@@ -26,7 +26,7 @@ func (c *Connection) Update(f func()) {
 	f()
 }
 
-func (c *Connection) StartPeer(device *device.Device, profile Profile, peerID string) {
+func (c *Connection) StartPeer(device *device.Device, profile Profile, peerID string, networkConnection *NetworkConnection) {
 	c.Lock()
 	defer c.Unlock()
 	if c.Peers[peerID] != nil {
@@ -40,7 +40,7 @@ func (c *Connection) StartPeer(device *device.Device, profile Profile, peerID st
 		c.logger.Error.Println(debug.Stack())
 	} else {
 		c.logger.Info.Println("Starting connection to peer", peerID)
-		c.Peers[peerID] = NewPeerConnection(device, c.logger, profile, peerProfile)
+		c.Peers[peerID] = NewPeerConnection(device, c.logger, profile, peerProfile, networkConnection)
 		go func(peerID string, peerProfile PeerProfile, pc *PeerConnection) {
 			for {
 				func() {
