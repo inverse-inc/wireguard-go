@@ -13,6 +13,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/inverse-inc/wireguard-go/filter"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -87,6 +88,9 @@ func startInverse(interfaceName string, device *device.Device) {
 
 	networkConnection := ztn.NewNetworkConnection(logger)
 	go networkConnection.Start()
+
+	filter := filter.NewFilterFromAcls(profile.ACLs)
+	device.SetReceiveFilter(filter)
 
 	for _, peerID := range profile.AllowedPeers {
 		connection.StartPeer(device, profile, peerID, networkConnection)
