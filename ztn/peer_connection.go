@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -59,6 +60,9 @@ type PeerConnection struct {
 
 	try int
 
+	bothStunning bool
+	stunPeerConn *net.UDPConn
+
 	Status string
 
 	BindTechnique BindTechnique
@@ -103,6 +107,10 @@ func (pc *PeerConnection) reset() {
 	pc.connectedOutbound = false
 	pc.lastOutboundPacket = time.Time{}
 
+	if pc.stunPeerConn != nil {
+		pc.stunPeerConn.Close()
+	}
+
 	pc.Status = PEER_STATUS_INITIATING_CONNECTION
 }
 
@@ -112,6 +120,8 @@ func (pc *PeerConnection) run() {
 	keepalive := time.Tick(500 * time.Millisecond)
 
 	foundPeer := make(chan bool)
+
+	var peerAddr *net.UDPAddr
 
 	for {
 		res := func() bool {
@@ -125,10 +135,14 @@ func (pc *PeerConnection) run() {
 					pc.Status = PEER_STATUS_CONNECT_PUBLIC
 				}
 
+				var err error
+				peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
+				sharedutils.CheckError(err)
+
 				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
 				GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
 
-				pc.setupPeerConnection(peerStr)
+				pc.setupPeerConnection(peerStr, peerAddr)
 
 				pc.started = true
 				pc.try++
@@ -138,6 +152,10 @@ func (pc *PeerConnection) run() {
 			case <-keepalive:
 				if !pc.CheckConnectionLiveness() {
 					return false
+				}
+
+				if peerAddr != nil {
+					udpSendStr(pingMsg, pc.networkConnection.localConn, peerAddr)
 				}
 
 				if pc.networkConnection.publicAddr != nil && peerAddrChan == nil {
@@ -213,6 +231,7 @@ func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 		"public_endpoint":  pc.networkConnection.publicAddr.String(),
 		"private_endpoint": pc.getPrivateAddr(),
 		"try":              pc.try,
+		"bind_technique":   pc.networkConnection.BindTechnique,
 	}}
 }
 
@@ -236,6 +255,13 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 					if event.Data["try"] != nil && pc.IAmTheSmallestKey() {
 						pc.try = int(event.Data["try"].(float64))
 						pc.logger.Info.Println("Using peer defined try ID", pc.try)
+					}
+					if event.Data["bind_technique"].(string) == string(BindSTUN) && pc.networkConnection.BindTechnique == BindSTUN {
+						pc.logger.Debug.Println("Self and peer are using STUN to connect")
+						pc.bothStunning = true
+					} else {
+						pc.logger.Debug.Println("Either self or peer isn't using STUN to connect")
+						pc.bothStunning = false
 					}
 					if pc.ShouldTryPrivate() {
 						result <- event.Data["private_endpoint"].(string)
@@ -263,7 +289,7 @@ func (pc *PeerConnection) ShouldTryPrivate() bool {
 func (pc *PeerConnection) MyTurnPublicConnect() bool {
 	if pc.IAmTheSmallestKey() && pc.try%3 == 1 {
 		return true
-	} else if pc.try%3 == 2 {
+	} else if !pc.IAmTheSmallestKey() && pc.try%3 == 2 {
 		return true
 	} else {
 		return false
@@ -291,10 +317,20 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
 	return pc.getPeerAddr()
 }
 
-func (pc *PeerConnection) setupPeerConnection(peerStr string) {
+func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPAddr) {
 	conf := ""
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-	if pc.ShouldTryPrivate() || pc.MyTurnPublicConnect() {
+	if pc.ShouldTryPrivate() {
+		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
+	} else if pc.bothStunning {
+		var err error
+		pc.stunPeerConn, err = net.ListenUDP(udp, nil)
+		sharedutils.CheckError(err)
+		pc.networkConnection.listen(pc.stunPeerConn, pc.networkConnection.messageChan)
+		pc.networkConnection.peerConnections[pc.stunPeerConn.LocalAddr().String()] = &bridge{conn: pc.networkConnection.localConn, raddr: peerAddr}
+		a := strings.Split(pc.stunPeerConn.LocalAddr().String(), ":")
+		conf += fmt.Sprintf("endpoint=%s\n", fmt.Sprintf("127.0.0.1:%s", a[len(a)-1]))
+	} else if pc.MyTurnPublicConnect() {
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	}
 	conf += "replace_allowed_ips=true\n"
