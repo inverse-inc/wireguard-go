@@ -133,10 +133,6 @@ func (nc *NetworkConnection) Start() {
 					} else {
 						n := len(message.message)
 						writeBack := nc.setupBridge(message.conn, message.raddr, &net.UDPAddr{IP: localWGIP, Port: localWGPort}, messageChan)
-						//if !pc.Connected() && message.raddr.String() != pc.peerAddr.String() {
-						//	pc.logger.Info.Println("Peer address changed from", pc.peerAddr.String(), "to", message.raddr.String())
-						//	pc.setupPeerConnection(message.raddr.String())
-						//}
 						nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes %s\n", writeBack.conn.RemoteAddr().String(), n, message.raddr)
 						writeBack.conn.Write(message.message)
 					}
