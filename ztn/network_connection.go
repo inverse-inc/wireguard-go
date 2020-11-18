@@ -132,8 +132,9 @@ func (nc *NetworkConnection) Start() {
 						udpSend(message.message, writeBack.conn, writeBack.raddr)
 					} else {
 						n := len(message.message)
-						writeBack := nc.setupBridge(message.conn, message.raddr, &net.UDPAddr{IP: localWGIP, Port: localWGPort}, messageChan)
-						nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes %s\n", writeBack.conn.RemoteAddr().String(), n, message.raddr)
+						localWGAddr := &net.UDPAddr{IP: localWGIP, Port: localWGPort}
+						writeBack := nc.setupBridge(message.conn, message.raddr, localWGAddr, messageChan)
+						nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes %s\n", localWGAddr.String(), n, message.raddr)
 						writeBack.conn.Write(message.message)
 					}
 				}

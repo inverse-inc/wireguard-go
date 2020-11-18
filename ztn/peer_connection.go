@@ -233,7 +233,7 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 				sharedutils.CheckError(err)
 				if event.Type == "network_endpoint" && event.Data["id"].(string) != myID {
 					// Follow what the peer says if he has a bigger key
-					if event.Data["try"] != nil && pc.MyProfile.PublicKey < pc.PeerProfile.PublicKey {
+					if event.Data["try"] != nil && pc.IAmTheSmallestKey() {
 						pc.try = int(event.Data["try"].(float64))
 						pc.logger.Info.Println("Using peer defined try ID", pc.try)
 					}
@@ -252,8 +252,22 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 	return result
 }
 
+func (pc *PeerConnection) IAmTheSmallestKey() bool {
+	return pc.MyProfile.PublicKey < pc.PeerProfile.PublicKey
+}
+
 func (pc *PeerConnection) ShouldTryPrivate() bool {
-	return pc.try%2 == 0
+	return pc.try%3 == 0
+}
+
+func (pc *PeerConnection) MyTurnPublicConnect() bool {
+	if pc.IAmTheSmallestKey() && pc.try%3 == 1 {
+		return true
+	} else if pc.try%3 == 2 {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (pc *PeerConnection) Connected() bool {
@@ -280,7 +294,9 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
 func (pc *PeerConnection) setupPeerConnection(peerStr string) {
 	conf := ""
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-	conf += fmt.Sprintf("endpoint=%s\n", peerStr)
+	if pc.MyTurnPublicConnect() {
+		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
+	}
 	conf += "replace_allowed_ips=true\n"
 	if pc.PeerProfile.IsGateway {
 		conf += "allowed_ip=0.0.0.0/0\n"
