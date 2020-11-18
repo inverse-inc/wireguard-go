@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -205,8 +204,7 @@ func (pc *PeerConnection) getPrivateAddr() string {
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
-	a := strings.Split(pc.networkConnection.publicAddr.String(), ":")
-	return localAddr.IP.String() + ":" + a[len(a)-1]
+	return fmt.Sprintf("%s:%d", localAddr.IP.String(), localWGPort)
 }
 
 func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
