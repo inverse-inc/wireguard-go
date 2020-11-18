@@ -148,7 +148,7 @@ func (pc *PeerConnection) run() {
 
 				if pc.Connected() {
 					pc.Status = PEER_STATUS_CONNECTED
-				} else if pc.started && pc.lastKeepalive.Before(time.Now().Add(-5*time.Second)) {
+				} else if pc.started && time.Since(pc.lastKeepalive) > connectionLivenessTolerance {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
 					return false
 				}
