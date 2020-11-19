@@ -36,6 +36,10 @@ type NetworkConnection struct {
 	logger *device.Logger
 
 	messageChan chan *pkt
+
+	started        time.Time
+	lastWGInbound  time.Time
+	lastWGOutbound time.Time
 }
 
 func NewNetworkConnection(logger *device.Logger) *NetworkConnection {
@@ -52,7 +56,34 @@ func NewNetworkConnection(logger *device.Logger) *NetworkConnection {
 	return nc
 }
 
+func (nc *NetworkConnection) reset() {
+	nc.publicAddr = nil
+	if nc.localConn != nil {
+		nc.localConn.Close()
+	}
+	if nc.wgConn != nil {
+		nc.wgConn.Close()
+	}
+	for _, pc := range nc.peerConnections {
+		pc.conn.Close()
+	}
+	nc.peerConnections = map[string]*bridge{}
+	nc.messageChan = make(chan *pkt)
+
+	nc.started = time.Time{}
+	nc.lastWGInbound = time.Time{}
+	nc.lastWGOutbound = time.Time{}
+}
+
 func (nc *NetworkConnection) Start() {
+	for {
+		nc.run()
+		nc.reset()
+		nc.logger.Info.Println("Public network connection seems to be inactive, will open a new public port")
+	}
+}
+
+func (nc *NetworkConnection) run() {
 	var err error
 
 	var stunPublicAddr stun.XORMappedAddress
@@ -73,6 +104,8 @@ func (nc *NetworkConnection) Start() {
 	sharedutils.CheckError(err)
 
 	nc.listen(nc.localConn, nc.messageChan)
+
+	nc.started = time.Now()
 
 	for {
 		res := func() bool {
@@ -141,11 +174,13 @@ func (nc *NetworkConnection) Start() {
 
 				default:
 					if writeBack := nc.findBridge(message.conn.LocalAddr()); writeBack != nil {
+						nc.lastWGOutbound = time.Now()
 						n := len(message.message)
 						nc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", writeBack.raddr.String(), n, message.raddr)
 						writeBack.conn.Write(message.message)
 						udpSend(message.message, writeBack.conn, writeBack.raddr)
 					} else {
+						nc.lastWGInbound = time.Now()
 						n := len(message.message)
 						localWGAddr := &net.UDPAddr{IP: localWGIP, Port: localWGPort}
 						writeBack := nc.setupBridge(message.conn, message.raddr, localWGAddr, nc.messageChan)
@@ -154,6 +189,10 @@ func (nc *NetworkConnection) Start() {
 					}
 				}
 			case <-keepalive:
+				if !nc.CheckConnectionLiveness() {
+					return false
+				}
+
 				nc.logger.Debug.Println("Using", nc.BindTechnique, "binding technique")
 
 				// Keep NAT binding alive using STUN server
@@ -214,4 +253,14 @@ func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAd
 
 func (nc *NetworkConnection) findBridge(addr net.Addr) *bridge {
 	return nc.peerConnections[addr.String()]
+}
+
+func (nc *NetworkConnection) CheckConnectionLiveness() bool {
+	if time.Since(nc.started) > PublicPortLivenessTolerance {
+		if time.Since(nc.lastWGInbound) > PublicPortLivenessTolerance || time.Since(nc.lastWGOutbound) > PublicPortLivenessTolerance {
+			nc.logger.Info.Println("Have not processed a public packet for too long on the public port")
+			return false
+		}
+	}
+	return true
 }

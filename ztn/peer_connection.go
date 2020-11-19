@@ -106,6 +106,11 @@ func (pc *PeerConnection) run() {
 		res := func() bool {
 			select {
 			case peerStr := <-peerAddrChan:
+				if peerStr == "" {
+					pc.logger.Info.Println("No connection could be established to", pc.peerID)
+					peerAddrChan = nil
+					return true
+				}
 				if pc.ShouldTryPrivate() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
 					pc.Status = PEER_STATUS_CONNECT_PRIVATE
@@ -223,8 +228,11 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 	go func() {
 		c := GLPClient(p2pk)
 		c.Start(APIClientCtx)
+		maxWait := time.After(PublicPortLivenessTolerance)
 		for {
 			select {
+			case <-maxWait:
+				result <- ""
 			case e := <-c.EventsChan:
 				event := Event{}
 				err := json.Unmarshal(e.Data, &event)
