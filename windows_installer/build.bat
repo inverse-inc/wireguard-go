@@ -16,6 +16,7 @@ set WIX_LIGHT_FLAGS=%WIX_LIGHT_FLAGS% -sw1056
 set WIX_LIGHT_FLAGS=%WIX_LIGHT_FLAGS% -sice:ICE30
 set WIX_LIGHT_FLAGS=%WIX_LIGHT_FLAGS% -sice:ICE61
 set WIX_LIGHT_FLAGS=%WIX_LIGHT_FLAGS% -sice:ICE09
+set WIX_LIGHT_FLAGS=%WIX_LIGHT_FLAGS%
 
 if exist .deps\prepared goto :build
 :installdeps
@@ -70,9 +71,9 @@ if exist .deps\prepared goto :build
 	if not exist "%~1" mkdir "%~1"
 	echo [+] Compiling %1
 	%CC% %CFLAGS% %LDFLAGS% -o "%~1\customactions.dll" customactions.c %LDLIBS% || exit /b 1
-	"%WIX%bin\candle" %WIX_CANDLE_FLAGS% -dWIREGUARD_PLATFORM="%~1" -out "%~1\wireguard.wixobj" -arch %3 wireguard.wxs || exit /b %errorlevel%
+	"%WIX%bin\candle" %WIX_CANDLE_FLAGS% -dWIREGUARD_PLATFORM="%~1" -out "%~1\wireguard.wixobj" -arch %3 wireguard.wxs -ext WixFirewallExtension  || exit /b %errorlevel%
 	echo [+] Linking %1
-	"%WIX%bin\light" %WIX_LIGHT_FLAGS% -out "dist\wireguard-%~1-%WIREGUARD_VERSION%.msi" "%~1\wireguard.wixobj" || exit /b %errorlevel%
+	"%WIX%bin\light" %WIX_LIGHT_FLAGS%  -ext WixFirewallExtension -out "dist\wireguard-%~1-%WIREGUARD_VERSION%.msi" "%~1\wireguard.wixobj" || exit /b %errorlevel%
 	goto :eof
 
 :error

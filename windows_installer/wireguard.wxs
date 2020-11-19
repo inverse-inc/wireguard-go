@@ -18,7 +18,7 @@
 	<?error Unknown platform ?>
 <?endif?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:fwrules="http://schemas.microsoft.com/wix/FirewallExtension">
 	<Product
 		Id="*"
 		Name="PacketFence Zero Trust Client"
@@ -84,6 +84,8 @@
 			<Component Directory="WireGuardFolder" Id="WireGuardExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1acc">
 				<File Source="..\$(var.WIREGUARD_PLATFORM)\wireguard.exe" KeyPath="yes">
 				</File>
+				<fwrules:FirewallException Id="WireguardException12674" Description="PacketFence Zero Trust agent port 12674" Name="PacketFence Zero Trust agent port 12674" Port="12674" Scope="any" Protocol="udp"/>
+				<fwrules:FirewallException Id="WireguardException12675" Description="PacketFence Zero Trust agent port 12675" Name="PacketFence Zero Trust agent port 12675" Port="12675" Scope="any" Protocol="udp"/>
 			</Component>
 			<Component Directory="WireGuardFolder" Id="GUIwrapperExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1fff">
 				<File Source="..\$(var.WIREGUARD_PLATFORM)\guiwrapper.exe" KeyPath="yes">
