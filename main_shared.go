@@ -30,7 +30,7 @@ func startInverse(interfaceName string, device *device.Device) {
 	go func() {
 		if ztn.NewUPNPGID().CheckNet() == nil {
 			logger.Debug.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
-			ztn.DefaultBindTechnique = ztn.BindUPNPGID
+			ztn.BindTechniques.Add(ztn.BindUPNPGID)
 			bindTechniqueDone <- true
 		}
 	}()
@@ -38,7 +38,7 @@ func startInverse(interfaceName string, device *device.Device) {
 	go func() {
 		if ztn.NewNATPMP().CheckNet() == nil {
 			logger.Debug.Println("Router supports NAT PMP, it will be used to create public P2P connections")
-			ztn.DefaultBindTechnique = ztn.BindNATPMP
+			ztn.BindTechniques.Add(ztn.BindNATPMP)
 			bindTechniqueDone <- true
 		}
 	}()
@@ -49,6 +49,8 @@ func startInverse(interfaceName string, device *device.Device) {
 	case <-time.After(5 * time.Second):
 		logger.Info.Println("Timeout trying to find a bind technique")
 	}
+
+	ztn.BindTechniques.Add(ztn.BindSTUN)
 
 	go wgrpc.StartRPC(connection)
 

@@ -37,6 +37,9 @@ type NetworkConnection struct {
 
 	messageChan chan *pkt
 
+	inboundAttempts     int
+	inboundAttemptsChan chan int
+
 	started        time.Time
 	lastWGInbound  time.Time
 	lastWGOutbound time.Time
@@ -46,12 +49,12 @@ func NewNetworkConnection(logger *device.Logger) *NetworkConnection {
 	nc := &NetworkConnection{
 		logger:          logger,
 		peerConnections: map[string]*bridge{},
-		messageChan:     make(chan *pkt),
 	}
+	nc.reset()
 	if bt := sharedutils.EnvOrDefault("WG_BIND_TECHNIQUE", ""); bt != "" {
 		nc.BindTechnique = BindTechnique(bt)
 	} else {
-		nc.BindTechnique = DefaultBindTechnique
+		nc.BindTechnique = BindTechniques.Next()
 	}
 	return nc
 }
@@ -68,7 +71,11 @@ func (nc *NetworkConnection) reset() {
 		pc.conn.Close()
 	}
 	nc.peerConnections = map[string]*bridge{}
+
 	nc.messageChan = make(chan *pkt)
+
+	nc.inboundAttempts = 0
+	nc.inboundAttemptsChan = make(chan int)
 
 	nc.started = time.Time{}
 	nc.lastWGInbound = time.Time{}
@@ -188,8 +195,16 @@ func (nc *NetworkConnection) run() {
 						writeBack.conn.Write(message.message)
 					}
 				}
+			case <-nc.inboundAttemptsChan:
+				nc.logger.Debug.Println("Got an inbound failure reported by a peer connection")
+				nc.inboundAttempts++
+				if nc.inboundAttempts > InboundAttemptsTolerance && time.Since(nc.started) > InboundAttemptsTryAtLeast && nc.lastWGInbound.IsZero() {
+					nc.BindTechnique = BindTechniques.Next()
+					return false
+				}
 			case <-keepalive:
 				if !nc.CheckConnectionLiveness() {
+					nc.BindTechnique = BindTechniques.Next()
 					return false
 				}
 
@@ -263,4 +278,8 @@ func (nc *NetworkConnection) CheckConnectionLiveness() bool {
 		}
 	}
 	return true
+}
+
+func (nc *NetworkConnection) RecordInboundAttempt() {
+	nc.inboundAttemptsChan <- 1
 }

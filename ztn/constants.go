@@ -1,17 +1,14 @@
 package ztn
 
-import "time"
-
-const (
-	BindSTUN    = BindTechnique("STUN")
-	BindUPNPGID = BindTechnique("UPNPGID")
-	BindNATPMP  = BindTechnique("NATPMP")
+import (
+	"time"
 )
-
-var DefaultBindTechnique = BindSTUN
 
 var PublicPortLivenessTolerance = 10 * time.Minute
 var ConnectionLivenessTolerance = 10 * time.Second
+
+var InboundAttemptsTryAtLeast = 1 * time.Minute
+var InboundAttemptsTolerance = 5
 
 const udp = "udp"
 const pingMsg = "ping"

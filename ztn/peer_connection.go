@@ -14,8 +14,6 @@ import (
 	"github.com/inverse-inc/wireguard-go/device"
 )
 
-type BindTechnique string
-
 type PeerConnection struct {
 	myID        string
 	peerID      string
@@ -319,6 +317,8 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 		conf += fmt.Sprintf("endpoint=%s\n", fmt.Sprintf("127.0.0.1:%s", a[len(a)-1]))
 	} else if pc.MyTurnPublicConnect() {
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
+	} else {
+		pc.networkConnection.RecordInboundAttempt()
 	}
 	conf += "replace_allowed_ips=true\n"
 	if pc.PeerProfile.IsGateway {
