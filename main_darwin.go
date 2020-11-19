@@ -243,9 +243,12 @@ func main() {
 	signal.Notify(term, os.Interrupt)
 
 	select {
-	case <-term:
-	case <-errs:
-	case <-device.Wait():
+	case sig := <-term:
+		fmt.Println("got term", sig)
+	case err := <-errs:
+		fmt.Println("got errs", err)
+	case w := <-device.Wait():
+		fmt.Println("device done waiting", w)
 	}
 
 	// clean up
