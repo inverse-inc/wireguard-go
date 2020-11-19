@@ -12,6 +12,17 @@ import (
 	"gortc.io/stun"
 )
 
+type bridge struct {
+	conn  *net.UDPConn
+	raddr *net.UDPAddr
+}
+
+type pkt struct {
+	conn    *net.UDPConn
+	raddr   *net.UDPAddr
+	message []byte
+}
+
 type NetworkConnection struct {
 	publicAddr *net.UDPAddr
 
@@ -25,11 +36,6 @@ type NetworkConnection struct {
 	logger *device.Logger
 
 	messageChan chan *pkt
-}
-
-type bridge struct {
-	conn  *net.UDPConn
-	raddr *net.UDPAddr
 }
 
 func NewNetworkConnection(logger *device.Logger) *NetworkConnection {

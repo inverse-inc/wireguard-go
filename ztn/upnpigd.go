@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/inverse-inc/upnp"
 )
@@ -47,7 +48,7 @@ func (u *UPNPIGD) ExternalIPAddr() (net.IP, error) {
 }
 
 func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
-	if err := u.mapping.AddPortMapping(localPort, remotePort, 3600, "UDP", "WireguardGO"); err == nil {
+	if err := u.mapping.AddPortMapping(localPort, remotePort, int(PublicPortTTL/time.Second)*2, "UDP", "PacketFence-Zero-Trust-Client"); err == nil {
 		fmt.Println("Port mapped successfully", localPort, remotePort)
 		return nil
 	} else {
