@@ -16,7 +16,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/wireguard-go/conn"
 	"github.com/inverse-inc/wireguard-go/ipc"
 )
@@ -98,8 +97,6 @@ func (device *Device) IpcGetOperation(socket *bufio.Writer) error {
 	}()
 
 	// send lines (does not require resource locks)
-
-	spew.Dump(lines)
 
 	for _, line := range lines {
 		_, err := socket.WriteString(line + "\n")
