@@ -7,6 +7,12 @@ import (
 
 type BindTechnique string
 
+var BindTechniqueNames = map[string]BindTechnique{
+	"STUN":    BindSTUN,
+	"UPNPGID": BindUPNPGID,
+	"NATPMP":  "NATPMP",
+}
+
 const (
 	// These will get ordered in the BindTechniques.
 	// Lower string == tried first if available

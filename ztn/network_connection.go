@@ -51,8 +51,8 @@ func NewNetworkConnection(logger *device.Logger) *NetworkConnection {
 		peerConnections: map[string]*bridge{},
 	}
 	nc.reset()
-	if bt := sharedutils.EnvOrDefault("WG_BIND_TECHNIQUE", ""); bt != "" {
-		nc.BindTechnique = BindTechnique(bt)
+	if bt := sharedutils.EnvOrDefault("WG_BIND_TECHNIQUE", ""); bt != "" && BindTechniqueNames[bt] != "" {
+		nc.BindTechnique = BindTechniqueNames[bt]
 	} else {
 		nc.BindTechnique = BindTechniques.Next()
 	}
