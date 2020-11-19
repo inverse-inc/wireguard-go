@@ -7,8 +7,10 @@ import (
 	"math/rand"
 	"net"
 	"sync"
+	"time"
+
 	"github.com/jackpal/gateway"
-	"github.com/jackpal/go-nat-pmp"
+	natpmp "github.com/jackpal/go-nat-pmp"
 )
 
 type NATPMP struct {
@@ -29,7 +31,7 @@ func (u *NATPMP) CheckNet() error {
 	}
 
 	u.mapping = *natpmp.NewClient(gatewayIP)
-	
+
 	myExternalIP, err := u.ExternalIPAddr()
 
 	if err != nil {
@@ -52,7 +54,7 @@ func (u *NATPMP) ExternalIPAddr() (net.IP, error) {
 
 func (u *NATPMP) AddPortMapping(localPort, remotePort int) error {
 
-	if _, err := u.mapping.AddPortMapping("udp", localPort, remotePort, 3600); err == nil {
+	if _, err := u.mapping.AddPortMapping("udp", localPort, remotePort, int(PublicPortTTL/time.Second)*2); err == nil {
 		fmt.Println("Port mapped successfully")
 		return nil
 	}

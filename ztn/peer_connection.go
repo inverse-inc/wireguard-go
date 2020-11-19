@@ -14,28 +14,7 @@ import (
 	"github.com/inverse-inc/wireguard-go/device"
 )
 
-const udp = "udp"
-const pingMsg = "ping"
-
-const stunServer = "srv.semaan.ca:3478"
-
-const connectionLivenessTolerance = 10 * time.Second
-
 type BindTechnique string
-
-const (
-	BindSTUN    = BindTechnique("STUN")
-	BindUPNPGID = BindTechnique("UPNPGID")
-	BindNATPMP  = BindTechnique("NATPMP")
-)
-
-var DefaultBindTechnique = BindSTUN
-
-type pkt struct {
-	conn    *net.UDPConn
-	raddr   *net.UDPAddr
-	message []byte
-}
 
 type PeerConnection struct {
 	myID        string
@@ -165,7 +144,7 @@ func (pc *PeerConnection) run() {
 
 				if pc.Connected() {
 					pc.Status = PEER_STATUS_CONNECTED
-				} else if pc.started && time.Since(pc.lastKeepalive) > connectionLivenessTolerance {
+				} else if pc.started && time.Since(pc.lastKeepalive) > ConnectionLivenessTolerance {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
 					return false
 				}
@@ -355,7 +334,7 @@ func (pc *PeerConnection) CheckConnectionLiveness() bool {
 					pc.connectedOutbound = true
 					pc.lastOutboundPacket = time.Now()
 					pc.lastTX = stats.TX
-				} else if time.Since(pc.lastOutboundPacket) > connectionLivenessTolerance {
+				} else if time.Since(pc.lastOutboundPacket) > ConnectionLivenessTolerance {
 					if pc.connectedOutbound {
 						pc.logger.Error.Println("Outbound connection lost to", pc.peerID)
 						result = false
@@ -367,7 +346,7 @@ func (pc *PeerConnection) CheckConnectionLiveness() bool {
 					pc.connectedInbound = true
 					pc.lastInboundPacket = time.Now()
 					pc.lastRX = stats.RX
-				} else if time.Since(pc.lastInboundPacket) > connectionLivenessTolerance {
+				} else if time.Since(pc.lastInboundPacket) > ConnectionLivenessTolerance {
 					if pc.connectedInbound {
 						pc.logger.Error.Println("Inbound connection lost to", pc.peerID)
 						result = false
