@@ -306,9 +306,6 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 	conf := ""
 
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-	conf += "remove=true\n"
-
-	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
 	if pc.ShouldTryPrivate() {
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	} else if pc.bothStunning {
