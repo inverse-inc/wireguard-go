@@ -2,10 +2,12 @@ package ztn
 
 import (
 	"time"
+
+	"github.com/inverse-inc/wireguard-go/device"
 )
 
 var PublicPortLivenessTolerance = 10 * time.Minute
-var ConnectionLivenessTolerance = 10 * time.Second
+var ConnectionLivenessTolerance = device.RekeyTimeout*3 + 1*time.Second
 
 var InboundAttemptsTryAtLeast = 1 * time.Minute
 var InboundAttemptsTolerance = 5
