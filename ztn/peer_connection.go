@@ -304,10 +304,6 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
 
 func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPAddr) {
 	conf := ""
-
-	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-	conf += "remove=true\n"
-
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
 	if pc.ShouldTryPrivate() {
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
