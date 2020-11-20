@@ -16,6 +16,7 @@ import (
 	"syscall"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/tun"
@@ -63,6 +64,8 @@ func warning() {
 }
 
 func main() {
+	defer binutils.CapturePanic()
+
 	godotenv.Load(os.Args[1])
 
 	var foreground = true

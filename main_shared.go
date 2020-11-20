@@ -12,6 +12,7 @@ import (
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/filter"
 	"github.com/inverse-inc/wireguard-go/util"
@@ -23,11 +24,15 @@ import (
 var connection *ztn.Connection
 
 func startInverse(interfaceName string, device *device.Device) {
+	defer binutils.CapturePanic()
+
 	connection = ztn.NewConnection(logger)
 
 	bindTechniqueDone := make(chan bool)
 
 	go func() {
+		defer binutils.CapturePanic()
+
 		if ztn.NewUPNPGID().CheckNet() == nil {
 			logger.Debug.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
 			ztn.BindTechniques.Add(ztn.BindUPNPGID)
@@ -36,6 +41,8 @@ func startInverse(interfaceName string, device *device.Device) {
 	}()
 
 	go func() {
+		defer binutils.CapturePanic()
+
 		if ztn.NewNATPMP().CheckNet() == nil {
 			logger.Debug.Println("Router supports NAT PMP, it will be used to create public P2P connections")
 			ztn.BindTechniques.Add(ztn.BindNATPMP)

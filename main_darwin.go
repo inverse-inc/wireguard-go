@@ -14,8 +14,10 @@ import (
 	"runtime"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/outputlog"
@@ -64,6 +66,8 @@ func warning() {
 }
 
 func main() {
+	defer binutils.CapturePanic()
+
 	godotenv.Load(os.Args[1])
 
 	outputlog.RedirectOutputToFilePrefix("/tmp/wireguard")
@@ -222,18 +226,24 @@ func main() {
 		os.Exit(ExitSetupFailed)
 	}
 
+	// TODO: for some reason on Mac OS, the UAPI doesn't seem to be fully ready to handle connections immediately so we wait a bit before we start accepting connections
+	// This needs to be investigated so that this hack can disapear
+	time.Sleep(2 * time.Second)
+
 	go func() {
 		for {
 			conn, err := uapi.Accept()
 			if err != nil {
-				errs <- err
-				return
+				fmt.Println("Got err in UAPI:", err)
+			} else {
+				go device.IpcHandle(conn)
 			}
-			go device.IpcHandle(conn)
 		}
 	}()
 
 	logger.Info.Println("UAPI listener started")
+
+	// Sleep a bit to give time to UAPI to start up
 
 	startInverse(interfaceName, device)
 

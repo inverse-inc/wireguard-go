@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/outputlog"
@@ -27,6 +28,8 @@ const (
 var logger *device.Logger
 
 func main() {
+	defer binutils.CapturePanic()
+
 	outputlog.RedirectOutputToFilePrefix("C:\\Program Files\\PacketFence-Zero-Trust-Client\\wireguard")
 
 	godotenv.Load(os.Args[1])

@@ -1,10 +1,12 @@
 package binutils
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
@@ -27,4 +29,11 @@ func RunCmd(cmd *exec.Cmd) {
 	err := cmd.Start()
 	sharedutils.CheckError(err)
 	cmd.Wait()
+}
+
+func CapturePanic() {
+	if err := recover(); err != nil {
+		fmt.Println("Recoved panic in program:", err)
+		debug.PrintStack()
+	}
 }
