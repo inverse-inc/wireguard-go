@@ -149,6 +149,7 @@ func (pc *PeerConnection) run() {
 					pc.Status = PEER_STATUS_CONNECTED
 				} else if pc.started && time.Since(pc.lastKeepalive) > ConnectionLivenessTolerance {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
+					pc.RemovePeer()
 					return false
 				}
 			}
@@ -343,6 +344,13 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 
 	SetConfigMulti(pc.device, conf)
 
+}
+
+func (pc *PeerConnection) RemovePeer() {
+	conf := ""
+	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
+	conf += "remove=true\n"
+	SetConfigMulti(pc.device, conf)
 }
 
 func (pc *PeerConnection) CheckConnectionLiveness() bool {
