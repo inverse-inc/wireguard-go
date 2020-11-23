@@ -2,22 +2,23 @@ package main
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/widget"
 )
 
-func makeTable(headings []string, rows [][]string) *widget.Box {
-
+func makeTable(headings []string, rows [][]string) *fyne.Container {
 	columns := rowsToColumns(headings, rows)
-
-	objects := make([]fyne.CanvasObject, len(columns))
-	for k, col := range columns {
-		box := widget.NewVBox(widget.NewLabelWithStyle(headings[k], fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-		for _, val := range col {
-			box.Append(widget.NewLabel(val))
+	objects := []fyne.CanvasObject{}
+	for i, col := range columns {
+		elems := []fyne.CanvasObject{
+			widget.NewLabelWithStyle(headings[i], fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		}
-		objects[k] = box
+		for _, elem := range col {
+			elems = append(elems, widget.NewLabel(elem))
+		}
+		objects = append(objects, container.NewGridWithColumns(1, elems...))
 	}
-	return widget.NewHBox(objects...)
+	return container.NewHBox(objects...)
 }
 
 func rowsToColumns(headings []string, rows [][]string) [][]string {
