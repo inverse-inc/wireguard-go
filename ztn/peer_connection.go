@@ -287,9 +287,18 @@ func (pc *PeerConnection) Connected() bool {
 
 func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
 	go func() {
+		after := []time.Duration{
+			1 * time.Second,
+			2 * time.Second,
+			5 * time.Second,
+			10 * time.Second,
+			30 * time.Second,
+		}
+		i := 0
 		for {
 			select {
-			case <-time.After(1 * time.Second):
+			case <-time.After(after[i%len(after)]):
+				i++
 				pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
 				GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
 			case <-foundPeer:
