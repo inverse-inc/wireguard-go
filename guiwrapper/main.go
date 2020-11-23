@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -37,10 +38,8 @@ func main() {
 	SetupAPIClientGUI(func(runTunnel bool) {
 		go checkTunnelStatus()
 		if runTunnel {
-			binutils.RunTunnel()
+			go binutils.RunTunnel()
 		}
-		postRun()
-		quit()
 	})
 	quit()
 }
@@ -71,6 +70,7 @@ func checkTunnelStatus() {
 	started := time.Now()
 	status := ""
 	fails := 0
+	alreadyFullyFailed := false
 	for {
 		statusReply, err := rpc.GetStatus(ctx, &wgrpc.StatusRequest{})
 		if err != nil {
@@ -80,13 +80,19 @@ func checkTunnelStatus() {
 					statusLabel.SetText("Failed to start tunnel process")
 				}
 			} else if fails >= maxRpcFails {
-				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead.")
+				if !alreadyFullyFailed {
+					statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead.")
+					alreadyFullyFailed = true
+					reconnectBtn.Show()
+					peersTable.SetContent(widget.NewLabel(""))
+				}
 			} else {
 				fmt.Println("Failed to contact tunnel for status update")
 				statusLabel.SetText("Tunnel seems to be inactive...")
 				fails++
 			}
 		} else {
+			alreadyFullyFailed = false
 			fails = 0
 			status = statusReply.Status
 			if status == ztn.STATUS_ERROR {
