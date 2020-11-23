@@ -4,11 +4,12 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net"
 	"sync"
 
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/upnp"
+	"github.com/theckman/go-securerandom"
 )
 
 type UPNPIGD struct {
@@ -19,7 +20,9 @@ type UPNPIGD struct {
 }
 
 func NewUPNPGID() *UPNPIGD {
-	return &UPNPIGD{id: rand.Uint64(), mapping: upnp.Upnp{}}
+	id, err := securerandom.Uint64()
+	sharedutils.CheckError(err)
+	return &UPNPIGD{id: id, mapping: upnp.Upnp{}}
 }
 
 func (u *UPNPIGD) CheckNet() error {
@@ -97,7 +100,9 @@ func (u *UPNPIGD) BindRequest(localPeerConn *net.UDPConn, localPeerPort int, sen
 	}
 
 	if u.remotePort == 0 {
-		u.remotePort = rand.Intn(40000-30000) + 30000
+		r, err := securerandom.Uint64()
+		sharedutils.CheckError(err)
+		u.remotePort = int(r%10000 + 30000)
 		err = u.AddPortMapping(localPeerPort, u.remotePort)
 
 		if err != nil {

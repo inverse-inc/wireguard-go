@@ -4,12 +4,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net"
 	"sync"
 
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/jackpal/gateway"
 	natpmp "github.com/jackpal/go-nat-pmp"
+	"github.com/theckman/go-securerandom"
 )
 
 type NATPMP struct {
@@ -20,7 +21,9 @@ type NATPMP struct {
 }
 
 func NewNATPMP() *NATPMP {
-	return &NATPMP{id: rand.Uint64(), mapping: natpmp.Client{}}
+	id, err := securerandom.Uint64()
+	sharedutils.CheckError(err)
+	return &NATPMP{id: id, mapping: natpmp.Client{}}
 }
 
 func (u *NATPMP) CheckNet() error {
@@ -101,7 +104,9 @@ func (u *NATPMP) BindRequest(localPeerConn *net.UDPConn, localPeerPort int, send
 	}
 
 	if u.remotePort == 0 {
-		u.remotePort = rand.Intn(40000-30000) + 30000
+		r, err := securerandom.Uint64()
+		sharedutils.CheckError(err)
+		u.remotePort = int(r%10000 + 30000)
 		err = u.AddPortMapping(localPeerPort, u.remotePort)
 
 		if err != nil {

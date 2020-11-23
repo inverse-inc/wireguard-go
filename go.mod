@@ -17,6 +17,7 @@ require (
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/mitchellh/go-ps v1.0.0
+	github.com/theckman/go-securerandom v0.1.1
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/sys v0.0.0-20201113233024-12cec1faf1ba
