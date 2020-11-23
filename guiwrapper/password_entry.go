@@ -6,17 +6,19 @@ import (
 )
 
 type PasswordField struct {
-	*widget.Entry
+	widget.Entry
 	onEnter func()
 }
 
 func NewPasswordField() *PasswordField {
-	e := widget.NewEntry()
+	e := &PasswordField{}
+	e.ExtendBaseWidget(e)
 	e.Password = true
-	return &PasswordField{Entry: e, onEnter: func() {}}
+	return e
 }
 
 func (p *PasswordField) KeyUp(k *fyne.KeyEvent) {
+	p.Entry.KeyUp(k)
 	switch k.Name {
 	case fyne.KeyReturn:
 		p.onEnter()
