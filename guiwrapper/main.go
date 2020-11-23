@@ -36,12 +36,16 @@ func main() {
 
 	setupExitSignals()
 	SetupAPIClientGUI(func(runTunnel bool) {
-		go checkTunnelStatus()
-		if runTunnel {
-			go binutils.RunTunnel()
-		}
+		startTunnel(runTunnel)
 	})
 	quit()
+}
+
+func startTunnel(runTunnel bool) {
+	go checkTunnelStatus()
+	if runTunnel {
+		go binutils.RunTunnel()
+	}
 }
 
 func postRun() {
@@ -70,7 +74,6 @@ func checkTunnelStatus() {
 	started := time.Now()
 	status := ""
 	fails := 0
-	alreadyFullyFailed := false
 	for {
 		statusReply, err := rpc.GetStatus(ctx, &wgrpc.StatusRequest{})
 		if err != nil {
@@ -80,19 +83,16 @@ func checkTunnelStatus() {
 					statusLabel.SetText("Failed to start tunnel process")
 				}
 			} else if fails >= maxRpcFails {
-				if !alreadyFullyFailed {
-					statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead.")
-					alreadyFullyFailed = true
-					reconnectBtn.Show()
-					peersTable.SetContent(widget.NewLabel(""))
-				}
+				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead.")
+				reconnectBtn.Show()
+				peersTable.SetContent(widget.NewLabel(""))
+				return
 			} else {
 				fmt.Println("Failed to contact tunnel for status update")
 				statusLabel.SetText("Tunnel seems to be inactive...")
 				fails++
 			}
 		} else {
-			alreadyFullyFailed = false
 			fails = 0
 			status = statusReply.Status
 			if status == ztn.STATUS_ERROR {

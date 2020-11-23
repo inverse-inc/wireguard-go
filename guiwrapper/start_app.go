@@ -46,7 +46,7 @@ func SetupAPIClientGUI(callback func(bool)) {
 	reconnectBtn = widget.NewButton("Reconnect", func() {
 		reconnectBtn.Hide()
 		statusLabel.SetText("Reconnecting")
-		go binutils.RunTunnel()
+		startTunnel(true)
 	})
 	reconnectBtn.Hide()
 
