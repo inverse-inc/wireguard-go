@@ -68,190 +68,198 @@ func main() {
 
 	godotenv.Load(os.Args[1])
 
-	var foreground = true
-	var interfaceName = "wg0"
-
-	if !foreground {
-		foreground = os.Getenv(ENV_WG_PROCESS_FOREGROUND) == "1"
-	}
-
-	// get log level (default: info)
-
-	logLevel := func() int {
-		switch os.Getenv("LOG_LEVEL") {
-		case "debug":
-			return device.LogLevelDebug
-		case "info":
-			return device.LogLevelInfo
-		case "error":
-			return device.LogLevelError
-		case "silent":
-			return device.LogLevelSilent
-		}
-		return device.LogLevelInfo
-	}()
-
-	// open TUN device (or use supplied fd)
-
-	tun, err := func() (tun.Device, error) {
-		tunFdStr := os.Getenv(ENV_WG_TUN_FD)
-		if tunFdStr == "" {
-			return tun.CreateTUN(interfaceName, device.DefaultMTU)
-		}
-
-		// construct tun device from supplied fd
-
-		fd, err := strconv.ParseUint(tunFdStr, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-
-		err = syscall.SetNonblock(int(fd), true)
-		if err != nil {
-			return nil, err
-		}
-
-		file := os.NewFile(uintptr(fd), "")
-		return tun.CreateTUNFromFile(file, device.DefaultMTU)
-	}()
-
-	if err == nil {
-		realInterfaceName, err2 := tun.Name()
-		if err2 == nil {
-			interfaceName = realInterfaceName
-		}
-	}
-
-	logger = device.NewLogger(
-		logLevel,
-		fmt.Sprintf("(%s) ", interfaceName),
-	)
-
-	logger.Info.Println("Starting wireguard-go version", device.WireGuardGoVersion)
-
-	logger.Debug.Println("Debug log enabled")
-
-	if err != nil {
-		logger.Error.Println("Failed to create TUN device:", err)
-		os.Exit(ExitSetupFailed)
-	}
-
-	// open UAPI file (or use supplied fd)
-
-	fileUAPI, err := func() (*os.File, error) {
-		uapiFdStr := os.Getenv(ENV_WG_UAPI_FD)
-		if uapiFdStr == "" {
-			return ipc.UAPIOpen(interfaceName)
-		}
-
-		// use supplied fd
-
-		fd, err := strconv.ParseUint(uapiFdStr, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-
-		return os.NewFile(uintptr(fd), ""), nil
-	}()
-
-	if err != nil {
-		logger.Error.Println("UAPI listen error:", err)
-		os.Exit(ExitSetupFailed)
-		return
-	}
-	// daemonize the process
-
-	if !foreground {
-		env := os.Environ()
-		env = append(env, fmt.Sprintf("%s=3", ENV_WG_TUN_FD))
-		env = append(env, fmt.Sprintf("%s=4", ENV_WG_UAPI_FD))
-		env = append(env, fmt.Sprintf("%s=1", ENV_WG_PROCESS_FOREGROUND))
-		files := [3]*os.File{}
-		if os.Getenv("LOG_LEVEL") != "" && logLevel != device.LogLevelSilent {
-			files[0], _ = os.Open(os.DevNull)
-			files[1] = os.Stdout
-			files[2] = os.Stderr
-		} else {
-			files[0], _ = os.Open(os.DevNull)
-			files[1], _ = os.Open(os.DevNull)
-			files[2], _ = os.Open(os.DevNull)
-		}
-		attr := &os.ProcAttr{
-			Files: []*os.File{
-				files[0], // stdin
-				files[1], // stdout
-				files[2], // stderr
-				tun.File(),
-				fileUAPI,
-			},
-			Dir: ".",
-			Env: env,
-		}
-
-		path, err := os.Executable()
-		if err != nil {
-			logger.Error.Println("Failed to determine executable:", err)
-			os.Exit(ExitSetupFailed)
-		}
-
-		process, err := os.StartProcess(
-			path,
-			os.Args,
-			attr,
-		)
-		if err != nil {
-			logger.Error.Println("Failed to daemonize:", err)
-			os.Exit(ExitSetupFailed)
-		}
-		process.Release()
-		return
-	}
-
-	device := device.NewDevice(tun, logger)
-
-	logger.Info.Println("Device started")
-
-	errs := make(chan error)
-	term := make(chan os.Signal, 1)
-
-	uapi, err := ipc.UAPIListen(interfaceName, fileUAPI)
-	if err != nil {
-		logger.Error.Println("Failed to listen on uapi socket:", err)
-		os.Exit(ExitSetupFailed)
-	}
-
-	go func() {
+	if len(os.Args) > 2 && os.Args[2] == "--master" {
+		go checkParentIsAlive()
 		for {
-			conn, err := uapi.Accept()
-			if err != nil {
-				errs <- err
-				return
-			}
-			go device.IpcHandle(conn)
+			binutils.RunTunnelFG(os.Args[1])
 		}
-	}()
+	} else {
 
-	logger.Info.Println("UAPI listener started")
+		var foreground = true
+		var interfaceName = "wg0"
 
-	startInverse(interfaceName, device)
+		if !foreground {
+			foreground = os.Getenv(ENV_WG_PROCESS_FOREGROUND) == "1"
+		}
 
-	// wait for program to terminate
+		// get log level (default: info)
 
-	signal.Notify(term, syscall.SIGTERM)
-	signal.Notify(term, os.Interrupt)
+		logLevel := func() int {
+			switch os.Getenv("LOG_LEVEL") {
+			case "debug":
+				return device.LogLevelDebug
+			case "info":
+				return device.LogLevelInfo
+			case "error":
+				return device.LogLevelError
+			case "silent":
+				return device.LogLevelSilent
+			}
+			return device.LogLevelInfo
+		}()
 
-	select {
-	case <-term:
-	case <-errs:
-	case <-device.Wait():
+		// open TUN device (or use supplied fd)
+
+		tun, err := func() (tun.Device, error) {
+			tunFdStr := os.Getenv(ENV_WG_TUN_FD)
+			if tunFdStr == "" {
+				return tun.CreateTUN(interfaceName, device.DefaultMTU)
+			}
+
+			// construct tun device from supplied fd
+
+			fd, err := strconv.ParseUint(tunFdStr, 10, 32)
+			if err != nil {
+				return nil, err
+			}
+
+			err = syscall.SetNonblock(int(fd), true)
+			if err != nil {
+				return nil, err
+			}
+
+			file := os.NewFile(uintptr(fd), "")
+			return tun.CreateTUNFromFile(file, device.DefaultMTU)
+		}()
+
+		if err == nil {
+			realInterfaceName, err2 := tun.Name()
+			if err2 == nil {
+				interfaceName = realInterfaceName
+			}
+		}
+
+		logger = device.NewLogger(
+			logLevel,
+			fmt.Sprintf("(%s) ", interfaceName),
+		)
+
+		logger.Info.Println("Starting wireguard-go version", device.WireGuardGoVersion)
+
+		logger.Debug.Println("Debug log enabled")
+
+		if err != nil {
+			logger.Error.Println("Failed to create TUN device:", err)
+			os.Exit(ExitSetupFailed)
+		}
+
+		// open UAPI file (or use supplied fd)
+
+		fileUAPI, err := func() (*os.File, error) {
+			uapiFdStr := os.Getenv(ENV_WG_UAPI_FD)
+			if uapiFdStr == "" {
+				return ipc.UAPIOpen(interfaceName)
+			}
+
+			// use supplied fd
+
+			fd, err := strconv.ParseUint(uapiFdStr, 10, 32)
+			if err != nil {
+				return nil, err
+			}
+
+			return os.NewFile(uintptr(fd), ""), nil
+		}()
+
+		if err != nil {
+			logger.Error.Println("UAPI listen error:", err)
+			os.Exit(ExitSetupFailed)
+			return
+		}
+		// daemonize the process
+
+		if !foreground {
+			env := os.Environ()
+			env = append(env, fmt.Sprintf("%s=3", ENV_WG_TUN_FD))
+			env = append(env, fmt.Sprintf("%s=4", ENV_WG_UAPI_FD))
+			env = append(env, fmt.Sprintf("%s=1", ENV_WG_PROCESS_FOREGROUND))
+			files := [3]*os.File{}
+			if os.Getenv("LOG_LEVEL") != "" && logLevel != device.LogLevelSilent {
+				files[0], _ = os.Open(os.DevNull)
+				files[1] = os.Stdout
+				files[2] = os.Stderr
+			} else {
+				files[0], _ = os.Open(os.DevNull)
+				files[1], _ = os.Open(os.DevNull)
+				files[2], _ = os.Open(os.DevNull)
+			}
+			attr := &os.ProcAttr{
+				Files: []*os.File{
+					files[0], // stdin
+					files[1], // stdout
+					files[2], // stderr
+					tun.File(),
+					fileUAPI,
+				},
+				Dir: ".",
+				Env: env,
+			}
+
+			path, err := os.Executable()
+			if err != nil {
+				logger.Error.Println("Failed to determine executable:", err)
+				os.Exit(ExitSetupFailed)
+			}
+
+			process, err := os.StartProcess(
+				path,
+				os.Args,
+				attr,
+			)
+			if err != nil {
+				logger.Error.Println("Failed to daemonize:", err)
+				os.Exit(ExitSetupFailed)
+			}
+			process.Release()
+			return
+		}
+
+		device := device.NewDevice(tun, logger)
+
+		logger.Info.Println("Device started")
+
+		errs := make(chan error)
+		term := make(chan os.Signal, 1)
+
+		uapi, err := ipc.UAPIListen(interfaceName, fileUAPI)
+		if err != nil {
+			logger.Error.Println("Failed to listen on uapi socket:", err)
+			os.Exit(ExitSetupFailed)
+		}
+
+		go func() {
+			for {
+				conn, err := uapi.Accept()
+				if err != nil {
+					errs <- err
+					return
+				}
+				go device.IpcHandle(conn)
+			}
+		}()
+
+		logger.Info.Println("UAPI listener started")
+
+		startInverse(interfaceName, device)
+
+		// wait for program to terminate
+
+		signal.Notify(term, syscall.SIGTERM)
+		signal.Notify(term, os.Interrupt)
+
+		select {
+		case <-term:
+		case <-errs:
+		case <-device.Wait():
+		}
+
+		// clean up
+
+		uapi.Close()
+		device.Close()
+
+		logger.Info.Println("Shutting down")
 	}
-
-	// clean up
-
-	uapi.Close()
-	device.Close()
-
-	logger.Info.Println("Shutting down")
 }
 
 func checkParentIsAlive() {

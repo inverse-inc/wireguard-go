@@ -31,6 +31,11 @@ func RunCmd(cmd *exec.Cmd) {
 	cmd.Wait()
 }
 
+func RunTunnelFG(envPath string) {
+	cmd := exec.Command(BinPath("wireguard"), envPath)
+	RunCmd(cmd)
+}
+
 func CapturePanic() {
 	if err := recover(); err != nil {
 		fmt.Println("Recoved panic in program:", err)

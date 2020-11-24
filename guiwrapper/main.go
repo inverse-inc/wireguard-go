@@ -69,7 +69,7 @@ func setupExitSignals() {
 }
 
 func checkTunnelStatus() {
-	maxRpcFails := 5
+	maxRpcFails := 30
 	ctx := context.Background()
 	started := time.Now()
 	status := ""
@@ -83,10 +83,8 @@ func checkTunnelStatus() {
 					statusLabel.SetText("Failed to start tunnel process")
 				}
 			} else if fails >= maxRpcFails {
-				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead.")
-				reconnectBtn.Show()
+				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead. Please restart the client.")
 				peersTable.SetContent(widget.NewLabel(""))
-				return
 			} else {
 				fmt.Println("Failed to contact tunnel for status update")
 				statusLabel.SetText("Tunnel seems to be inactive...")

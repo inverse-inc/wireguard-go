@@ -20,7 +20,7 @@ var spacePlaceholder = "                          "
 
 var statusLabel *widget.Label
 var peersTable *widget.Card
-var reconnectBtn *widget.Button
+
 var restartBtn *widget.Button
 
 var w fyne.Window
@@ -50,13 +50,6 @@ func Start(w fyne.Window, callback func(bool)) {
 	tab1 := container.NewTabItem("Connection", widget.NewHBox())
 	tab2 := container.NewTabItem("Settings", widget.NewHBox())
 	tabs := container.NewAppTabs(tab1)
-
-	reconnectBtn = widget.NewButton("Reconnect", func() {
-		reconnectBtn.Hide()
-		statusLabel.SetText("Reconnecting")
-		startTunnel(true)
-	})
-	reconnectBtn.Hide()
 
 	restartBtn = widget.NewButton("Restart", func() {
 		_, err := rpc.Stop(context.Background(), &wgrpc.StopRequest{})
@@ -174,7 +167,6 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 			passwordEntry,
 		),
 		widget.NewButton("Connect", connect),
-		reconnectBtn,
 	)
 
 	settingsTab.Content = widget.NewVBox(
@@ -190,7 +182,7 @@ func PostConnect(tabs *container.AppTabs) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
 	statusLabel.Wrapping = fyne.TextWrapWord
 	peersTable = widget.NewCard("Peers", "", widget.NewVBox())
-	tabs.Items[0].Content = widget.NewVBox(statusLabel, restartBtn, reconnectBtn, peersTable)
+	tabs.Items[0].Content = widget.NewVBox(statusLabel, restartBtn, peersTable)
 	if len(tabs.Items) > 1 {
 		tabs.RemoveIndex(1)
 	}
