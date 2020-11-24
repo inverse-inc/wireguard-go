@@ -188,6 +188,7 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 
 func PostConnect(tabs *container.AppTabs) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
+	statusLabel.Wrapping = fyne.TextWrapWord
 	peersTable = widget.NewCard("Peers", "", widget.NewVBox())
 	tabs.Items[0].Content = widget.NewVBox(statusLabel, restartBtn, reconnectBtn, peersTable)
 	if len(tabs.Items) > 1 {
