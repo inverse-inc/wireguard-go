@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type WGServiceClient interface {
 	GetStatus(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusReply, error)
 	GetPeers(ctx context.Context, in *PeersRequest, opts ...grpc.CallOption) (*PeersReply, error)
+	Stop(ctx context.Context, in *StopRequest, opts ...grpc.CallOption) (*StopReply, error)
 }
 
 type wGServiceClient struct {
@@ -47,12 +48,22 @@ func (c *wGServiceClient) GetPeers(ctx context.Context, in *PeersRequest, opts .
 	return out, nil
 }
 
+func (c *wGServiceClient) Stop(ctx context.Context, in *StopRequest, opts ...grpc.CallOption) (*StopReply, error) {
+	out := new(StopReply)
+	err := c.cc.Invoke(ctx, "/WGService/Stop", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WGServiceServer is the server API for WGService service.
 // All implementations must embed UnimplementedWGServiceServer
 // for forward compatibility
 type WGServiceServer interface {
 	GetStatus(context.Context, *StatusRequest) (*StatusReply, error)
 	GetPeers(context.Context, *PeersRequest) (*PeersReply, error)
+	Stop(context.Context, *StopRequest) (*StopReply, error)
 	mustEmbedUnimplementedWGServiceServer()
 }
 
@@ -65,6 +76,9 @@ func (UnimplementedWGServiceServer) GetStatus(context.Context, *StatusRequest) (
 }
 func (UnimplementedWGServiceServer) GetPeers(context.Context, *PeersRequest) (*PeersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPeers not implemented")
+}
+func (UnimplementedWGServiceServer) Stop(context.Context, *StopRequest) (*StopReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
 }
 func (UnimplementedWGServiceServer) mustEmbedUnimplementedWGServiceServer() {}
 
@@ -115,6 +129,24 @@ func _WGService_GetPeers_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WGService_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StopRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WGServiceServer).Stop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/WGService/Stop",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WGServiceServer).Stop(ctx, req.(*StopRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _WGService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "WGService",
 	HandlerType: (*WGServiceServer)(nil),
@@ -126,6 +158,10 @@ var _WGService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPeers",
 			Handler:    _WGService_GetPeers_Handler,
+		},
+		{
+			MethodName: "Stop",
+			Handler:    _WGService_Stop_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

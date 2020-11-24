@@ -5,6 +5,7 @@ option go_package = "wgrpc";
 service WGService {
   rpc GetStatus (StatusRequest) returns (StatusReply) {}
   rpc GetPeers (PeersRequest) returns (PeersReply) {}
+  rpc Stop (StopRequest) returns (StopReply) {}
 }
 
 message StatusRequest {
@@ -26,4 +27,10 @@ message PeersRequest {
 
 message PeersReply {
   repeated PeerReply peers = 1;
+}
+
+message StopRequest {
+}
+
+message StopReply {
 }

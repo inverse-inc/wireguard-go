@@ -97,6 +97,8 @@ func checkTunnelStatus() {
 			status = statusReply.Status
 			if status == ztn.STATUS_ERROR {
 				statusLabel.SetText(messages[status] + ": " + statusReply.LastError)
+				restartBtn.Show()
+				return
 			} else {
 				statusLabel.SetText(messages[status])
 				UpdatePeers(ctx, rpc)

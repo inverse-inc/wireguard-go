@@ -2,6 +2,8 @@ package wgrpc
 
 import (
 	context "context"
+	"os"
+	"time"
 
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
@@ -39,4 +41,10 @@ func (s *WGServiceServerHandler) GetPeers(ctx context.Context, in *PeersRequest)
 		}
 	}
 	return &PeersReply{Peers: peerReplies}, nil
+}
+
+func (s *WGServiceServerHandler) Stop(ctx context.Context, in *StopRequest) (*StopReply, error) {
+	time.Sleep(1 * time.Second)
+	os.Exit(0)
+	return &StopReply{}, nil
 }

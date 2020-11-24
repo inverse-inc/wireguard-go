@@ -21,11 +21,12 @@ var spacePlaceholder = "                          "
 var statusLabel *widget.Label
 var peersTable *widget.Card
 var reconnectBtn *widget.Button
+var restartBtn *widget.Button
 
 var w fyne.Window
 
 func Refresh() {
-	//w.Content().Refresh()
+	w.Content().Refresh()
 }
 
 func SetupAPIClientGUI(callback func(bool)) {
@@ -39,6 +40,13 @@ func SetupAPIClientGUI(callback func(bool)) {
 	}
 
 	w = a.NewWindow(util.AppName)
+	Start(w, callback)
+	w.ShowAndRun()
+}
+
+func Start(w fyne.Window, callback func(bool)) {
+	var err error
+
 	tab1 := container.NewTabItem("Connection", widget.NewHBox())
 	tab2 := container.NewTabItem("Settings", widget.NewHBox())
 	tabs := container.NewAppTabs(tab1)
@@ -49,6 +57,15 @@ func SetupAPIClientGUI(callback func(bool)) {
 		startTunnel(true)
 	})
 	reconnectBtn.Hide()
+
+	restartBtn = widget.NewButton("Restart", func() {
+		_, err := rpc.Stop(context.Background(), &wgrpc.StopRequest{})
+		if err != nil {
+			fmt.Println("Failed to stop the tunnel", err)
+		}
+		Start(w, callback)
+	})
+	restartBtn.Hide()
 
 	_, err = rpc.GetStatus(context.Background(), &wgrpc.StatusRequest{})
 	if err != nil {
@@ -61,7 +78,7 @@ func SetupAPIClientGUI(callback func(bool)) {
 
 	w.SetContent(tabs)
 
-	w.ShowAndRun()
+	Refresh()
 }
 
 func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
@@ -172,7 +189,7 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 func PostConnect(tabs *container.AppTabs) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
 	peersTable = widget.NewCard("Peers", "", widget.NewVBox())
-	tabs.Items[0].Content = widget.NewVBox(statusLabel, reconnectBtn, peersTable)
+	tabs.Items[0].Content = widget.NewVBox(statusLabel, restartBtn, reconnectBtn, peersTable)
 	if len(tabs.Items) > 1 {
 		tabs.RemoveIndex(1)
 	}
