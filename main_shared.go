@@ -3,6 +3,7 @@ package main
 //go:generate go run dns/directives_generate.go
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"log"
@@ -10,8 +11,11 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"strings"
+	"text/template"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
@@ -29,6 +33,7 @@ import (
 const mainConnectionPort = 12673
 
 var connection *ztn.Connection
+var NamesToResolve []string
 
 func startInverse(interfaceName string, device *device.Device) {
 	defer binutils.CapturePanic()
@@ -111,7 +116,7 @@ func startInverse(interfaceName string, device *device.Device) {
 
 	filter := filter.NewFilterFromAcls(profile.ACLs)
 	device.SetReceiveFilter(filter)
-
+	NamesToResolve = profile.NamesToResolve
 	for _, peerID := range profile.AllowedPeers {
 		connection.StartPeer(device, profile, peerID, networkConnection)
 	}
@@ -188,4 +193,47 @@ func findppid(pid int) int {
 func quit() {
 	ztn.UPNPIGDCleanupMapped()
 	os.Exit(0)
+}
+
+func generateCoreDNSConfig(nameservers []string, domains []string) *bytes.Buffer {
+
+	var tpl bytes.Buffer
+
+	type Data struct {
+		Domains     []string
+		Nameservers string
+		API         string
+	}
+
+	APIClient := ztn.GetAPIClient()
+
+	data := Data{
+		Domains:     domains,
+		Nameservers: strings.Join(nameservers[:], " "),
+		API:         APIClient.Host,
+	}
+	spew.Dump(data)
+
+	t := template.New("Coreconfig")
+
+	t, _ = t.Parse(
+		`.:53 {
+
+		bind 127.0.0.69
+		#debug
+		{{ range .Domains }}
+		{{ if ne . "" }}
+		dnsredir {{.}} {
+		   to ietf-doh://{{ $.API }}:9999/dns-query
+		}
+		{{ end }}
+		{{ end }}
+		forward . {
+			to {{ .Nameservers }}
+		}
+	}`)
+
+	t.Execute(&tpl, data)
+	spew.Dump(tpl)
+	return &tpl
 }

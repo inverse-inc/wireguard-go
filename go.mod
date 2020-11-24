@@ -16,9 +16,10 @@ require (
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.4.3
+	github.com/google/gopacket v1.1.19 // indirect
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
-	github.com/inverse-inc/go-dnschange v0.0.0-20201030170812-9a70f8803b20
+	github.com/inverse-inc/go-dnschange v0.0.0-20201124194110-c569440ef372
 	github.com/inverse-inc/packetfence v10.2.1-0.20201118170534-51d28c5194e5+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20201118170534-51d28c5194e5
 	github.com/inverse-inc/upnp v0.0.0-20201112135509-c215d3967126
