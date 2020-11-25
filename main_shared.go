@@ -27,6 +27,7 @@ func startInverse(interfaceName string, device *device.Device) {
 	defer binutils.CapturePanic()
 
 	connection = ztn.NewConnection(logger)
+	go wgrpc.StartRPC(connection)
 
 	bindTechniqueDone := make(chan bool)
 
@@ -58,8 +59,6 @@ func startInverse(interfaceName string, device *device.Device) {
 	}
 
 	ztn.BindTechniques.Add(ztn.BindSTUN)
-
-	go wgrpc.StartRPC(connection)
 
 	if !ztn.RunningInCLI() {
 		go checkParentIsAlive()
