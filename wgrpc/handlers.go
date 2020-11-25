@@ -10,7 +10,8 @@ import (
 
 type WGServiceServerHandler struct {
 	UnimplementedWGServiceServer
-	connection *ztn.Connection
+	connection        *ztn.Connection
+	NetworkConnection *ztn.NetworkConnection
 }
 
 func NewWGServiceServerHandler(connection *ztn.Connection) *WGServiceServerHandler {
@@ -47,4 +48,11 @@ func (s *WGServiceServerHandler) Stop(ctx context.Context, in *StopRequest) (*St
 	time.Sleep(1 * time.Second)
 	os.Exit(0)
 	return &StopReply{}, nil
+}
+
+func (s *WGServiceServerHandler) PrintDebug(ctx context.Context, in *PrintDebugRequest) (*PrintDebugReply, error) {
+	if s.NetworkConnection != nil {
+		s.NetworkConnection.PrintDebug()
+	}
+	return &PrintDebugReply{}, nil
 }

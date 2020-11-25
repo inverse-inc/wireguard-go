@@ -7,14 +7,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"gortc.io/stun"
 )
 
 type bridge struct {
-	conn  *net.UDPConn
-	raddr *net.UDPAddr
+	conn     *net.UDPConn
+	raddr    *net.UDPAddr
+	lastUsed time.Time
 }
 
 type pkt struct {
@@ -36,6 +38,8 @@ type NetworkConnection struct {
 	logger *device.Logger
 
 	messageChan chan *pkt
+
+	printDebugChan chan bool
 
 	inboundAttempts     int
 	inboundAttemptsChan chan int
@@ -74,6 +78,8 @@ func (nc *NetworkConnection) reset() {
 
 	nc.messageChan = make(chan *pkt)
 
+	nc.printDebugChan = make(chan bool)
+
 	nc.inboundAttempts = 0
 	nc.inboundAttemptsChan = make(chan int)
 
@@ -96,6 +102,8 @@ func (nc *NetworkConnection) run() {
 	var stunPublicAddr stun.XORMappedAddress
 
 	keepalive := time.Tick(500 * time.Millisecond)
+
+	maintenance := time.Tick(1 * time.Minute)
 
 	nc.localConn, err = net.ListenUDP(udp, nil)
 	sharedutils.CheckError(err)
@@ -202,6 +210,11 @@ func (nc *NetworkConnection) run() {
 					nc.BindTechnique = BindTechniques.Next()
 					return false
 				}
+			case <-nc.printDebugChan:
+				spew.Dump(nc.peerConnections)
+				nc.logger.Info.Println("Last inbound/outbound", nc.lastWGInbound, "/", nc.lastWGOutbound)
+			case <-maintenance:
+				nc.maintenance()
 			case <-keepalive:
 				if !nc.CheckConnectionLiveness() {
 					nc.BindTechnique = BindTechniques.Next()
@@ -263,11 +276,16 @@ func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAd
 		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr}
 		nc.listen(conn, messages)
 	}
+	nc.peerConnections[raddr.String()].lastUsed = time.Now()
 	return nc.peerConnections[raddr.String()]
 }
 
 func (nc *NetworkConnection) findBridge(addr net.Addr) *bridge {
-	return nc.peerConnections[addr.String()]
+	b := nc.peerConnections[addr.String()]
+	if b != nil {
+		b.lastUsed = time.Now()
+	}
+	return b
 }
 
 func (nc *NetworkConnection) CheckConnectionLiveness() bool {
@@ -282,4 +300,22 @@ func (nc *NetworkConnection) CheckConnectionLiveness() bool {
 
 func (nc *NetworkConnection) RecordInboundAttempt() {
 	nc.inboundAttemptsChan <- 1
+}
+
+func (nc *NetworkConnection) PrintDebug() {
+	nc.printDebugChan <- true
+}
+
+func (nc *NetworkConnection) maintenance() {
+	toDel := []string{}
+	for raddr, br := range nc.peerConnections {
+		if time.Since(br.lastUsed) > PublicPortLivenessTolerance {
+			nc.logger.Info.Println("Closing inactive bridge to", raddr)
+			br.conn.Close()
+			toDel = append(toDel, raddr)
+		}
+	}
+	for _, raddr := range toDel {
+		delete(nc.peerConnections, raddr)
+	}
 }

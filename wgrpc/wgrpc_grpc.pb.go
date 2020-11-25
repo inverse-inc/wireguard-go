@@ -20,6 +20,7 @@ type WGServiceClient interface {
 	GetStatus(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusReply, error)
 	GetPeers(ctx context.Context, in *PeersRequest, opts ...grpc.CallOption) (*PeersReply, error)
 	Stop(ctx context.Context, in *StopRequest, opts ...grpc.CallOption) (*StopReply, error)
+	PrintDebug(ctx context.Context, in *PrintDebugRequest, opts ...grpc.CallOption) (*PrintDebugReply, error)
 }
 
 type wGServiceClient struct {
@@ -57,6 +58,15 @@ func (c *wGServiceClient) Stop(ctx context.Context, in *StopRequest, opts ...grp
 	return out, nil
 }
 
+func (c *wGServiceClient) PrintDebug(ctx context.Context, in *PrintDebugRequest, opts ...grpc.CallOption) (*PrintDebugReply, error) {
+	out := new(PrintDebugReply)
+	err := c.cc.Invoke(ctx, "/WGService/PrintDebug", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WGServiceServer is the server API for WGService service.
 // All implementations must embed UnimplementedWGServiceServer
 // for forward compatibility
@@ -64,6 +74,7 @@ type WGServiceServer interface {
 	GetStatus(context.Context, *StatusRequest) (*StatusReply, error)
 	GetPeers(context.Context, *PeersRequest) (*PeersReply, error)
 	Stop(context.Context, *StopRequest) (*StopReply, error)
+	PrintDebug(context.Context, *PrintDebugRequest) (*PrintDebugReply, error)
 	mustEmbedUnimplementedWGServiceServer()
 }
 
@@ -79,6 +90,9 @@ func (UnimplementedWGServiceServer) GetPeers(context.Context, *PeersRequest) (*P
 }
 func (UnimplementedWGServiceServer) Stop(context.Context, *StopRequest) (*StopReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
+}
+func (UnimplementedWGServiceServer) PrintDebug(context.Context, *PrintDebugRequest) (*PrintDebugReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrintDebug not implemented")
 }
 func (UnimplementedWGServiceServer) mustEmbedUnimplementedWGServiceServer() {}
 
@@ -147,6 +161,24 @@ func _WGService_Stop_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WGService_PrintDebug_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrintDebugRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WGServiceServer).PrintDebug(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/WGService/PrintDebug",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WGServiceServer).PrintDebug(ctx, req.(*PrintDebugRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _WGService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "WGService",
 	HandlerType: (*WGServiceServer)(nil),
@@ -162,6 +194,10 @@ var _WGService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Stop",
 			Handler:    _WGService_Stop_Handler,
+		},
+		{
+			MethodName: "PrintDebug",
+			Handler:    _WGService_PrintDebug_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

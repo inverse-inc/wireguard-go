@@ -97,6 +97,8 @@ func startInverse(interfaceName string, device *device.Device) {
 	networkConnection := ztn.NewNetworkConnection(logger)
 	go networkConnection.Start()
 
+	wgrpc.WGRPCServer.NetworkConnection = networkConnection
+
 	filter := filter.NewFilterFromAcls(profile.ACLs)
 	device.SetReceiveFilter(filter)
 

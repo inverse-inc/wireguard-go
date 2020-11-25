@@ -6,6 +6,7 @@ service WGService {
   rpc GetStatus (StatusRequest) returns (StatusReply) {}
   rpc GetPeers (PeersRequest) returns (PeersReply) {}
   rpc Stop (StopRequest) returns (StopReply) {}
+  rpc PrintDebug(PrintDebugRequest) returns (PrintDebugReply) {}
 }
 
 message StatusRequest {
@@ -35,3 +36,8 @@ message StopRequest {
 message StopReply {
 }
 
+message PrintDebugRequest {
+}
+
+message PrintDebugReply {
+}
