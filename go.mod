@@ -6,6 +6,7 @@ require (
 	fyne.io/fyne v1.4.0
 	github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa // indirect
 	github.com/davecgh/go-spew v1.1.1
+	github.com/fullstorydev/grpcurl v1.7.0 // indirect
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.4.3

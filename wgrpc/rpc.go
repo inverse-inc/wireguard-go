@@ -7,6 +7,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const ServerPort = 6970
@@ -19,6 +20,7 @@ func StartRPC(connection *ztn.Connection) {
 	grpcServer := grpc.NewServer()
 	WGRPCServer = NewWGServiceServerHandler(connection)
 	RegisterWGServiceServer(grpcServer, WGRPCServer)
+	reflection.Register(grpcServer)
 	grpcServer.Serve(lis)
 }
 
