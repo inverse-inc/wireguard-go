@@ -2,10 +2,12 @@ package peerrpc
 
 import (
 	context "context"
+	"errors"
 	"fmt"
 	sync "sync"
 	"time"
 
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	"github.com/theckman/go-securerandom"
@@ -14,12 +16,17 @@ import (
 type PeerServiceServerHandler struct {
 	sync.Mutex
 	UnimplementedPeerServiceServer
-	logger      *device.Logger
-	peerBridges map[uint64]*ztn.NetworkConnection
+	logger         *device.Logger
+	peerBridges    map[uint64]*ztn.NetworkConnection
+	maxPeerBridges int
 }
 
 func NewPeerServiceServerHandler(logger *device.Logger) *PeerServiceServerHandler {
-	s := &PeerServiceServerHandler{logger: logger, peerBridges: map[uint64]*ztn.NetworkConnection{}}
+	s := &PeerServiceServerHandler{
+		logger:         logger,
+		peerBridges:    map[uint64]*ztn.NetworkConnection{},
+		maxPeerBridges: sharedutils.EnvOrDefaultInt("WG_MAX_PEER_BRIDGES", 16),
+	}
 	go func() {
 		for {
 			select {
@@ -36,6 +43,13 @@ func (s *PeerServiceServerHandler) CanOfferForwarding(ctx context.Context, in *C
 }
 
 func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *SetupForwardingRequest) (*SetupForwardingReply, error) {
+	s.Lock()
+	if len(s.peerBridges) >= s.maxPeerBridges {
+		s.Unlock()
+		return nil, errors.New("Reached the maximum amount of peer bridges on this server")
+	}
+	s.Unlock()
+
 	token, err := securerandom.Uint64()
 	if err != nil {
 		return nil, err
@@ -70,4 +84,5 @@ func (s *PeerServiceServerHandler) PrintDebug() {
 	for _, nc := range s.peerBridges {
 		nc.PrintDebug()
 	}
+	s.logger.Info.Printf("Got %d bridges active out of a maximum of %d", len(s.peerBridges), s.maxPeerBridges)
 }

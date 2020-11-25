@@ -22,7 +22,10 @@ type WGServiceServerHandler struct {
 }
 
 func NewWGServiceServerHandler(connection *ztn.Connection) *WGServiceServerHandler {
-	return &WGServiceServerHandler{connection: connection, debugables: []Debugable{}}
+	return &WGServiceServerHandler{
+		connection: connection,
+		debugables: []Debugable{},
+	}
 }
 
 func (s *WGServiceServerHandler) AddDebugable(d Debugable) {
