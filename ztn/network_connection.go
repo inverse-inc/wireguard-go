@@ -32,7 +32,6 @@ type NetworkConnection struct {
 	publicAddr *net.UDPAddr
 
 	localConn *net.UDPConn
-	wgConn    *net.UDPConn
 
 	BindTechnique BindTechnique
 
@@ -50,6 +49,8 @@ type NetworkConnection struct {
 	started        time.Time
 	lastWGInbound  time.Time
 	lastWGOutbound time.Time
+
+	WGAddr *net.UDPAddr
 }
 
 func NewNetworkConnection(description string, logger *device.Logger) *NetworkConnection {
@@ -57,6 +58,8 @@ func NewNetworkConnection(description string, logger *device.Logger) *NetworkCon
 		logger:          logger.AddPrepend(fmt.Sprintf("(NC:%s) ", description)),
 		peerConnections: map[string]*bridge{},
 	}
+	nc.WGAddr = &net.UDPAddr{IP: localWGIP, Port: localWGPort}
+
 	nc.reset()
 	if bt := sharedutils.EnvOrDefault("WG_BIND_TECHNIQUE", ""); bt != "" && BindTechniqueNames[bt] != "" {
 		nc.BindTechnique = BindTechniqueNames[bt]
@@ -70,9 +73,6 @@ func (nc *NetworkConnection) reset() {
 	nc.publicAddr = nil
 	if nc.localConn != nil {
 		nc.localConn.Close()
-	}
-	if nc.wgConn != nil {
-		nc.wgConn.Close()
 	}
 	for _, pc := range nc.peerConnections {
 		pc.conn.Close()
@@ -200,9 +200,10 @@ func (nc *NetworkConnection) run() {
 					} else {
 						nc.lastWGInbound = time.Now()
 						n := len(message.message)
-						localWGAddr := &net.UDPAddr{IP: localWGIP, Port: localWGPort}
-						writeBack := nc.setupBridge(message.conn, message.raddr, localWGAddr, nc.messageChan)
-						nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", localWGAddr.String(), n, message.raddr)
+						wgConn, err := net.DialUDP("udp4", nil, nc.WGAddr)
+						sharedutils.CheckError(err)
+						writeBack := nc.setupBridge(message.conn, message.raddr, wgConn, nc.messageChan)
+						nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", nc.WGAddr.String(), n, message.raddr)
 						writeBack.conn.Write(message.message)
 					}
 				}
@@ -271,13 +272,11 @@ func (nc *NetworkConnection) listen(conn *net.UDPConn, messages chan *pkt) {
 	}()
 }
 
-func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAddr, toAddr *net.UDPAddr, messages chan *pkt) *bridge {
+func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAddr, toConn *net.UDPConn, messages chan *pkt) *bridge {
 	if nc.peerConnections[raddr.String()] == nil {
-		conn, err := net.DialUDP("udp4", nil, toAddr)
-		sharedutils.CheckError(err)
-		nc.peerConnections[raddr.String()] = &bridge{conn: conn, raddr: raddr, autoClose: true}
-		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr}
-		nc.listen(conn, messages)
+		nc.peerConnections[raddr.String()] = &bridge{conn: toConn, raddr: raddr, autoClose: true}
+		nc.peerConnections[toConn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr}
+		nc.listen(toConn, messages)
 	}
 	nc.peerConnections[raddr.String()].lastUsed = time.Now()
 	return nc.peerConnections[raddr.String()]
