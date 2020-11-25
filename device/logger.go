@@ -20,9 +20,11 @@ const (
 )
 
 type Logger struct {
-	Debug *log.Logger
-	Info  *log.Logger
-	Error *log.Logger
+	Debug   *log.Logger
+	Info    *log.Logger
+	Error   *log.Logger
+	level   int
+	prepend string
 }
 
 func NewLogger(level int, prepend string) *Logger {
@@ -55,5 +57,13 @@ func NewLogger(level int, prepend string) *Logger {
 		"ERROR: "+prepend,
 		log.Ldate|log.Ltime,
 	)
+
+	logger.level = level
+	logger.prepend = prepend
+
 	return logger
+}
+
+func (l *Logger) AddPrepend(prepend string) *Logger {
+	return NewLogger(l.level, l.prepend+prepend)
 }

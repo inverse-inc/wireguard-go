@@ -27,6 +27,8 @@ type pkt struct {
 }
 
 type NetworkConnection struct {
+	description string
+
 	publicAddr *net.UDPAddr
 
 	localConn *net.UDPConn
@@ -50,9 +52,9 @@ type NetworkConnection struct {
 	lastWGOutbound time.Time
 }
 
-func NewNetworkConnection(logger *device.Logger) *NetworkConnection {
+func NewNetworkConnection(description string, logger *device.Logger) *NetworkConnection {
 	nc := &NetworkConnection{
-		logger:          logger,
+		logger:          logger.AddPrepend(fmt.Sprintf("(NC:%s) ", description)),
 		peerConnections: map[string]*bridge{},
 	}
 	nc.reset()
@@ -212,7 +214,7 @@ func (nc *NetworkConnection) run() {
 					return false
 				}
 			case <-nc.printDebugChan:
-				spew.Dump(nc.peerConnections)
+				nc.logger.Info.Print(spew.Sdump(nc.peerConnections))
 				nc.logger.Info.Println("Last inbound/outbound", nc.lastWGInbound, "/", nc.lastWGOutbound)
 			case <-maintenance:
 				nc.maintenance()

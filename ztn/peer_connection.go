@@ -53,7 +53,7 @@ type PeerConnection struct {
 func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profile, peerProfile PeerProfile, networkConnection *NetworkConnection) *PeerConnection {
 	pc := &PeerConnection{
 		device:            d,
-		logger:            logger,
+		logger:            logger.AddPrepend(fmt.Sprintf("(PEER:%s) ", peerProfile.Hostname)),
 		myID:              myProfile.PublicKey,
 		peerID:            peerProfile.PublicKey,
 		MyProfile:         myProfile,
