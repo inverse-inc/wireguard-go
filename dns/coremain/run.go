@@ -33,7 +33,7 @@ func init() {
 }
 
 // Run is CoreDNS's main() function.
-func Run() {
+func Run(config ...string) {
 	caddy.TrapSignals()
 
 	// Reset flag.CommandLine to get rid of unwanted flags for instance from glog (used in kubernetes).
@@ -67,13 +67,22 @@ func Run() {
 		fmt.Println(caddy.DescribePlugins())
 		os.Exit(0)
 	}
+	var corefile caddy.Input
+	var err error
 
-	// Get Corefile input
-	corefile, err := caddy.LoadCaddyfile(serverType)
-	if err != nil {
-		mustLogFatal(err)
+	if len(config) > 0 {
+		corefile, err = caddy.CaddyfileFromString(config[0], serverType)
+		if err != nil {
+			mustLogFatal(err)
+		}
+
+	} else {
+		// Get Corefile input
+		corefile, err = caddy.LoadCaddyfile(serverType)
+		if err != nil {
+			mustLogFatal(err)
+		}
 	}
-
 	// Start your engines
 	instance, err := caddy.Start(corefile)
 	if err != nil {

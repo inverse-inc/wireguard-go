@@ -15,7 +15,6 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
@@ -254,11 +253,11 @@ func main() {
 
 		spew.Dump(myDNS)
 
-		generateCoreDNSConfig(myDNS, NamesToResolve)
+		buffer := GenerateCoreDNSConfig(myDNS, NamesToResolve)
 
 		dnsChange.Change("127.0.0.69")
 
-		coremain.Run()
+		coremain.Run(buffer)
 
 		// wait for program to terminate
 

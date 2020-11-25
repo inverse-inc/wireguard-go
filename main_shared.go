@@ -195,7 +195,7 @@ func quit() {
 	os.Exit(0)
 }
 
-func generateCoreDNSConfig(nameservers []string, domains []string) *bytes.Buffer {
+func GenerateCoreDNSConfig(nameservers []string, domains []string) string {
 
 	var tpl bytes.Buffer
 
@@ -234,6 +234,5 @@ func generateCoreDNSConfig(nameservers []string, domains []string) *bytes.Buffer
 	}`)
 
 	t.Execute(&tpl, data)
-	spew.Dump(tpl)
-	return &tpl
+	return tpl.String()
 }
