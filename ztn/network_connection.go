@@ -14,9 +14,10 @@ import (
 )
 
 type bridge struct {
-	conn     *net.UDPConn
-	raddr    *net.UDPAddr
-	lastUsed time.Time
+	conn      *net.UDPConn
+	raddr     *net.UDPAddr
+	lastUsed  time.Time
+	autoClose bool
 }
 
 type pkt struct {
@@ -272,7 +273,7 @@ func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAd
 	if nc.peerConnections[raddr.String()] == nil {
 		conn, err := net.DialUDP("udp4", nil, toAddr)
 		sharedutils.CheckError(err)
-		nc.peerConnections[raddr.String()] = &bridge{conn: conn, raddr: raddr}
+		nc.peerConnections[raddr.String()] = &bridge{conn: conn, raddr: raddr, autoClose: true}
 		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr}
 		nc.listen(conn, messages)
 	}
@@ -291,7 +292,7 @@ func (nc *NetworkConnection) findBridge(addr net.Addr) *bridge {
 func (nc *NetworkConnection) CheckConnectionLiveness() bool {
 	if time.Since(nc.started) > PublicPortLivenessTolerance {
 		if time.Since(nc.lastWGInbound) > PublicPortLivenessTolerance || time.Since(nc.lastWGOutbound) > PublicPortLivenessTolerance {
-			nc.logger.Info.Println("Have not processed a public packet for too long on the public port")
+			nc.logger.Info.Println("Have not processed a public packet for too long on the public port.", "Last inbound", nc.lastWGInbound, ", last outbound", nc.lastWGOutbound)
 			return false
 		}
 	}
@@ -310,8 +311,12 @@ func (nc *NetworkConnection) maintenance() {
 	toDel := []string{}
 	for raddr, br := range nc.peerConnections {
 		if time.Since(br.lastUsed) > PublicPortLivenessTolerance {
-			nc.logger.Info.Println("Closing inactive bridge to", raddr)
-			br.conn.Close()
+			if br.autoClose {
+				nc.logger.Info.Println("Closing inactive connection to", raddr)
+				br.conn.Close()
+			} else {
+				nc.logger.Debug.Println("Deleting inactive peer connection to", raddr)
+			}
 			toDel = append(toDel, raddr)
 		}
 	}
