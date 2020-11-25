@@ -31,6 +31,22 @@ type BindTechniquesStruct struct {
 	index          int
 }
 
+func (bts *BindTechniquesStruct) CopyNew() *BindTechniquesStruct {
+	bts.Lock()
+	defer bts.Unlock()
+	newBts := &BindTechniquesStruct{
+		bindTechniques: map[BindTechnique]bool{},
+		sorted:         make([]BindTechnique, len(bts.sorted)),
+	}
+	for k, v := range bts.sorted {
+		newBts.sorted[k] = v
+	}
+	for k, v := range bts.bindTechniques {
+		newBts.bindTechniques[k] = v
+	}
+	return newBts
+}
+
 func (bts *BindTechniquesStruct) Add(bt BindTechnique) {
 	bts.Lock()
 	defer bts.Unlock()

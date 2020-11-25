@@ -1,6 +1,7 @@
 package ztn
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	"github.com/theckman/go-securerandom"
 	"gortc.io/stun"
 )
 
@@ -29,11 +31,16 @@ type pkt struct {
 type NetworkConnection struct {
 	description string
 
+	id uint64
+
 	publicAddr *net.UDPAddr
+
+	publicAddrChan chan *net.UDPAddr
 
 	localConn *net.UDPConn
 
-	BindTechnique BindTechnique
+	BindTechnique  BindTechnique
+	BindTechniques *BindTechniquesStruct
 
 	peerConnections map[string]*bridge
 
@@ -60,17 +67,23 @@ func NewNetworkConnection(description string, logger *device.Logger) *NetworkCon
 	}
 	nc.WGAddr = &net.UDPAddr{IP: localWGIP, Port: localWGPort}
 
+	var err error
+	nc.id, err = securerandom.Uint64()
+	sharedutils.CheckError(err)
+
 	nc.reset()
+	nc.BindTechniques = BindTechniques.CopyNew()
 	if bt := sharedutils.EnvOrDefault("WG_BIND_TECHNIQUE", ""); bt != "" && BindTechniqueNames[bt] != "" {
 		nc.BindTechnique = BindTechniqueNames[bt]
 	} else {
-		nc.BindTechnique = BindTechniques.Next()
+		nc.BindTechnique = nc.BindTechniques.Next()
 	}
 	return nc
 }
 
 func (nc *NetworkConnection) reset() {
 	nc.publicAddr = nil
+
 	if nc.localConn != nil {
 		nc.localConn.Close()
 	}
@@ -96,6 +109,19 @@ func (nc *NetworkConnection) Start() {
 		nc.run()
 		nc.reset()
 		nc.logger.Info.Println("Public network connection seems to be inactive, will open a new public port")
+	}
+}
+
+func (nc *NetworkConnection) SetupForwarding() *net.UDPAddr {
+	nc.publicAddrChan = make(chan *net.UDPAddr)
+
+	go nc.run()
+
+	select {
+	case <-time.After(5 * time.Second):
+		return nil
+	case addr := <-nc.publicAddrChan:
+		return addr
 	}
 }
 
@@ -143,6 +169,8 @@ func (nc *NetworkConnection) run() {
 				}
 
 				switch {
+				case nc.IsMessage(message.message):
+					nc.logger.Error.Println("Need to implement this here!!!!")
 				case peerupnpgid.IsMessage(message.message):
 					externalIP, externalPort, err := peerupnpgid.ParseBindRequestPkt(message.message)
 					if err != nil {
@@ -153,7 +181,7 @@ func (nc *NetworkConnection) run() {
 					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
 					sharedutils.CheckError(err)
 					if newaddr.String() != nc.publicAddr.String() {
-						nc.publicAddr = newaddr
+						nc.setPublicAddr(newaddr)
 					}
 				case peernatpmp.IsMessage(message.message):
 					externalIP, externalPort, err := peernatpmp.ParseBindRequestPkt(message.message)
@@ -165,7 +193,7 @@ func (nc *NetworkConnection) run() {
 					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
 					sharedutils.CheckError(err)
 					if newaddr.String() != nc.publicAddr.String() {
-						nc.publicAddr = newaddr
+						nc.setPublicAddr(newaddr)
 					}
 				case stun.IsMessage(message.message):
 					m := new(stun.Message)
@@ -183,8 +211,9 @@ func (nc *NetworkConnection) run() {
 
 					if stunPublicAddr.String() != xorAddr.String() {
 						stunPublicAddr = xorAddr
-						nc.publicAddr, err = net.ResolveUDPAddr("udp4", xorAddr.String())
+						newaddr, err := net.ResolveUDPAddr("udp4", xorAddr.String())
 						sharedutils.CheckError(err)
+						nc.setPublicAddr(newaddr)
 					}
 
 				case string(message.message) == pingMsg:
@@ -211,7 +240,7 @@ func (nc *NetworkConnection) run() {
 				nc.logger.Debug.Println("Got an inbound failure reported by a peer connection")
 				nc.inboundAttempts++
 				if nc.inboundAttempts > InboundAttemptsTolerance && time.Since(nc.started) > InboundAttemptsTryAtLeast && nc.lastWGInbound.IsZero() {
-					nc.BindTechnique = BindTechniques.Next()
+					nc.BindTechnique = nc.BindTechniques.Next()
 					return false
 				}
 			case <-nc.printDebugChan:
@@ -221,7 +250,7 @@ func (nc *NetworkConnection) run() {
 				nc.maintenance()
 			case <-keepalive:
 				if !nc.CheckConnectionLiveness() {
-					nc.BindTechnique = BindTechniques.Next()
+					nc.BindTechnique = nc.BindTechniques.Next()
 					return false
 				}
 
@@ -323,5 +352,25 @@ func (nc *NetworkConnection) maintenance() {
 	}
 	for _, raddr := range toDel {
 		delete(nc.peerConnections, raddr)
+	}
+}
+
+func (nc *NetworkConnection) setPublicAddr(addr *net.UDPAddr) {
+	nc.publicAddr = addr
+	if nc.publicAddrChan != nil {
+		nc.publicAddrChan <- addr
+	}
+}
+
+func (nc *NetworkConnection) ID() uint64 {
+	return nc.id
+}
+
+func (nc *NetworkConnection) IsMessage(b []byte) bool {
+	id, _ := binary.Uvarint(b[0:binary.MaxVarintLen64])
+	if id == nc.id {
+		return true
+	} else {
+		return false
 	}
 }

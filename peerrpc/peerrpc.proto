@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "peerrpc";
+
+service PeerService {
+  rpc CanOfferForwarding (CanOfferForwardingRequest) returns (CanOfferForwardingReply) {}
+  rpc SetupForwarding (SetupForwardingRequest) returns (SetupForwardingReply) {}
+}
+
+message CanOfferForwardingRequest{
+}
+
+message CanOfferForwardingReply {
+  bool result = 1;
+}
+
+message SetupForwardingRequest {
+}
+
+message SetupForwardingReply {
+  uint64 id = 1;
+  uint64 token = 2;
+  string raddr = 3;
+}

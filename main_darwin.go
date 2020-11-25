@@ -273,6 +273,8 @@ func main() {
 		device.Close()
 
 		logger.Info.Println("Shutting down")
+
+		quit()
 	}
 }
 

@@ -12,6 +12,8 @@ import (
 	"github.com/theckman/go-securerandom"
 )
 
+var upnpigdMapped = []UPNPIGD{}
+
 type UPNPIGD struct {
 	sync.Mutex
 	id         uint64
@@ -23,6 +25,13 @@ func NewUPNPGID() *UPNPIGD {
 	id, err := securerandom.Uint64()
 	sharedutils.CheckError(err)
 	return &UPNPIGD{id: id, mapping: upnp.Upnp{}}
+}
+
+func UPNPIGDCleanupMapped() {
+	for _, u := range upnpigdMapped {
+		fmt.Println("Clearing UPNPIGD mapping", u.remotePort)
+		u.DelPortMapping()
+	}
 }
 
 func (u *UPNPIGD) CheckNet() error {
@@ -49,9 +58,15 @@ func (u *UPNPIGD) ExternalIPAddr() (net.IP, error) {
 	return net.ParseIP(u.mapping.GatewayOutsideIP), nil
 }
 
+func (u *UPNPIGD) DelPortMapping() error {
+	u.mapping.DelPortMapping(u.remotePort, "UDP")
+	return nil
+}
+
 func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
 	if err := u.mapping.AddPortMapping(localPort, remotePort, PublicPortTTL(), "UDP", "PacketFence-Zero-Trust-Client"); err == nil {
 		fmt.Println("Port mapped successfully", localPort, remotePort)
+		upnpigdMapped = append(upnpigdMapped, *u)
 		return nil
 	} else {
 		u.remotePort = 0
