@@ -4,6 +4,7 @@ import (
 	context "context"
 	"fmt"
 	sync "sync"
+	"time"
 
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -14,11 +15,20 @@ type PeerServiceServerHandler struct {
 	sync.Mutex
 	UnimplementedPeerServiceServer
 	logger      *device.Logger
-	peerBridges []*ztn.NetworkConnection
+	peerBridges map[uint64]*ztn.NetworkConnection
 }
 
 func NewPeerServiceServerHandler(logger *device.Logger) *PeerServiceServerHandler {
-	return &PeerServiceServerHandler{logger: logger, peerBridges: []*ztn.NetworkConnection{}}
+	s := &PeerServiceServerHandler{logger: logger, peerBridges: map[uint64]*ztn.NetworkConnection{}}
+	go func() {
+		for {
+			select {
+			case <-time.After(1 * time.Second):
+				s.maintenance()
+			}
+		}
+	}()
+	return s
 }
 
 func (s *PeerServiceServerHandler) CanOfferForwarding(ctx context.Context, in *CanOfferForwardingRequest) (*CanOfferForwardingReply, error) {
@@ -35,7 +45,29 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 
 	s.Lock()
 	defer s.Unlock()
-	s.peerBridges = append(s.peerBridges, nc)
+	s.peerBridges[token] = nc
 
 	return &SetupForwardingReply{Id: nc.ID(), Token: token, Raddr: addr.String()}, nil
+}
+
+func (s *PeerServiceServerHandler) maintenance() {
+	s.Lock()
+	defer s.Unlock()
+	toDel := []uint64{}
+	for t, nc := range s.peerBridges {
+		if !nc.CheckConnectionLiveness() {
+			toDel = append(toDel, t)
+		}
+	}
+	for _, t := range toDel {
+		delete(s.peerBridges, t)
+	}
+}
+
+func (s *PeerServiceServerHandler) PrintDebug() {
+	s.Lock()
+	defer s.Unlock()
+	for _, nc := range s.peerBridges {
+		nc.PrintDebug()
+	}
 }

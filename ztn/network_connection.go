@@ -250,6 +250,9 @@ func (nc *NetworkConnection) run() {
 				nc.maintenance()
 			case <-keepalive:
 				if !nc.CheckConnectionLiveness() {
+					if peerupnpgid.remotePort != 0 {
+						peerupnpgid.DelPortMapping()
+					}
 					nc.BindTechnique = nc.BindTechniques.Next()
 					return false
 				}
@@ -364,6 +367,10 @@ func (nc *NetworkConnection) setPublicAddr(addr *net.UDPAddr) {
 
 func (nc *NetworkConnection) ID() uint64 {
 	return nc.id
+}
+
+func (nc *NetworkConnection) Description() string {
+	return nc.description
 }
 
 func (nc *NetworkConnection) IsMessage(b []byte) bool {

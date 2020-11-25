@@ -2,20 +2,33 @@ package wgrpc
 
 import (
 	context "context"
+	"fmt"
 	"os"
+	sync "sync"
 	"time"
 
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
+type Debugable interface {
+	PrintDebug()
+}
+
 type WGServiceServerHandler struct {
+	sync.Mutex
 	UnimplementedWGServiceServer
-	connection        *ztn.Connection
-	NetworkConnection *ztn.NetworkConnection
+	connection *ztn.Connection
+	debugables []Debugable
 }
 
 func NewWGServiceServerHandler(connection *ztn.Connection) *WGServiceServerHandler {
-	return &WGServiceServerHandler{connection: connection}
+	return &WGServiceServerHandler{connection: connection, debugables: []Debugable{}}
+}
+
+func (s *WGServiceServerHandler) AddDebugable(d Debugable) {
+	s.Lock()
+	defer s.Unlock()
+	s.debugables = append(s.debugables, d)
 }
 
 func (s *WGServiceServerHandler) GetStatus(ctx context.Context, in *StatusRequest) (*StatusReply, error) {
@@ -51,8 +64,9 @@ func (s *WGServiceServerHandler) Stop(ctx context.Context, in *StopRequest) (*St
 }
 
 func (s *WGServiceServerHandler) PrintDebug(ctx context.Context, in *PrintDebugRequest) (*PrintDebugReply, error) {
-	if s.NetworkConnection != nil {
-		s.NetworkConnection.PrintDebug()
+	for _, d := range s.debugables {
+		fmt.Println("Printing debug for", d)
+		d.PrintDebug()
 	}
 	return &PrintDebugReply{}, nil
 }

@@ -27,6 +27,8 @@ func StartRPC(logger *device.Logger, connection *ztn.Connection) {
 	PeerServer := peerrpc.NewPeerServiceServerHandler(logger)
 	peerrpc.RegisterPeerServiceServer(grpcServer, PeerServer)
 
+	WGRPCServer.AddDebugable(PeerServer)
+
 	reflection.Register(grpcServer)
 	grpcServer.Serve(lis)
 }
