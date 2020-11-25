@@ -35,6 +35,8 @@ type PeerConnection struct {
 	lastOutboundPacket time.Time
 	connectedOutbound  bool
 
+	connectedOnce bool
+
 	try int
 
 	bothStunning bool
@@ -76,13 +78,15 @@ func (pc *PeerConnection) reset() {
 	pc.lastKeepalive = time.Time{}
 
 	// Reset the try flag if a connection attempt was already successful so that it retries from scratch next time
-	if pc.Connected() {
+	if pc.connectedOnce {
 		pc.try = 0
 	}
 	pc.connectedInbound = false
 	pc.lastInboundPacket = time.Time{}
 	pc.connectedOutbound = false
 	pc.lastOutboundPacket = time.Time{}
+
+	pc.connectedOnce = false
 
 	if pc.stunPeerConn != nil {
 		pc.stunPeerConn.Close()
@@ -146,6 +150,7 @@ func (pc *PeerConnection) run() {
 				}
 
 				if pc.Connected() {
+					pc.connectedOnce = true
 					pc.Status = PEER_STATUS_CONNECTED
 				} else if pc.started && time.Since(pc.lastKeepalive) > ConnectionLivenessTolerance {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
