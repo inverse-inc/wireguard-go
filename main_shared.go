@@ -218,20 +218,17 @@ func GenerateCoreDNSConfig(nameservers []string, domains []string) string {
 
 	t, _ = t.Parse(
 		`.:53 {
-
-		bind 127.0.0.69
-		#debug
-		{{ range .Domains }}
-		{{ if ne . "" }}
-		dnsredir {{.}} {
-		   to ietf-doh://{{ $.API }}:9999/dns-query
-		}
-		{{ end }}
-		{{ end }}
-		forward . {
-			to {{ .Nameservers }}
-		}
-	}`)
+bind 127.0.0.69
+debug
+{{ range .Domains }}
+{{ if ne . "" }}
+dnsredir {{.}} {
+   to ietf-doh://{{ $.API }}:9999/dns-query
+}
+{{ end }}
+{{ end }}
+forward . {{ .Nameservers }}
+}`)
 
 	t.Execute(&tpl, data)
 	return tpl.String()
