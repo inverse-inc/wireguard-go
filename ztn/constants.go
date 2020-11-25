@@ -18,5 +18,6 @@ const pingMsg = "ping"
 const stunServer = "srv.semaan.ca:3478"
 
 func PublicPortTTL() int {
-	return int(PublicPortLivenessTolerance/time.Second) * 2
+	// 30 days
+	return 30 * 24 * 60 * 60
 }
