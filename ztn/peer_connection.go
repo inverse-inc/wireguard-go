@@ -42,7 +42,8 @@ type PeerConnection struct {
 	bothStunning bool
 	stunPeerConn *net.UDPConn
 
-	Status string
+	Status         string
+	ConnectionType string
 
 	BindTechnique BindTechnique
 
@@ -151,7 +152,7 @@ func (pc *PeerConnection) run() {
 
 				if pc.Connected() {
 					pc.connectedOnce = true
-					pc.Status = PEER_STATUS_CONNECTED
+					pc.Status = fmt.Sprintf("%s (%s)", PEER_STATUS_CONNECTED, pc.ConnectionType)
 				} else if pc.started && time.Since(pc.lastKeepalive) > ConnectionLivenessTolerance {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
 					pc.RemovePeer()
@@ -322,10 +323,11 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
 	if pc.ShouldTryPrivate() {
+		pc.ConnectionType = "LAN"
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	} else if pc.bothStunning {
 		var err error
-		pc.Status += " (2 way STUN)"
+		pc.ConnectionType = "WAN STUN"
 		pc.stunPeerConn, err = net.ListenUDP(udp, nil)
 		sharedutils.CheckError(err)
 		pc.networkConnection.listen(pc.stunPeerConn, pc.networkConnection.messageChan)
@@ -333,10 +335,10 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 		a := strings.Split(pc.stunPeerConn.LocalAddr().String(), ":")
 		conf += fmt.Sprintf("endpoint=%s\n", fmt.Sprintf("127.0.0.1:%s", a[len(a)-1]))
 	} else if pc.MyTurnPublicConnect() {
-		pc.Status += " (OUT)"
+		pc.ConnectionType = "WAN OUT"
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	} else {
-		pc.Status += " (IN)"
+		pc.ConnectionType = "WAN IN"
 		pc.networkConnection.RecordInboundAttempt()
 	}
 	conf += "replace_allowed_ips=true\n"
@@ -346,6 +348,8 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 		conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
 	}
 	conf += "persistent_keepalive_interval=1"
+
+	pc.Status += fmt.Sprintf(" (%s)", pc.ConnectionType)
 
 	SetConfigMulti(pc.device, conf)
 
