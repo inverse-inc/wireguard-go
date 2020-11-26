@@ -18,15 +18,12 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
-	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/tun"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/joho/godotenv"
 
 	_ "net/http/pprof"
-
-	godnschange "github.com/inverse-inc/go-dnschange"
 )
 
 const (
@@ -244,20 +241,7 @@ func main() {
 		logger.Info.Println("UAPI listener started")
 
 		startInverse(interfaceName, device)
-
-		spew.Dump(NamesToResolve)
-
-		dnsChange := godnschange.NewDNSChange()
-
-		myDNS := dnsChange.GetDNS()
-
-		spew.Dump(myDNS)
-
-		buffer := GenerateCoreDNSConfig(myDNS, NamesToResolve)
-
-		dnsChange.Change("127.0.0.69")
-
-		coremain.Run(buffer)
+		dnsChange := StartDNS()
 
 		// wait for program to terminate
 

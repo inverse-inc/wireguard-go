@@ -15,12 +15,13 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
+	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	_ "github.com/inverse-inc/wireguard-go/dns/core/plugin"
+	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/filter"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
@@ -212,14 +213,13 @@ func GenerateCoreDNSConfig(nameservers []string, domains []string) string {
 		Nameservers: strings.Join(nameservers[:], " "),
 		API:         APIClient.Host,
 	}
-	spew.Dump(data)
 
 	t := template.New("Coreconfig")
 
 	t, _ = t.Parse(
 		`.:53 {
 bind 127.0.0.69
-debug
+#debug
 {{ range .Domains }}
 {{ if ne . "" }}
 dnsredir {{.}} {
@@ -232,4 +232,18 @@ forward . {{ .Nameservers }}
 
 	t.Execute(&tpl, data)
 	return tpl.String()
+}
+
+func StartDNS() *godnschange.DNSStruct {
+	dnsChange := godnschange.NewDNSChange()
+
+	myDNS := dnsChange.GetDNS()
+
+	buffer := GenerateCoreDNSConfig(myDNS, NamesToResolve)
+
+	dnsChange.Change("127.0.0.69")
+
+	coremain.Run(buffer)
+
+	return dnsChange
 }
