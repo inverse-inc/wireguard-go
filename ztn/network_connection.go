@@ -175,7 +175,7 @@ func (nc *NetworkConnection) run() {
 					externalIP, externalPort, err := peerupnpgid.ParseBindRequestPkt(message.message)
 					if err != nil {
 						nc.logger.Error.Println("Unable to decode UPNP GID message:", err)
-						break
+						return false
 					}
 
 					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
@@ -187,7 +187,7 @@ func (nc *NetworkConnection) run() {
 					externalIP, externalPort, err := peernatpmp.ParseBindRequestPkt(message.message)
 					if err != nil {
 						nc.logger.Error.Println("Unable to decode UPNP GID message:", err)
-						break
+						return false
 					}
 
 					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
@@ -201,12 +201,12 @@ func (nc *NetworkConnection) run() {
 					decErr := m.Decode()
 					if decErr != nil {
 						nc.logger.Error.Println("Unable to decode STUN message:", decErr)
-						break
+						return false
 					}
 					var xorAddr stun.XORMappedAddress
 					if getErr := xorAddr.GetFrom(m); getErr != nil {
 						nc.logger.Error.Println("Unable to get STUN XOR address:", getErr)
-						break
+						return false
 					}
 
 					if stunPublicAddr.String() != xorAddr.String() {
