@@ -8,6 +8,7 @@ import (
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"github.com/inverse-inc/wireguard-go/util"
 	"gortc.io/stun"
 )
 
@@ -24,12 +25,7 @@ const (
 )
 
 func udpSend(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) error {
-	_, err := conn.WriteToUDP(msg, addr)
-	if err != nil {
-		return fmt.Errorf("send: %v", err)
-	}
-
-	return nil
+	return util.UDPSend(msg, conn, addr)
 }
 
 func udpSendStr(msg string, conn *net.UDPConn, addr *net.UDPAddr) error {

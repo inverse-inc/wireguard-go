@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "peerrpc";
+option go_package = "ztn";
 
 service PeerService {
   rpc CanOfferForwarding (CanOfferForwardingRequest) returns (CanOfferForwardingReply) {}
@@ -23,5 +23,6 @@ message SetupForwardingReply {
   uint64 id = 1;
   uint64 token = 2;
   string raddr = 3;
-  string publicAddr = 4;
+  bytes publicIP = 4;
+  int32 publicPort = 5;
 }

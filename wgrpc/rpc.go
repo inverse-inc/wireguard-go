@@ -6,7 +6,6 @@ import (
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
-	"github.com/inverse-inc/wireguard-go/peerrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -24,8 +23,8 @@ func StartRPC(logger *device.Logger, connection *ztn.Connection) {
 	WGRPCServer = NewWGServiceServerHandler(connection)
 	RegisterWGServiceServer(grpcServer, WGRPCServer)
 
-	PeerServer := peerrpc.NewPeerServiceServerHandler(logger)
-	peerrpc.RegisterPeerServiceServer(grpcServer, PeerServer)
+	PeerServer := ztn.NewPeerServiceServerHandler(logger)
+	ztn.RegisterPeerServiceServer(grpcServer, PeerServer)
 
 	WGRPCServer.AddDebugable(PeerServer)
 

@@ -9,13 +9,12 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
-	"github.com/inverse-inc/wireguard-go/peerrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
 func main() {
-	c := peerrpc.Client()
-	res, err := c.SetupForwarding(context.Background(), &peerrpc.SetupForwardingRequest{Name: "testing", PeerConnectionType: ztn.ConnectionTypeLAN})
+	c := ztn.ConnectPeerServiceClient("127.0.0.1:6970")
+	res, err := c.SetupForwarding(context.Background(), &ztn.SetupForwardingRequest{Name: "testing", PeerConnectionType: ztn.ConnectionTypeLAN})
 	sharedutils.CheckError(err)
 
 	spew.Dump(res)

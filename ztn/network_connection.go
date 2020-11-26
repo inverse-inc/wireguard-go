@@ -119,7 +119,7 @@ func (nc *NetworkConnection) Start() {
 	}
 }
 
-func (nc *NetworkConnection) SetupForwarding(ct string) (net.Addr, net.Addr) {
+func (nc *NetworkConnection) SetupForwarding(ct string) (net.Addr, *net.UDPAddr) {
 	nc.publicAddrChan = make(chan *net.UDPAddr)
 
 	go nc.run()

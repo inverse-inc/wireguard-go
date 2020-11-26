@@ -421,3 +421,7 @@ func (pc *PeerConnection) CheckConnectionLiveness() bool {
 	})
 	return result
 }
+
+func (pc *PeerConnection) OffersBridging() bool {
+	return pc.offersBridging
+}

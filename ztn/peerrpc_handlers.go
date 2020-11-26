@@ -1,4 +1,4 @@
-package peerrpc
+package ztn
 
 import (
 	context "context"
@@ -9,21 +9,20 @@ import (
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
-	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
 type PeerServiceServerHandler struct {
 	sync.Mutex
 	UnimplementedPeerServiceServer
 	logger         *device.Logger
-	peerBridges    map[uint64]*ztn.NetworkConnection
+	peerBridges    map[uint64]*NetworkConnection
 	maxPeerBridges int
 }
 
 func NewPeerServiceServerHandler(logger *device.Logger) *PeerServiceServerHandler {
 	s := &PeerServiceServerHandler{
 		logger:         logger,
-		peerBridges:    map[uint64]*ztn.NetworkConnection{},
+		peerBridges:    map[uint64]*NetworkConnection{},
 		maxPeerBridges: sharedutils.EnvOrDefaultInt("WG_MAX_PEER_BRIDGES", 16),
 	}
 	go func() {
@@ -53,7 +52,7 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	}
 	s.Unlock()
 
-	nc := ztn.NewNetworkConnection(fmt.Sprintf("peer-service-%s", in.Name), s.logger)
+	nc := NewNetworkConnection(fmt.Sprintf("peer-service-%s", in.Name), s.logger)
 	raddr, publicAddr := nc.SetupForwarding(in.PeerConnectionType)
 
 	if raddr == nil || publicAddr == nil {
@@ -64,7 +63,7 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	defer s.Unlock()
 	s.peerBridges[nc.Token()] = nc
 
-	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr.String(), PublicAddr: publicAddr.String()}, nil
+	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr.String(), PublicIP: publicAddr.IP[12:15], PublicPort: int32(publicAddr.Port)}, nil
 }
 
 func (s *PeerServiceServerHandler) maintenance() {

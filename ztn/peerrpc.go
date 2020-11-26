@@ -1,16 +1,15 @@
-package peerrpc
+package ztn
 
 import (
-	"fmt"
-
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	grpc "google.golang.org/grpc"
 )
 
-func Client() PeerServiceClient {
-	// TODO move this to the WG interface
+const PeerServiceServerPort = 6971
+
+func ConnectPeerServiceClient(addr string) PeerServiceClient {
 	conn, err := grpc.Dial(
-		fmt.Sprintf("127.0.0.1:%d", 6970),
+		addr,
 		grpc.WithInsecure(),
 	)
 	sharedutils.CheckError(err)
