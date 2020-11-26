@@ -323,11 +323,11 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
 	if pc.ShouldTryPrivate() {
-		pc.ConnectionType = "LAN"
+		pc.ConnectionType = ConnectionTypeLAN
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	} else if pc.bothStunning {
 		var err error
-		pc.ConnectionType = "WAN STUN"
+		pc.ConnectionType = ConnectionTypeWANSTUN
 		pc.stunPeerConn, err = net.ListenUDP(udp, nil)
 		sharedutils.CheckError(err)
 		pc.networkConnection.listen(pc.stunPeerConn, pc.networkConnection.messageChan)
@@ -335,10 +335,10 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 		a := strings.Split(pc.stunPeerConn.LocalAddr().String(), ":")
 		conf += fmt.Sprintf("endpoint=%s\n", fmt.Sprintf("127.0.0.1:%s", a[len(a)-1]))
 	} else if pc.MyTurnPublicConnect() {
-		pc.ConnectionType = "WAN OUT"
+		pc.ConnectionType = ConnectionTypeWANOUT
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	} else {
-		pc.ConnectionType = "WAN IN"
+		pc.ConnectionType = ConnectionTypeWANIN
 		pc.networkConnection.RecordInboundAttempt()
 	}
 	conf += "replace_allowed_ips=true\n"

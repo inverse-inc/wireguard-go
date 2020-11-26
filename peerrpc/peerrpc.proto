@@ -15,10 +15,13 @@ message CanOfferForwardingReply {
 }
 
 message SetupForwardingRequest {
+  string name = 1;
+  string peerConnectionType = 2;
 }
 
 message SetupForwardingReply {
   uint64 id = 1;
   uint64 token = 2;
   string raddr = 3;
+  string publicAddr = 4;
 }

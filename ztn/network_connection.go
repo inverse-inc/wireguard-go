@@ -31,7 +31,8 @@ type pkt struct {
 type NetworkConnection struct {
 	description string
 
-	id uint64
+	id    uint64
+	token uint64
 
 	publicAddr *net.UDPAddr
 
@@ -57,7 +58,9 @@ type NetworkConnection struct {
 	lastWGInbound  time.Time
 	lastWGOutbound time.Time
 
-	WGAddr *net.UDPAddr
+	WGAddr       *net.UDPAddr
+	wgConn       *net.UDPConn
+	wgConnRemote bool
 }
 
 func NewNetworkConnection(description string, logger *device.Logger) *NetworkConnection {
@@ -69,6 +72,8 @@ func NewNetworkConnection(description string, logger *device.Logger) *NetworkCon
 
 	var err error
 	nc.id, err = securerandom.Uint64()
+	sharedutils.CheckError(err)
+	nc.token, err = securerandom.Uint64()
 	sharedutils.CheckError(err)
 
 	nc.reset()
@@ -102,6 +107,8 @@ func (nc *NetworkConnection) reset() {
 	nc.started = time.Time{}
 	nc.lastWGInbound = time.Time{}
 	nc.lastWGOutbound = time.Time{}
+
+	nc.wgConn = nil
 }
 
 func (nc *NetworkConnection) Start() {
@@ -112,16 +119,22 @@ func (nc *NetworkConnection) Start() {
 	}
 }
 
-func (nc *NetworkConnection) SetupForwarding() *net.UDPAddr {
+func (nc *NetworkConnection) SetupForwarding(ct string) (net.Addr, net.Addr) {
 	nc.publicAddrChan = make(chan *net.UDPAddr)
 
 	go nc.run()
 
 	select {
 	case <-time.After(5 * time.Second):
-		return nil
+		return nil, nil
 	case addr := <-nc.publicAddrChan:
-		return addr
+		// If our peer wants the LAN address or the WAN address to talk to us
+		// And also what is the address to advertise to his own peers
+		if ct == ConnectionTypeLAN {
+			return nc.localConn.LocalAddr(), addr
+		} else {
+			return addr, addr
+		}
 	}
 }
 
@@ -153,6 +166,7 @@ func (nc *NetworkConnection) run() {
 
 	for {
 		res := func() bool {
+			err = nil
 			var message *pkt
 			var ok bool
 
@@ -170,7 +184,7 @@ func (nc *NetworkConnection) run() {
 
 				switch {
 				case nc.IsMessage(message.message):
-					nc.logger.Error.Println("Need to implement this here!!!!")
+					nc.handleMessage(message.conn, message.raddr, message.message)
 				case peerupnpgid.IsMessage(message.message):
 					externalIP, externalPort, err := peerupnpgid.ParseBindRequestPkt(message.message)
 					if err != nil {
@@ -225,15 +239,28 @@ func (nc *NetworkConnection) run() {
 						n := len(message.message)
 						nc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s\n", writeBack.raddr.String(), n, message.raddr)
 						writeBack.conn.Write(message.message)
-						udpSend(message.message, writeBack.conn, writeBack.raddr)
+						err = udpSend(message.message, writeBack.conn, writeBack.raddr)
+						if err != nil {
+							nc.logger.Error.Printf("Error sending packet to peer %s from WG server %s: %s", writeBack.raddr.String(), message.raddr, err)
+						}
 					} else {
 						nc.lastWGInbound = time.Now()
 						n := len(message.message)
-						wgConn, err := net.DialUDP("udp4", nil, nc.WGAddr)
-						sharedutils.CheckError(err)
-						writeBack := nc.setupBridge(message.conn, message.raddr, wgConn, nc.messageChan)
-						nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes %s\n", nc.WGAddr.String(), n, message.raddr)
-						writeBack.conn.Write(message.message)
+						if nc.wgConn == nil {
+							nc.wgConn, err = net.DialUDP("udp4", nil, nc.WGAddr)
+							nc.wgConnRemote = false
+							sharedutils.CheckError(err)
+						}
+						writeBack := nc.setupBridge(message.conn, message.raddr, nc.wgConn, nc.messageChan)
+						nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes from %s\n", nc.WGAddr.String(), n, message.raddr)
+						if nc.wgConnRemote {
+							err = udpSend(message.message, writeBack.conn, nc.WGAddr)
+						} else {
+							writeBack.conn.Write(message.message)
+						}
+						if err != nil {
+							nc.logger.Error.Printf("Error sending packet to WG server %s from peer %s: %s", nc.WGAddr.String(), message.raddr, err)
+						}
 					}
 				}
 			case <-nc.inboundAttemptsChan:
@@ -269,6 +296,10 @@ func (nc *NetworkConnection) run() {
 					} else if nc.BindTechnique == BindNATPMP {
 						err = peernatpmp.BindRequest(nc.localConn, localPort, nc.messageChan)
 					}
+				}
+
+				if nc.wgConnRemote {
+					udpSend([]byte(pingMsg), nc.wgConn, nc.WGAddr)
 				}
 
 				if err != nil {
@@ -369,15 +400,56 @@ func (nc *NetworkConnection) ID() uint64 {
 	return nc.id
 }
 
+func (nc *NetworkConnection) Token() uint64 {
+	return nc.token
+}
+
 func (nc *NetworkConnection) Description() string {
 	return nc.description
 }
 
 func (nc *NetworkConnection) IsMessage(b []byte) bool {
-	id, _ := binary.Uvarint(b[0:binary.MaxVarintLen64])
+	id, _ := binary.Uvarint(b[:binary.MaxVarintLen64])
 	if id == nc.id {
 		return true
 	} else {
 		return false
 	}
+}
+
+func (nc *NetworkConnection) handleMessage(conn *net.UDPConn, raddr *net.UDPAddr, b []byte) bool {
+	id, _ := binary.Uvarint(b[:binary.MaxVarintLen64])
+	token, _ := binary.Uvarint(b[1*binary.MaxVarintLen64 : 2*binary.MaxVarintLen64])
+	msgType, _ := binary.Uvarint(b[2*binary.MaxVarintLen64 : 3*binary.MaxVarintLen64])
+	data := b[3*binary.MaxVarintLen64:]
+
+	if id != nc.id {
+		nc.logger.Error.Println("Tried to handle a message that doesn't have the right ID")
+		return true
+	}
+
+	if token != nc.token {
+		nc.logger.Info.Println("Stopped handling a message that doesn't have a valid token")
+		return true
+	}
+
+	handlers := map[uint64]func(conn *net.UDPConn, raddr *net.UDPAddr, id, token, msgType uint64, data []byte) bool{
+		MsgNcBindPeerBridge: nc.bindPeerBridge,
+	}
+
+	if h, ok := handlers[msgType]; ok {
+		return h(conn, raddr, id, token, msgType, data)
+	} else {
+		nc.logger.Error.Println("Received unknown message type", msgType)
+		return true
+	}
+}
+
+func (nc *NetworkConnection) bindPeerBridge(conn *net.UDPConn, raddr *net.UDPAddr, id, token, msgType uint64, data []byte) bool {
+	nc.logger.Info.Println("Setting up peer bridge to", raddr)
+	nc.WGAddr = raddr
+	nc.wgConn = conn
+	nc.wgConnRemote = true
+	udpSend([]byte(pingMsg), conn, raddr)
+	return true
 }

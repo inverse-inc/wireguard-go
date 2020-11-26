@@ -10,7 +10,6 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ztn"
-	"github.com/theckman/go-securerandom"
 )
 
 type PeerServiceServerHandler struct {
@@ -43,6 +42,10 @@ func (s *PeerServiceServerHandler) CanOfferForwarding(ctx context.Context, in *C
 }
 
 func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *SetupForwardingRequest) (*SetupForwardingReply, error) {
+	if in.Name == "" {
+		return nil, errors.New("Missing name for your connection")
+	}
+
 	s.Lock()
 	if len(s.peerBridges) >= s.maxPeerBridges {
 		s.Unlock()
@@ -50,18 +53,18 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	}
 	s.Unlock()
 
-	token, err := securerandom.Uint64()
-	if err != nil {
-		return nil, err
+	nc := ztn.NewNetworkConnection(fmt.Sprintf("peer-service-%s", in.Name), s.logger)
+	raddr, publicAddr := nc.SetupForwarding(in.PeerConnectionType)
+
+	if raddr == nil || publicAddr == nil {
+		return nil, errors.New("Unable to setup the forwarding")
 	}
-	nc := ztn.NewNetworkConnection(fmt.Sprintf("peer-service-%d", token), s.logger)
-	addr := nc.SetupForwarding()
 
 	s.Lock()
 	defer s.Unlock()
-	s.peerBridges[token] = nc
+	s.peerBridges[nc.Token()] = nc
 
-	return &SetupForwardingReply{Id: nc.ID(), Token: token, Raddr: addr.String()}, nil
+	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr.String(), PublicAddr: publicAddr.String()}, nil
 }
 
 func (s *PeerServiceServerHandler) maintenance() {
