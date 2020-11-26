@@ -152,9 +152,11 @@ func listenEvents(device *device.Device, profile ztn.Profile, networkConnection 
 			event := ztn.Event{}
 			err := json.Unmarshal(e.Data, &event)
 			sharedutils.CheckError(err)
-			if event.Type == "new_peer" && event.Data["id"].(string) != myID {
-				logger.Info.Println("Received new peer from pub/sub", event.Data["id"].(string))
-				connection.StartPeer(device, profile, event.Data["id"].(string), networkConnection)
+			data := map[string]interface{}{}
+			err = json.Unmarshal(event.Data, &data)
+			if event.Type == "new_peer" && data["id"].(string) != myID {
+				logger.Info.Println("Received new peer from pub/sub", data["id"].(string))
+				connection.StartPeer(device, profile, data["id"].(string), networkConnection)
 			}
 		}
 	}

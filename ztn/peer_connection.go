@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
 )
@@ -36,6 +35,8 @@ type PeerConnection struct {
 	connectedOutbound  bool
 
 	connectedOnce bool
+
+	offersBridging bool
 
 	try int
 
@@ -88,6 +89,8 @@ func (pc *PeerConnection) reset() {
 	pc.lastOutboundPacket = time.Time{}
 
 	pc.connectedOnce = false
+
+	pc.offersBridging = false
 
 	if pc.stunPeerConn != nil {
 		pc.stunPeerConn.Close()
@@ -214,14 +217,30 @@ func (pc *PeerConnection) getPrivateAddr() string {
 	return fmt.Sprintf("%s:%d", localAddr.IP.String(), localWGPort)
 }
 
+type NetworkEndpointEvent struct {
+	ID              string        `json:"id"`
+	PublicEndpoint  string        `json:"public_endpoint"`
+	PrivateEndpoint string        `json:"private_endpoint"`
+	Try             int           `json:"try"`
+	BindTechnique   BindTechnique `json:"bind_technique"`
+	OffersBridging  bool          `json:"offers_bridging"`
+}
+
+func (nee NetworkEndpointEvent) ToJSON() []byte {
+	b, err := json.Marshal(nee)
+	sharedutils.CheckError(err)
+	return b
+}
+
 func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
-	return Event{Type: "network_endpoint", Data: gin.H{
-		"id":               pc.MyProfile.PublicKey,
-		"public_endpoint":  pc.networkConnection.publicAddr.String(),
-		"private_endpoint": pc.getPrivateAddr(),
-		"try":              pc.try,
-		"bind_technique":   pc.networkConnection.BindTechnique,
-	}}
+	return Event{Type: "network_endpoint", Data: NetworkEndpointEvent{
+		ID:              pc.MyProfile.PublicKey,
+		PublicEndpoint:  pc.networkConnection.publicAddr.String(),
+		PrivateEndpoint: pc.getPrivateAddr(),
+		Try:             pc.try,
+		BindTechnique:   pc.networkConnection.BindTechnique,
+		OffersBridging:  sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
+	}.ToJSON()}
 }
 
 func (pc *PeerConnection) getPeerAddr() chan string {
@@ -242,25 +261,31 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 				event := Event{}
 				err := json.Unmarshal(e.Data, &event)
 				sharedutils.CheckError(err)
-				if event.Type == "network_endpoint" && event.Data["id"].(string) != myID {
-					// Follow what the peer says if he has a bigger key
-					if event.Data["try"] != nil && pc.IAmTheSmallestKey() {
-						pc.try = int(event.Data["try"].(float64))
-						pc.logger.Info.Println("Using peer defined try ID", pc.try)
-					}
-					if event.Data["bind_technique"].(string) == string(BindSTUN) && pc.networkConnection.BindTechnique == BindSTUN {
-						pc.logger.Debug.Println("Self and peer are using STUN to connect")
-						pc.bothStunning = true
-					} else {
-						pc.logger.Debug.Println("Either self or peer isn't using STUN to connect")
-						pc.bothStunning = false
-					}
-					if pc.ShouldTryPrivate() {
-						result <- event.Data["private_endpoint"].(string)
-						return
-					} else {
-						result <- event.Data["public_endpoint"].(string)
-						return
+				if event.Type == "network_endpoint" {
+					nee := NetworkEndpointEvent{}
+					err = json.Unmarshal(event.Data, &nee)
+					sharedutils.CheckError(err)
+					if nee.ID != myID {
+						// Follow what the peer says if he has a bigger key
+						if pc.IAmTheSmallestKey() {
+							pc.try = nee.Try
+							pc.logger.Info.Println("Using peer defined try ID", pc.try)
+						}
+						if nee.BindTechnique == BindSTUN && pc.networkConnection.BindTechnique == BindSTUN {
+							pc.logger.Debug.Println("Self and peer are using STUN to connect")
+							pc.bothStunning = true
+						} else {
+							pc.logger.Debug.Println("Either self or peer isn't using STUN to connect")
+							pc.bothStunning = false
+						}
+						pc.offersBridging = nee.OffersBridging
+						if pc.ShouldTryPrivate() {
+							result <- nee.PrivateEndpoint
+							return
+						} else {
+							result <- nee.PublicEndpoint
+							return
+						}
 					}
 				}
 			}

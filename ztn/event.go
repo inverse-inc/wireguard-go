@@ -2,17 +2,17 @@ package ztn
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/packetfence/go/unifiedapiclient"
 	"github.com/inverse-inc/packetfence/go/unifiedapiclient/glpclient"
 )
 
 type Event struct {
-	Type string `json:"type"`
-	Data gin.H  `json:"data"`
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
 }
 
 func init() {
