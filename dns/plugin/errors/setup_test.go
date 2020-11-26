@@ -3,7 +3,7 @@ package errors
 import (
 	"testing"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 )
 
 func TestErrorsParse(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"testing"
 	gotmpl "text/template"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/metadata"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"

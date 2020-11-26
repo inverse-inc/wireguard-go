@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 )
 
 func TestAutoParse(t *testing.T) {

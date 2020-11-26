@@ -190,7 +190,6 @@ github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:z
 github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd/go.mod h1:sE/e/2PUdi/liOCUjSTXgM1o87ZssimdTWN964YiIeI=
 github.com/coredns/caddy v1.1.0 h1:ezvsPrT/tA/7pYDBZxu0cT0VmWk75AfIaf6GSYCNMf0=
 github.com/coredns/caddy v1.1.0/go.mod h1:A6ntJQlAWuQfFlsd9hvigKbo2WS0VUs2l1e2F+BawD4=
-github.com/coredns/caddy v1.1.0/go.mod h1:A6ntJQlAWuQfFlsd9hvigKbo2WS0VUs2l1e2F+BawD4=
 github.com/coredns/coredns v1.8.0 h1:U6Z6Ljuy5D8VKDquF1dUotUtFeoNt0PVCwSfIVYFC6s=
 github.com/coredns/coredns v1.8.0/go.mod h1:R/TQ2yPVKdafwpVXOh6NFN13ikgto21kOMPvOeFPS8o=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
@@ -516,6 +515,10 @@ github.com/influxdata/influxdb1-client v0.0.0-20191209144304-8bf82d3c094d/go.mod
 github.com/influxdata/influxdb1-client v0.0.0-20191209144304-8bf82d3c094d/go.mod h1:qj24IKcXYK6Iy9ceXlo3Tc+vtHo9lIhSX5JddghvEPo=
 github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062/go.mod h1:PcNJqIlcX/dj3DTG/+QQnRvSgTMG6CLpRMjWcv4+J6w=
 github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062/go.mod h1:PcNJqIlcX/dj3DTG/+QQnRvSgTMG6CLpRMjWcv4+J6w=
+github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126152059-80eaf3c0f7de h1:Sf+7UQG8d1t/6eQ/mZvREOm3JWAtp/Tl4x+4Gna9rgw=
+github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126152059-80eaf3c0f7de/go.mod h1:OAdbY/EXrPbAh1WHci0y9zGMxU6ScSpiJFMUqfkeoCU=
+github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126153337-171152e671af h1:Vs/ohI3NTFBwNAyzKjnPhlCVsZJhCxInWV/G5HpjTfQ=
+github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126153337-171152e671af/go.mod h1:OAdbY/EXrPbAh1WHci0y9zGMxU6ScSpiJFMUqfkeoCU=
 github.com/inverse-inc/dhcp4 v0.0.0-20200625173842-2c4d1e50d7ca/go.mod h1:lvc5S3uPg6xat1wRFAA0ru/DfIV6YOmMK6E754FUEuo=
 github.com/inverse-inc/dhcp4 v0.0.0-20200625173842-2c4d1e50d7ca/go.mod h1:lvc5S3uPg6xat1wRFAA0ru/DfIV6YOmMK6E754FUEuo=
 github.com/inverse-inc/dhcp4 v0.0.0-20200625173842-2c4d1e50d7ca/go.mod h1:lvc5S3uPg6xat1wRFAA0ru/DfIV6YOmMK6E754FUEuo=

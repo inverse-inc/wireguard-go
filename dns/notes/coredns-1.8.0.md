@@ -17,8 +17,8 @@ This release also adds three backwards incompatible changes. This will only affe
 you'll need to upgrade to the new API as detailed in it's [documentation](/plugins/dnstap).
 
 Two, because Caddy is now developing a version 2 and we are using version 1, we've internalized
-Caddy into <https://github.com/coredns/caddy>. This means the `caddy` types change and *all* plugins
-need to fix the import path from: `github.com/caddyserver/caddy` to `github.com/coredns/caddy` (this
+Caddy into <https://github.com/inverse-inc/coredns-caddy>. This means the `caddy` types change and *all* plugins
+need to fix the import path from: `github.com/caddyserver/caddy` to `github.com/inverse-inc/coredns-caddy` (this
 can thankfully be automated).
 
 And lastly, the `transfer` plugin is now made a first class citizen and plugins wanting to perform

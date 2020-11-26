@@ -3,7 +3,7 @@ package test
 import (
 	"sync"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	_ "github.com/inverse-inc/wireguard-go/dns/core" // Hook in CoreDNS.
 	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 	_ "github.com/inverse-inc/wireguard-go/dns/core/plugin" // Load all managed plugins in github.com/coredns/coredns.

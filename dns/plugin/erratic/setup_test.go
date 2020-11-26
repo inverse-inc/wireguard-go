@@ -3,7 +3,7 @@ package erratic
 import (
 	"testing"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 )
 
 func TestSetup(t *testing.T) {

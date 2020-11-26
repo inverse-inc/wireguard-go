@@ -3,7 +3,7 @@ package sign
 import (
 	"testing"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 )
 
 func TestParse(t *testing.T) {

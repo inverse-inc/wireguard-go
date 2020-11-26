@@ -6,7 +6,7 @@
 package dnsredir
 
 import (
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/miekg/dns"
 	"runtime"
 )

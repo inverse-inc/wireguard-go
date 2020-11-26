@@ -4,7 +4,7 @@ package dnsredir
 
 import (
 	"fmt"
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/leiless/dnsredir/pf"
 	"github.com/miekg/dns"
 	"net"

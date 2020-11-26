@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coredns/caddy"
-	"github.com/coredns/caddy/caddyfile"
+	"github.com/inverse-inc/coredns-caddy"
+	"github.com/inverse-inc/coredns-caddy/caddyfile"
 	"github.com/inverse-inc/wireguard-go/dns/plugin"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnsutil"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/parse"

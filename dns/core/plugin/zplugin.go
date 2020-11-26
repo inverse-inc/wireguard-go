@@ -4,7 +4,7 @@ package plugin
 
 import (
 	// Include all plugins.
-	_ "github.com/coredns/caddy/onevent"
+	_ "github.com/inverse-inc/coredns-caddy/onevent"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/any"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/bind"
 	_ "github.com/inverse-inc/wireguard-go/dns/plugin/bufsize"

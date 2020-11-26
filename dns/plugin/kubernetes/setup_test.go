@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/fall"
 
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"

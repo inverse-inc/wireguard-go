@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coredns/caddy"
-	"github.com/coredns/caddy/caddyfile"
+	"github.com/inverse-inc/coredns-caddy"
+	"github.com/inverse-inc/coredns-caddy/caddyfile"
 
 	"github.com/prometheus/client_golang/prometheus"
 )

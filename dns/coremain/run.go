@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/coredns/caddy"
+	caddy "github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 )
 

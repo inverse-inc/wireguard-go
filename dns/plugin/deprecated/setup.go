@@ -1,6 +1,6 @@
 // Package deprecated is used when we deprecated plugin. In plugin.cfg just go from
 //
-// startup:github.com/coredns/caddy/startupshutdown
+// startup:github.com/inverse-inc/coredns-caddy/startupshutdown
 //
 // To:
 //
@@ -14,7 +14,7 @@ package deprecated
 import (
 	"errors"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )
 

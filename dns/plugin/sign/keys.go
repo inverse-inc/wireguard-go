@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 
 	"github.com/miekg/dns"

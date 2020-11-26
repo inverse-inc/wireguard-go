@@ -3,7 +3,7 @@ package dnstap
 import (
 	"testing"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 )
 
 func TestConfig(t *testing.T) {

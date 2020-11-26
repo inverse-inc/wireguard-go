@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 
 	"github.com/miekg/dns"
 )

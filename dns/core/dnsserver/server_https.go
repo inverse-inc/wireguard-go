@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnsutil"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/doh"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/response"

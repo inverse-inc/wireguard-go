@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	// Plug in CoreDNS, needed for AppVersion and AppName in this test.
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	_ "github.com/inverse-inc/wireguard-go/dns/coremain"
 
 	"github.com/miekg/dns"

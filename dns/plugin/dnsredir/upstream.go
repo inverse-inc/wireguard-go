@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/plugin"
 	pkgtls "github.com/inverse-inc/wireguard-go/dns/plugin/pkg/tls"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"

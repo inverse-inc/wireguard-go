@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 )
 
 func TestSetupDnssec(t *testing.T) {

@@ -3,7 +3,7 @@ package bufsize
 import (
 	"strconv"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/core/dnsserver"
 	"github.com/inverse-inc/wireguard-go/dns/plugin"
 )

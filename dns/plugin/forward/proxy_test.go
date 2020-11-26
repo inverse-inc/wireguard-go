@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/coredns/caddy"
+	"github.com/inverse-inc/coredns-caddy"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/dnstest"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/pkg/transport"
 	"github.com/inverse-inc/wireguard-go/dns/plugin/test"
