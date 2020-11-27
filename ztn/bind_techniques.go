@@ -8,18 +8,20 @@ import (
 type BindTechnique string
 
 var BindTechniqueNames = map[string]BindTechnique{
-	"STUN":    BindSTUN,
-	"UPNPGID": BindUPNPGID,
-	"NATPMP":  "NATPMP",
+	"STUN":         BindSTUN,
+	"UPNPGID":      BindUPNPGID,
+	"NATPMP":       BindNATPMP,
+	"THROUGH_PEER": BindThroughPeer,
 }
 
 const (
 	// These will get ordered in the BindTechniques.
 	// Lower string == tried first if available
 	// NAT PMP hasn't worked well in a few places so its left to be tried last
-	BindUPNPGID = BindTechnique("01-UPNPGID")
-	BindSTUN    = BindTechnique("02-STUN")
-	BindNATPMP  = BindTechnique("03-NATPMP")
+	BindUPNPGID     = BindTechnique("01-UPNPGID")
+	BindSTUN        = BindTechnique("02-STUN")
+	BindNATPMP      = BindTechnique("03-NATPMP")
+	BindThroughPeer = BindTechnique("99-THROUGH_PEER")
 )
 
 var DefaultBindTechnique = BindSTUN

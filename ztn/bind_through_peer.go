@@ -2,44 +2,61 @@ package ztn
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/util"
 )
 
-type BindThroughPeer struct {
-	id                [64]byte
+type BindThroughPeerAgent struct {
+	sync.Mutex
+	id                []byte
 	connection        *Connection
 	networkConnection *NetworkConnection
+	remoteIP          net.IP
+	remotePort        int
 }
 
-func NewBindThroughPeer(connection *Connection, networkConnection *NetworkConnection) *BindThroughPeer {
-	btp := &BindThroughPeer{
+func NewBindThroughPeerAgent(connection *Connection, networkConnection *NetworkConnection) *BindThroughPeerAgent {
+	btp := &BindThroughPeerAgent{
 		connection:        connection,
 		networkConnection: networkConnection,
 	}
+	btp.id = make([]byte, 64)
+	_, err := rand.Read(btp.id)
+	sharedutils.CheckError(err)
 	return btp
 }
 
-func (btp *BindThroughPeer) findBridgeablePeers() []*PeerConnection {
+func (btp *BindThroughPeerAgent) findBridgeablePeers() []*PeerConnection {
 	btp.connection.Lock()
 	defer btp.connection.Unlock()
 	pcs := []*PeerConnection{}
 	for _, pc := range btp.connection.Peers {
-		if pc.offersBridging {
+		if pc.offersBridging && pc.Connected() {
 			pcs = append(pcs, pc)
 		}
 	}
 	return pcs
 }
 
-func (btp *BindThroughPeer) BindRequest(conn *net.UDPConn, sendTo chan *pkt) error {
+func (btp *BindThroughPeerAgent) BindRequest(conn *net.UDPConn, sendTo chan *pkt) error {
+	btp.Lock()
+	defer btp.Unlock()
+
+	if btp.remotePort != 0 {
+		return nil
+	}
+
 	pcs := btp.findBridgeablePeers()
 	for _, pc := range pcs {
+		btp.networkConnection.logger.Info.Println("Attempting to setup forwarding with peer", pc.PeerProfile.WireguardIP)
+
 		serverAddr := fmt.Sprintf("%s:%d", pc.PeerProfile.WireguardIP.String(), PeerServiceServerPort)
 		c := ConnectPeerServiceClient(serverAddr)
 		res, err := c.SetupForwarding(context.Background(), &SetupForwardingRequest{Name: "testing", PeerConnectionType: pc.ConnectionType})
@@ -61,14 +78,23 @@ func (btp *BindThroughPeer) BindRequest(conn *net.UDPConn, sendTo chan *pkt) err
 			btp.networkConnection.logger.Error.Println("Failed to write to", addr, "via connection", conn, "due to the following error:", err)
 			continue
 		} else {
-			sendTo <- &pkt{message: btp.BindRequestPkt(net.IPv4(res.PublicIP[0], res.PublicIP[1], res.PublicIP[2], res.PublicIP[3]), int(res.PublicPort))}
+			btp.remoteIP = net.IPv4(res.PublicIP[0], res.PublicIP[1], res.PublicIP[2], res.PublicIP[3])
+			btp.remotePort = int(res.PublicPort)
+			go func() {
+				sendTo <- &pkt{message: btp.BindRequestPkt(btp.remoteIP, btp.remotePort)}
+			}()
+			return nil
 		}
 
 	}
+
+	go func() {
+		sendTo <- &pkt{message: btp.BindRequestPkt(net.IPv4(0, 0, 0, 0), 0)}
+	}()
 	return errors.New("Couldn't find a peer to bridge through")
 }
 
-func (btp *BindThroughPeer) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
+func (btp *BindThroughPeerAgent) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
 	var buf = defaultBufferPool.Get()
 	for i, v := range btp.id {
 		buf[i] = v
@@ -79,4 +105,24 @@ func (btp *BindThroughPeer) BindRequestPkt(externalIP net.IP, externalPort int) 
 	buf[len(btp.id)+4] = externalIP[15]
 	binary.PutUvarint(buf[len(btp.id)+5:], uint64(externalPort))
 	return buf
+}
+
+func (btp *BindThroughPeerAgent) IsMessage(b []byte) bool {
+	if len(b) < len(btp.id) {
+		return false
+	}
+
+	for i := 0; i < len(btp.id); i++ {
+		if b[i] != btp.id[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (btp *BindThroughPeerAgent) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
+	ip := net.IPv4(buf[len(btp.id)+1], buf[len(btp.id)+2], buf[len(btp.id)+3], buf[len(btp.id)+4])
+	port, _ := binary.Uvarint(buf[len(btp.id)+5:])
+	return ip, int(port), nil
 }

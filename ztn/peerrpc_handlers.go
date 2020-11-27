@@ -63,7 +63,7 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	defer s.Unlock()
 	s.peerBridges[nc.Token()] = nc
 
-	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr.String(), PublicIP: publicAddr.IP[12:15], PublicPort: int32(publicAddr.Port)}, nil
+	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr.String(), PublicIP: publicAddr.IP[12:16], PublicPort: int32(publicAddr.Port)}, nil
 }
 
 func (s *PeerServiceServerHandler) maintenance() {

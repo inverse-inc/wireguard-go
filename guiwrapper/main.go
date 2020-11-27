@@ -32,6 +32,9 @@ func main() {
 	binutils.Setenv("WG_GUI_PID", os.Getenv("WG_GUI_PID"))
 	binutils.Setenv("WG_CLI", "false")
 
+	//TODO: REMOVE THIS
+	binutils.Setenv("WG_BIND_TECHNIQUE", "THROUGH_PEER")
+
 	go binutils.CheckParentIsAlive(quit)
 
 	setupExitSignals()

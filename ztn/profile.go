@@ -120,6 +120,8 @@ func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) erro
 		}
 	}
 
+	go StartPeerServiceRPC(p.WireguardIP, p.logger)
+
 	return nil
 }
 

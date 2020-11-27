@@ -95,6 +95,7 @@ func startInverse(interfaceName string, device *device.Device) {
 	}
 
 	networkConnection := ztn.NewNetworkConnection("MAIN", logger)
+	networkConnection.Connection = connection
 	go networkConnection.Start()
 
 	wgrpc.WGRPCServer.AddDebugable(networkConnection)

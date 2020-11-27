@@ -121,7 +121,7 @@ func (pc *PeerConnection) run() {
 					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
 					pc.Status = PEER_STATUS_CONNECT_PRIVATE
 				} else {
-					pc.logger.Info.Println("Connecting to public IP address of peer", peerStr, "for peer", pc.peerID, ".")
+					pc.logger.Info.Println("Found public IP address of peer", peerStr, "for peer", pc.peerID, ".")
 					pc.Status = PEER_STATUS_CONNECT_PUBLIC
 				}
 
@@ -375,6 +375,8 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 	conf += "persistent_keepalive_interval=1"
 
 	pc.Status += fmt.Sprintf(" (%s)", pc.ConnectionType)
+
+	pc.logger.Info.Println(pc.Status)
 
 	SetConfigMulti(pc.device, conf)
 
