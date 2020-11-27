@@ -545,11 +545,14 @@ func (nc *NetworkConnection) addMarker(marker []byte, data []byte) []byte {
 }
 
 func (nc *NetworkConnection) infoFromMarker(message []byte) *net.UDPAddr {
-	port, _ := binary.Uvarint(message[4 : 4+binary.MaxVarintLen64])
-	return &net.UDPAddr{
-		IP:   net.IPv4(message[0], message[1], message[2], message[3]),
-		Port: int(port),
+	if nc.wgConnRemote || nc.BindTechnique == BindThroughPeer {
+		port, _ := binary.Uvarint(message[4 : 4+binary.MaxVarintLen64])
+		return &net.UDPAddr{
+			IP:   net.IPv4(message[0], message[1], message[2], message[3]),
+			Port: int(port),
+		}
 	}
+	return nil
 }
 
 func (nc *NetworkConnection) stripMarker(message []byte) ([]byte, []byte) {
