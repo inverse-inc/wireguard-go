@@ -227,7 +227,10 @@ dnsredir {{.}} {
 }
 {{ end }}
 {{ end }}
-forward . {{ .Nameservers }}
+
+forward . {{ .Nameservers }} {
+	prefer_udp
+}
 }`)
 
 	t.Execute(&tpl, data)

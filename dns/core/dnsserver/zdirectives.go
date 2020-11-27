@@ -23,7 +23,7 @@ var Directives = []string{
 	"chaos",
 	"cache",
 	"hosts",
-	"forward",
 	"dnsredir",
+	"forward",
 	"on",
 }
