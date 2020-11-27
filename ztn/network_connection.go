@@ -263,7 +263,7 @@ func (nc *NetworkConnection) run() {
 							msg = nc.addMarker(writeBack.marker, msg)
 						}
 						n := len(message.message)
-						nc.logger.Info.Printf("send to peer WG server: [%s]: %d bytes from %s\n", writeBack.raddr.String(), n, message.raddr)
+						nc.logger.Info.Printf("send to peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(writeBack.marker))
 						udpSend(msg, writeBack.conn, writeBack.raddr)
 						if err != nil {
 							nc.logger.Error.Printf("Error sending packet to peer %s from WG server %s: %s", writeBack.raddr.String(), message.raddr, err)
@@ -298,7 +298,7 @@ func (nc *NetworkConnection) run() {
 							writeBack := nc.setupBridge(message.conn, message.raddr, nc.WGAddr, nc.messageChan, marker)
 							// recompute length so that its refreshed if a marker was removed
 							n = len(msg)
-							nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes from %s\n", nc.WGAddr.String(), n, message.raddr)
+							nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(marker))
 							_, err = writeBack.conn.Write(msg)
 						}
 						if err != nil {
@@ -385,8 +385,10 @@ func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAd
 	if nc.peerConnections[raddr.String()] == nil {
 		conn, err := net.DialUDP("udp4", nil, toAddr)
 		sharedutils.CheckError(err)
-		nc.peerConnections[raddr.String()] = &bridge{conn: conn, raddr: raddr, marker: marker}
-		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr, marker: marker}
+		markerCopy := make([]byte, len(marker))
+		copy(markerCopy, marker)
+		nc.peerConnections[raddr.String()] = &bridge{conn: conn, raddr: raddr, marker: markerCopy}
+		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr, marker: markerCopy}
 		nc.listen(conn, messages)
 	}
 	return nc.peerConnections[raddr.String()]
@@ -409,7 +411,6 @@ func (nc *NetworkConnection) setupRemoteBridge(fromConn *net.UDPConn, raddr *net
 		conn := nc.wgRemoteConn
 		nc.peerConnections[remotePrefix+raddr.String()] = &bridge{conn: conn, raddr: raddr}
 		nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix] = &bridge{conn: fromConn, raddr: raddr}
-		spew.Dump(nc.peerConnections)
 	}
 }
 
