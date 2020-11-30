@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 	"os/user"
 	"path"
 	"strings"
@@ -191,11 +190,6 @@ func findppid(pid int) int {
 	return 0
 }
 
-func quit() {
-	ztn.UPNPIGDCleanupMapped()
-	os.Exit(0)
-}
-
 func GenerateCoreDNSConfig(nameservers []string, domains []string) string {
 
 	var tpl bytes.Buffer
@@ -244,8 +238,9 @@ func StartDNS() *godnschange.DNSStruct {
 
 	buffer := GenerateCoreDNSConfig(myDNS, NamesToResolve)
 	dnsChange.Change("127.0.0.69")
-
-	coremain.Run(buffer)
+	go func() {
+		coremain.Run(buffer)
+	}()
 
 	return dnsChange
 }

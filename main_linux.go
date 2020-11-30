@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"syscall"
 
+	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
@@ -40,6 +41,7 @@ const (
 var ENV_ID = sharedutils.EnvOrDefault("ID", "")
 
 var logger *device.Logger
+var DNSChange *godnschange.DNSStruct
 
 func printUsage() {
 	fmt.Printf("usage:\n")
@@ -241,9 +243,9 @@ func main() {
 		logger.Info.Println("UAPI listener started")
 
 		startInverse(interfaceName, device)
-		dnsChange := StartDNS()
 
 		// wait for program to terminate
+		DNSChange = StartDNS()
 
 		signal.Notify(term, syscall.SIGTERM)
 		signal.Notify(term, os.Interrupt)
@@ -260,12 +262,16 @@ func main() {
 		uapi.Close()
 		device.Close()
 
-		logger.Info.Println("Shutting down")
-		dnsChange.RestoreDNS("127.0.0.69")
 		quit()
 	}
 }
 
 func checkParentIsAlive() {
 	util.CheckGUIIsAliveUNIX(quit)
+}
+
+func quit() {
+
+	DNSChange.RestoreDNS("127.0.0.69")
+	os.Exit(0)
 }
