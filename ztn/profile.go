@@ -94,14 +94,14 @@ type Profile struct {
 	connection *Connection
 }
 
-func (p *Profile) SetupWireguard(device *device.Device, WGInterface string) error {
-	err := p.setupInterface(device, WGInterface)
+func (p *Profile) SetupWireguard(d *device.Device, WGInterface string) error {
+	err := p.setupInterface(d, WGInterface)
 	if err != nil {
 		return err
 	}
 
-	SetConfig(device, "listen_port", fmt.Sprintf("%d", localWGPort))
-	SetConfig(device, "private_key", keyToHex(p.PrivateKey))
+	SetConfig(d, "listen_port", fmt.Sprintf("%d", localWGPort))
+	SetConfig(d, "private_key", keyToHex(p.PrivateKey))
 
 	p.connection.Update(func() {
 		p.connection.Status = STATUS_CONNECTED
