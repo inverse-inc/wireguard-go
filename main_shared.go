@@ -243,7 +243,6 @@ func StartDNS() *godnschange.DNSStruct {
 	myDNS := dnsChange.GetDNS()
 
 	buffer := GenerateCoreDNSConfig(myDNS, NamesToResolve)
-
 	dnsChange.Change("127.0.0.69")
 
 	coremain.Run(buffer)
