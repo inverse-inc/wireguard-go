@@ -19,7 +19,7 @@ require (
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
 	github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126153337-171152e671af
-	github.com/inverse-inc/go-dnschange v0.0.0-20201127181844-736328ff1cf0
+	github.com/inverse-inc/go-dnschange v0.0.0-20201130161852-080b8a345cc5
 	github.com/inverse-inc/packetfence v10.2.1-0.20201118170534-51d28c5194e5+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20201118170534-51d28c5194e5
 	github.com/inverse-inc/upnp v0.0.0-20201112135509-c215d3967126
@@ -28,6 +28,7 @@ require (
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/krolaw/dhcp4 v0.0.0-20171222085133-4abfceffa76a // indirect
+	github.com/leiless/dnsredir v0.0.6
 	github.com/lucas-clemente/quic-go v0.11.0 // indirect
 	github.com/m13253/dns-over-https v1.4.2
 	github.com/matttproud/golang_protobuf_extensions v1.0.1
