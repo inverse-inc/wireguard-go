@@ -7,10 +7,10 @@ import (
 )
 
 var PublicPortLivenessTolerance = 10 * time.Minute
-var ConnectionLivenessTolerance = device.RekeyTimeout*3 + 1*time.Second
+var ConnectionLivenessTolerance = device.RekeyTimeout * 2
 
-var InboundAttemptsTryAtLeast = 1 * time.Minute
-var InboundAttemptsTolerance = 5
+var InboundAttemptsTryAtLeast = 30 * time.Second
+var InboundAttemptsTolerance = 2
 
 const udp = "udp"
 const pingMsg = "ping"
