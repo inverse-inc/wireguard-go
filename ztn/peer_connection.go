@@ -38,8 +38,7 @@ type PeerConnection struct {
 
 	offersBridging bool
 
-	try               int
-	lastSuccessfulTry int
+	try int
 
 	bothStunning bool
 	stunPeerConn *net.UDPConn
@@ -80,14 +79,15 @@ func (pc *PeerConnection) reset() {
 	pc.started = false
 	pc.lastKeepalive = time.Time{}
 
-	// Reset the try flag if a connection attempt was already successful so that it retries from scratch next time
-	if pc.connectedOnce {
-		pc.try = 0
-	}
 	pc.connectedInbound = false
 	pc.lastInboundPacket = time.Time{}
 	pc.connectedOutbound = false
 	pc.lastOutboundPacket = time.Time{}
+
+	// If we were connected once, then our previous try ID was a good one
+	if pc.connectedOnce {
+		pc.try = pc.try - 1
+	}
 
 	pc.connectedOnce = false
 
@@ -143,6 +143,11 @@ func (pc *PeerConnection) run() {
 
 				pc.started = true
 				pc.try++
+				// If we're ever going to go to max int and get into negative numbers, we reset to 0 since -1 has a special meaning
+				if pc.try < 0 {
+					pc.logger.Info.Println("We have a negative try ID, reseting it to 0")
+					pc.try = 0
+				}
 				pc.lastKeepalive = time.Now()
 				foundPeer <- true
 
@@ -225,13 +230,12 @@ func (pc *PeerConnection) getPrivateAddr() string {
 }
 
 type NetworkEndpointEvent struct {
-	ID                string        `json:"id"`
-	PublicEndpoint    string        `json:"public_endpoint"`
-	PrivateEndpoint   string        `json:"private_endpoint"`
-	Try               int           `json:"try"`
-	LastSuccessfulTry int           `json:"last_successful_try"`
-	BindTechnique     BindTechnique `json:"bind_technique"`
-	OffersBridging    bool          `json:"offers_bridging"`
+	ID              string        `json:"id"`
+	PublicEndpoint  string        `json:"public_endpoint"`
+	PrivateEndpoint string        `json:"private_endpoint"`
+	Try             int           `json:"try"`
+	BindTechnique   BindTechnique `json:"bind_technique"`
+	OffersBridging  bool          `json:"offers_bridging"`
 }
 
 func (nee NetworkEndpointEvent) ToJSON() []byte {
@@ -242,13 +246,12 @@ func (nee NetworkEndpointEvent) ToJSON() []byte {
 
 func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 	return Event{Type: "network_endpoint", Data: NetworkEndpointEvent{
-		ID:                pc.MyProfile.PublicKey,
-		PublicEndpoint:    pc.networkConnection.publicAddr.String(),
-		PrivateEndpoint:   pc.getPrivateAddr(),
-		Try:               pc.try,
-		LastSuccessfulTry: pc.lastSuccessfulTry,
-		BindTechnique:     pc.networkConnection.BindTechnique,
-		OffersBridging:    sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
+		ID:              pc.MyProfile.PublicKey,
+		PublicEndpoint:  pc.networkConnection.publicAddr.String(),
+		PrivateEndpoint: pc.getPrivateAddr(),
+		Try:             pc.try,
+		BindTechnique:   pc.networkConnection.BindTechnique,
+		OffersBridging:  sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
 	}.ToJSON()}
 }
 
@@ -286,34 +289,19 @@ func (pc *PeerConnection) getPeerAddr() chan *NetworkEndpointEvent {
 	return result
 }
 
+func (pc *PeerConnection) IAmTheBestTryHolder(nee *NetworkEndpointEvent) bool {
+	// TODO: change this
+	return pc.IAmTheSmallestKey()
+}
+
 func (pc *PeerConnection) HandleNetworkEndpointEvent(nee *NetworkEndpointEvent) {
-	if pc.try == 0 {
-		// Both peers know about a last successful try, the smallest key follows what the largest says
-		if pc.lastSuccessfulTry != 0 && nee.LastSuccessfulTry != 0 {
-			pc.logger.Info.Println("Peer and I have a last known successful try")
-			if pc.IAmTheSmallestKey() {
-				pc.logger.Info.Println("Using last successfull try of peer")
-				pc.try = nee.LastSuccessfulTry
-			} else {
-				pc.logger.Info.Println("Using my last successful try")
-				pc.try = pc.lastSuccessfulTry
-			}
-		} else if pc.lastSuccessfulTry != 0 {
-			pc.logger.Info.Println("Using my last successful try")
-			pc.try = pc.lastSuccessfulTry
-		} else if nee.LastSuccessfulTry != 0 {
-			pc.logger.Info.Println("Using last successfull try of peer")
-			pc.try = nee.LastSuccessfulTry
-		}
+	if pc.IAmTheBestTryHolder(nee) {
+		pc.logger.Info.Println("Using try from peer")
+		pc.try = nee.Try
 	} else {
-		if pc.IAmTheSmallestKey() {
-			pc.logger.Info.Println("Using try from peer")
-			pc.try = nee.Try
-		} else {
-			pc.logger.Info.Println("Using my own try")
-			// I know this is pretty useless but I just wanted to make it explicit
-			pc.try = pc.try
-		}
+		pc.logger.Info.Println("Using my own try")
+		// I know this is pretty useless but I just wanted to make it explicit
+		pc.try = pc.try
 	}
 	pc.logger.Info.Println("Using try ID", pc.try)
 
@@ -379,7 +367,9 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 	case ConnectionTypeWANOUT:
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	case ConnectionTypeWANIN:
-		pc.networkConnection.RecordInboundAttempt()
+		go func() {
+			pc.networkConnection.RecordInboundAttempt()
+		}()
 	default:
 		panic("Unknown connection type")
 	}
