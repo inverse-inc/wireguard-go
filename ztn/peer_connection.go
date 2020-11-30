@@ -156,7 +156,7 @@ func (pc *PeerConnection) run() {
 				if pc.Connected() {
 					pc.connectedOnce = true
 					pc.Status = fmt.Sprintf("%s (%s)", PEER_STATUS_CONNECTED, pc.ConnectionType)
-				} else if pc.started && time.Since(pc.lastKeepalive) > ConnectionLivenessTolerance {
+				} else if pc.started && time.Since(pc.lastKeepalive) > pc.ConnectionLivenessTolerance() {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
 					pc.RemovePeer()
 					return false
@@ -399,7 +399,7 @@ func (pc *PeerConnection) CheckConnectionLiveness() bool {
 					pc.connectedOutbound = true
 					pc.lastOutboundPacket = time.Now()
 					pc.lastTX = stats.TX
-				} else if time.Since(pc.lastOutboundPacket) > ConnectionLivenessTolerance {
+				} else if time.Since(pc.lastOutboundPacket) > pc.ConnectionLivenessTolerance() {
 					if pc.connectedOutbound {
 						pc.logger.Error.Println("Outbound connection lost to", pc.peerID)
 						result = false
@@ -411,7 +411,7 @@ func (pc *PeerConnection) CheckConnectionLiveness() bool {
 					pc.connectedInbound = true
 					pc.lastInboundPacket = time.Now()
 					pc.lastRX = stats.RX
-				} else if time.Since(pc.lastInboundPacket) > ConnectionLivenessTolerance {
+				} else if time.Since(pc.lastInboundPacket) > pc.ConnectionLivenessTolerance() {
 					if pc.connectedInbound {
 						pc.logger.Error.Println("Inbound connection lost to", pc.peerID)
 						result = false
@@ -426,4 +426,12 @@ func (pc *PeerConnection) CheckConnectionLiveness() bool {
 
 func (pc *PeerConnection) OffersBridging() bool {
 	return pc.offersBridging
+}
+
+func (pc *PeerConnection) ConnectionLivenessTolerance() time.Duration {
+	if pc.connectedOnce {
+		return ConnectedConnectionLivenessTolerance
+	} else {
+		return InitialConnectionLivenessTolerance
+	}
 }
