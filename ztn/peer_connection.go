@@ -38,7 +38,8 @@ type PeerConnection struct {
 
 	offersBridging bool
 
-	try int
+	try               int
+	lastSuccessfulTry int
 
 	bothStunning bool
 	stunPeerConn *net.UDPConn
@@ -100,7 +101,7 @@ func (pc *PeerConnection) reset() {
 }
 
 func (pc *PeerConnection) run() {
-	var peerAddrChan chan string
+	var peerAddrChan chan *NetworkEndpointEvent
 
 	keepalive := time.Tick(500 * time.Millisecond)
 
@@ -111,18 +112,24 @@ func (pc *PeerConnection) run() {
 	for {
 		res := func() bool {
 			select {
-			case peerStr := <-peerAddrChan:
-				if peerStr == "" {
+			case nee := <-peerAddrChan:
+
+				if nee == nil {
 					pc.logger.Info.Println("No connection could be established to", pc.peerID)
 					peerAddrChan = nil
 					return true
 				}
-				if pc.ShouldTryPrivate() {
-					pc.logger.Info.Println("Attempting to connect to private IP address of peer", peerStr, "for peer", pc.peerID, ". This connection attempt may fail")
+
+				pc.HandleNetworkEndpointEvent(nee)
+
+				pc.ConnectionType = pc.FindConnectionType()
+				var peerStr string
+				if pc.ConnectionType == ConnectionTypeLAN {
 					pc.Status = PEER_STATUS_CONNECT_PRIVATE
+					peerStr = nee.PrivateEndpoint
 				} else {
-					pc.logger.Info.Println("Found public IP address of peer", peerStr, "for peer", pc.peerID, ".")
 					pc.Status = PEER_STATUS_CONNECT_PUBLIC
+					peerStr = nee.PublicEndpoint
 				}
 
 				var err error
@@ -136,8 +143,8 @@ func (pc *PeerConnection) run() {
 
 				pc.started = true
 				pc.try++
-				foundPeer <- true
 				pc.lastKeepalive = time.Now()
+				foundPeer <- true
 
 			case <-keepalive:
 				if !pc.CheckConnectionLiveness() {
@@ -218,12 +225,13 @@ func (pc *PeerConnection) getPrivateAddr() string {
 }
 
 type NetworkEndpointEvent struct {
-	ID              string        `json:"id"`
-	PublicEndpoint  string        `json:"public_endpoint"`
-	PrivateEndpoint string        `json:"private_endpoint"`
-	Try             int           `json:"try"`
-	BindTechnique   BindTechnique `json:"bind_technique"`
-	OffersBridging  bool          `json:"offers_bridging"`
+	ID                string        `json:"id"`
+	PublicEndpoint    string        `json:"public_endpoint"`
+	PrivateEndpoint   string        `json:"private_endpoint"`
+	Try               int           `json:"try"`
+	LastSuccessfulTry int           `json:"last_successful_try"`
+	BindTechnique     BindTechnique `json:"bind_technique"`
+	OffersBridging    bool          `json:"offers_bridging"`
 }
 
 func (nee NetworkEndpointEvent) ToJSON() []byte {
@@ -234,17 +242,18 @@ func (nee NetworkEndpointEvent) ToJSON() []byte {
 
 func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 	return Event{Type: "network_endpoint", Data: NetworkEndpointEvent{
-		ID:              pc.MyProfile.PublicKey,
-		PublicEndpoint:  pc.networkConnection.publicAddr.String(),
-		PrivateEndpoint: pc.getPrivateAddr(),
-		Try:             pc.try,
-		BindTechnique:   pc.networkConnection.BindTechnique,
-		OffersBridging:  sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
+		ID:                pc.MyProfile.PublicKey,
+		PublicEndpoint:    pc.networkConnection.publicAddr.String(),
+		PrivateEndpoint:   pc.getPrivateAddr(),
+		Try:               pc.try,
+		LastSuccessfulTry: pc.lastSuccessfulTry,
+		BindTechnique:     pc.networkConnection.BindTechnique,
+		OffersBridging:    sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
 	}.ToJSON()}
 }
 
-func (pc *PeerConnection) getPeerAddr() chan string {
-	result := make(chan string)
+func (pc *PeerConnection) getPeerAddr() chan *NetworkEndpointEvent {
+	result := make(chan *NetworkEndpointEvent)
 	myID := pc.MyProfile.PublicKey
 
 	p2pk := pc.buildP2PKey()
@@ -256,7 +265,7 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 		for {
 			select {
 			case <-maxWait:
-				result <- ""
+				result <- nil
 			case e := <-c.EventsChan:
 				event := Event{}
 				err := json.Unmarshal(e.Data, &event)
@@ -266,26 +275,8 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 					err = json.Unmarshal(event.Data, &nee)
 					sharedutils.CheckError(err)
 					if nee.ID != myID {
-						// Follow what the peer says if he has a bigger key
-						if pc.IAmTheSmallestKey() {
-							pc.try = nee.Try
-							pc.logger.Info.Println("Using peer defined try ID", pc.try)
-						}
-						if nee.BindTechnique == BindSTUN && pc.networkConnection.BindTechnique == BindSTUN {
-							pc.logger.Debug.Println("Self and peer are using STUN to connect")
-							pc.bothStunning = true
-						} else {
-							pc.logger.Debug.Println("Either self or peer isn't using STUN to connect")
-							pc.bothStunning = false
-						}
-						pc.offersBridging = nee.OffersBridging
-						if pc.ShouldTryPrivate() {
-							result <- nee.PrivateEndpoint
-							return
-						} else {
-							result <- nee.PublicEndpoint
-							return
-						}
+						result <- &nee
+						return
 					}
 				}
 			}
@@ -295,29 +286,56 @@ func (pc *PeerConnection) getPeerAddr() chan string {
 	return result
 }
 
+func (pc *PeerConnection) HandleNetworkEndpointEvent(nee *NetworkEndpointEvent) {
+	if pc.try == 0 {
+		// Both peers know about a last successful try, the smallest key follows what the largest says
+		if pc.lastSuccessfulTry != 0 && nee.LastSuccessfulTry != 0 {
+			pc.logger.Info.Println("Peer and I have a last known successful try")
+			if pc.IAmTheSmallestKey() {
+				pc.logger.Info.Println("Using last successfull try of peer")
+				pc.try = nee.LastSuccessfulTry
+			} else {
+				pc.logger.Info.Println("Using my last successful try")
+				pc.try = pc.lastSuccessfulTry
+			}
+		} else if pc.lastSuccessfulTry != 0 {
+			pc.logger.Info.Println("Using my last successful try")
+			pc.try = pc.lastSuccessfulTry
+		} else if nee.LastSuccessfulTry != 0 {
+			pc.logger.Info.Println("Using last successfull try of peer")
+			pc.try = nee.LastSuccessfulTry
+		}
+	} else {
+		if pc.IAmTheSmallestKey() {
+			pc.logger.Info.Println("Using try from peer")
+			pc.try = nee.Try
+		} else {
+			pc.logger.Info.Println("Using my own try")
+			// I know this is pretty useless but I just wanted to make it explicit
+			pc.try = pc.try
+		}
+	}
+	pc.logger.Info.Println("Using try ID", pc.try)
+
+	if nee.BindTechnique == BindSTUN && pc.networkConnection.BindTechnique == BindSTUN {
+		pc.logger.Debug.Println("Self and peer are using STUN to connect")
+		pc.bothStunning = true
+	} else {
+		pc.logger.Debug.Println("Either self or peer isn't using STUN to connect")
+		pc.bothStunning = false
+	}
+	pc.offersBridging = nee.OffersBridging
+}
+
 func (pc *PeerConnection) IAmTheSmallestKey() bool {
 	return pc.MyProfile.PublicKey < pc.PeerProfile.PublicKey
-}
-
-func (pc *PeerConnection) ShouldTryPrivate() bool {
-	return pc.try%3 == 0
-}
-
-func (pc *PeerConnection) MyTurnPublicConnect() bool {
-	if pc.IAmTheSmallestKey() && pc.try%3 == 1 {
-		return true
-	} else if !pc.IAmTheSmallestKey() && pc.try%3 == 2 {
-		return true
-	} else {
-		return false
-	}
 }
 
 func (pc *PeerConnection) Connected() bool {
 	return pc.connectedInbound && pc.connectedOutbound
 }
 
-func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan string {
+func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan *NetworkEndpointEvent {
 	go func() {
 		after := []time.Duration{
 			1 * time.Second,
@@ -347,25 +365,25 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 	conf := ""
 
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
-	if pc.ShouldTryPrivate() {
-		pc.ConnectionType = ConnectionTypeLAN
+	switch pc.ConnectionType {
+	case ConnectionTypeLAN:
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
-	} else if pc.bothStunning {
+	case ConnectionTypeWANSTUN:
 		var err error
-		pc.ConnectionType = ConnectionTypeWANSTUN
 		pc.stunPeerConn, err = net.ListenUDP(udp, nil)
 		sharedutils.CheckError(err)
 		pc.networkConnection.listen(pc.stunPeerConn, pc.networkConnection.messageChan)
 		pc.networkConnection.peerConnections[pc.stunPeerConn.LocalAddr().String()] = &bridge{conn: pc.networkConnection.localConn, raddr: peerAddr}
 		a := strings.Split(pc.stunPeerConn.LocalAddr().String(), ":")
 		conf += fmt.Sprintf("endpoint=%s\n", fmt.Sprintf("127.0.0.1:%s", a[len(a)-1]))
-	} else if pc.MyTurnPublicConnect() {
-		pc.ConnectionType = ConnectionTypeWANOUT
+	case ConnectionTypeWANOUT:
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
-	} else {
-		pc.ConnectionType = ConnectionTypeWANIN
+	case ConnectionTypeWANIN:
 		pc.networkConnection.RecordInboundAttempt()
+	default:
+		panic("Unknown connection type")
 	}
+
 	conf += "replace_allowed_ips=true\n"
 	if pc.PeerProfile.IsGateway {
 		conf += "allowed_ip=0.0.0.0/0\n"
@@ -433,5 +451,36 @@ func (pc *PeerConnection) ConnectionLivenessTolerance() time.Duration {
 		return ConnectedConnectionLivenessTolerance
 	} else {
 		return InitialConnectionLivenessTolerance
+	}
+}
+
+func (pc *PeerConnection) IAmTheBestWANIN() bool {
+	return pc.IAmTheSmallestKey()
+}
+
+func (pc *PeerConnection) FindConnectionType() string {
+	tryMod := pc.try % 3
+
+	switch tryMod {
+	case 0:
+		if pc.bothStunning {
+			return ConnectionTypeWANSTUN
+		} else if pc.IAmTheBestWANIN() {
+			return ConnectionTypeWANIN
+		} else {
+			return ConnectionTypeWANOUT
+		}
+	case 1:
+		return ConnectionTypeLAN
+	case 2:
+		if pc.bothStunning {
+			return ConnectionTypeWANSTUN
+		} else if pc.IAmTheBestWANIN() {
+			return ConnectionTypeWANOUT
+		} else {
+			return ConnectionTypeWANIN
+		}
+	default:
+		panic("Unknown modulo when trying to find connection type")
 	}
 }

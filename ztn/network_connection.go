@@ -333,9 +333,7 @@ func (nc *NetworkConnection) run() {
 				if nc.BindTechnique == BindThroughPeer && nc.publicAddr != nil && nc.publicAddr.Port != 0 {
 					if !peerbindthroughpeer.StillAlive() {
 						nc.logger.Info.Println("Lost connection in bind through peer")
-						// reset this so that we get a new address
-						peerbindthroughpeer = NewBindThroughPeerAgent(nc.Connection, nc)
-						nc.publicAddr = nil
+						return false
 					}
 				}
 			case <-keepalive:

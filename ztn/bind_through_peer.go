@@ -136,6 +136,8 @@ func (btp *BindThroughPeerAgent) ParseBindRequestPkt(buf []byte) (net.IP, int, e
 }
 
 func (btp *BindThroughPeerAgent) StillAlive() bool {
+	btp.Lock()
+	defer btp.Unlock()
 	c := ConnectPeerServiceClient(btp.remotePSC)
 	res, err := c.ForwardingIsAlive(context.Background(), &ForwardingIsAliveRequest{Id: btp.remoteID, Token: btp.remoteToken})
 	if err != nil {
