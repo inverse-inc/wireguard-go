@@ -5,6 +5,7 @@ option go_package = "ztn";
 service PeerService {
   rpc CanOfferForwarding (CanOfferForwardingRequest) returns (CanOfferForwardingReply) {}
   rpc SetupForwarding (SetupForwardingRequest) returns (SetupForwardingReply) {}
+  rpc ForwardingIsAlive(ForwardingIsAliveRequest) returns (ForwardingIsAliveReply) {}
 }
 
 message CanOfferForwardingRequest{
@@ -25,4 +26,13 @@ message SetupForwardingReply {
   string raddr = 3;
   bytes publicIP = 4;
   int32 publicPort = 5;
+}
+
+message ForwardingIsAliveRequest {
+  uint64 id = 1;
+  uint64 token = 2;
+}
+
+message ForwardingIsAliveReply {
+  bool result = 1;
 }

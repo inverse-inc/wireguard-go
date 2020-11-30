@@ -66,6 +66,17 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr.String(), PublicIP: publicAddr.IP[12:16], PublicPort: int32(publicAddr.Port)}, nil
 }
 
+func (s *PeerServiceServerHandler) ForwardingIsAlive(ctx context.Context, in *ForwardingIsAliveRequest) (*ForwardingIsAliveReply, error) {
+	s.Lock()
+	defer s.Unlock()
+	if nc, ok := s.peerBridges[in.Token]; ok {
+		if nc.ID() == in.Id {
+			return &ForwardingIsAliveReply{Result: true}, nil
+		}
+	}
+	return &ForwardingIsAliveReply{Result: false}, nil
+}
+
 func (s *PeerServiceServerHandler) maintenance() {
 	s.Lock()
 	defer s.Unlock()

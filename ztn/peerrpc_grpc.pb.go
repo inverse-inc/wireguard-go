@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type PeerServiceClient interface {
 	CanOfferForwarding(ctx context.Context, in *CanOfferForwardingRequest, opts ...grpc.CallOption) (*CanOfferForwardingReply, error)
 	SetupForwarding(ctx context.Context, in *SetupForwardingRequest, opts ...grpc.CallOption) (*SetupForwardingReply, error)
+	ForwardingIsAlive(ctx context.Context, in *ForwardingIsAliveRequest, opts ...grpc.CallOption) (*ForwardingIsAliveReply, error)
 }
 
 type peerServiceClient struct {
@@ -47,12 +48,22 @@ func (c *peerServiceClient) SetupForwarding(ctx context.Context, in *SetupForwar
 	return out, nil
 }
 
+func (c *peerServiceClient) ForwardingIsAlive(ctx context.Context, in *ForwardingIsAliveRequest, opts ...grpc.CallOption) (*ForwardingIsAliveReply, error) {
+	out := new(ForwardingIsAliveReply)
+	err := c.cc.Invoke(ctx, "/PeerService/ForwardingIsAlive", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PeerServiceServer is the server API for PeerService service.
 // All implementations must embed UnimplementedPeerServiceServer
 // for forward compatibility
 type PeerServiceServer interface {
 	CanOfferForwarding(context.Context, *CanOfferForwardingRequest) (*CanOfferForwardingReply, error)
 	SetupForwarding(context.Context, *SetupForwardingRequest) (*SetupForwardingReply, error)
+	ForwardingIsAlive(context.Context, *ForwardingIsAliveRequest) (*ForwardingIsAliveReply, error)
 	mustEmbedUnimplementedPeerServiceServer()
 }
 
@@ -65,6 +76,9 @@ func (UnimplementedPeerServiceServer) CanOfferForwarding(context.Context, *CanOf
 }
 func (UnimplementedPeerServiceServer) SetupForwarding(context.Context, *SetupForwardingRequest) (*SetupForwardingReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetupForwarding not implemented")
+}
+func (UnimplementedPeerServiceServer) ForwardingIsAlive(context.Context, *ForwardingIsAliveRequest) (*ForwardingIsAliveReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ForwardingIsAlive not implemented")
 }
 func (UnimplementedPeerServiceServer) mustEmbedUnimplementedPeerServiceServer() {}
 
@@ -115,6 +129,24 @@ func _PeerService_SetupForwarding_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PeerService_ForwardingIsAlive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ForwardingIsAliveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PeerServiceServer).ForwardingIsAlive(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PeerService/ForwardingIsAlive",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PeerServiceServer).ForwardingIsAlive(ctx, req.(*ForwardingIsAliveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _PeerService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "PeerService",
 	HandlerType: (*PeerServiceServer)(nil),
@@ -126,6 +158,10 @@ var _PeerService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetupForwarding",
 			Handler:    _PeerService_SetupForwarding_Handler,
+		},
+		{
+			MethodName: "ForwardingIsAlive",
+			Handler:    _PeerService_ForwardingIsAlive_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

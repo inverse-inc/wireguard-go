@@ -59,6 +59,8 @@ type NetworkConnection struct {
 	inboundAttempts     int
 	inboundAttemptsChan chan int
 
+	stopForwardingPing chan bool
+
 	started        time.Time
 	lastWGInbound  time.Time
 	lastWGOutbound time.Time
@@ -117,6 +119,13 @@ func (nc *NetworkConnection) reset() {
 	nc.lastWGOutbound = time.Time{}
 
 	nc.wgRemoteConn = nil
+
+	if nc.stopForwardingPing != nil {
+		go func() {
+			nc.stopForwardingPing <- true
+		}()
+	}
+	nc.stopForwardingPing = make(chan bool)
 }
 
 func (nc *NetworkConnection) Start() {
@@ -161,6 +170,8 @@ func (nc *NetworkConnection) run() {
 	peerupnpgid := NewUPNPGID()
 	peernatpmp := NewNATPMP()
 	peerbindthroughpeer := NewBindThroughPeerAgent(nc.Connection, nc)
+
+	peerbindthroughpeerCheck := time.Tick(2 * time.Second)
 
 	a := strings.Split(nc.localConn.LocalAddr().String(), ":")
 	localPort, err := strconv.Atoi(a[len(a)-1])
@@ -318,6 +329,15 @@ func (nc *NetworkConnection) run() {
 				nc.logger.Info.Println("Last inbound/outbound", nc.lastWGInbound, "/", nc.lastWGOutbound)
 			case <-maintenance:
 				nc.maintenance()
+			case <-peerbindthroughpeerCheck:
+				if nc.BindTechnique == BindThroughPeer && nc.publicAddr != nil && nc.publicAddr.Port != 0 {
+					if !peerbindthroughpeer.StillAlive() {
+						nc.logger.Info.Println("Lost connection in bind through peer")
+						// reset this so that we get a new address
+						peerbindthroughpeer = NewBindThroughPeerAgent(nc.Connection, nc)
+						nc.publicAddr = nil
+					}
+				}
 			case <-keepalive:
 				if !nc.CheckConnectionLiveness() {
 					if peerupnpgid.remotePort != 0 {

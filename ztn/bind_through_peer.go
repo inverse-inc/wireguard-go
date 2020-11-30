@@ -20,6 +20,9 @@ type BindThroughPeerAgent struct {
 	networkConnection *NetworkConnection
 	remoteIP          net.IP
 	remotePort        int
+	remoteID          uint64
+	remoteToken       uint64
+	remotePSC         string
 }
 
 func NewBindThroughPeerAgent(connection *Connection, networkConnection *NetworkConnection) *BindThroughPeerAgent {
@@ -80,6 +83,11 @@ func (btp *BindThroughPeerAgent) BindRequest(conn *net.UDPConn, sendTo chan *pkt
 		} else {
 			btp.remoteIP = net.IPv4(res.PublicIP[0], res.PublicIP[1], res.PublicIP[2], res.PublicIP[3])
 			btp.remotePort = int(res.PublicPort)
+
+			btp.remotePSC = serverAddr
+			btp.remoteID = res.Id
+			btp.remoteToken = res.Token
+
 			go func() {
 				sendTo <- &pkt{message: btp.BindRequestPkt(btp.remoteIP, btp.remotePort)}
 			}()
@@ -125,4 +133,21 @@ func (btp *BindThroughPeerAgent) ParseBindRequestPkt(buf []byte) (net.IP, int, e
 	ip := net.IPv4(buf[len(btp.id)+1], buf[len(btp.id)+2], buf[len(btp.id)+3], buf[len(btp.id)+4])
 	port, _ := binary.Uvarint(buf[len(btp.id)+5:])
 	return ip, int(port), nil
+}
+
+func (btp *BindThroughPeerAgent) StillAlive() bool {
+	c := ConnectPeerServiceClient(btp.remotePSC)
+	res, err := c.ForwardingIsAlive(context.Background(), &ForwardingIsAliveRequest{Id: btp.remoteID, Token: btp.remoteToken})
+	if err != nil {
+		btp.networkConnection.logger.Error.Println("Unable to connect to remote BTP peer", btp.remotePSC, ". Error:", err)
+		return false
+	}
+
+	if res.Result {
+		btp.networkConnection.logger.Debug.Println("Still connected to remote BTP peer", btp.remotePSC)
+		return true
+	} else {
+		btp.networkConnection.logger.Error.Println("Remote BTP peer", btp.remotePSC, "reported the forwarding is now inactive")
+		return false
+	}
 }
