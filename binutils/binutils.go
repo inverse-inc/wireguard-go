@@ -32,7 +32,7 @@ func RunCmd(cmd *exec.Cmd) {
 }
 
 func RunTunnelFG(envPath string) {
-	cmd := exec.Command(BinPath("wireguard"), envPath)
+	cmd := exec.Command(BinPath("wireguard"), envPath, "--master-controlled")
 	RunCmd(cmd)
 }
 
