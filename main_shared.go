@@ -14,6 +14,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
@@ -190,22 +191,24 @@ func findppid(pid int) int {
 	return 0
 }
 
-func GenerateCoreDNSConfig(nameservers []string, domains []string) string {
+func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, domains []string) string {
 
 	var tpl bytes.Buffer
 
 	type Data struct {
-		Domains     []string
-		Nameservers string
-		API         string
+		Domains      []string
+		Nameservers  string
+		API          string
+		SearchDomain []string
 	}
 
 	APIClient := ztn.GetAPIClient()
 
 	data := Data{
-		Domains:     domains,
-		Nameservers: strings.Join(nameservers[:], " "),
-		API:         APIClient.Host,
+		Domains:      domains,
+		Nameservers:  strings.Join(myDNSInfo.NameServers[:], " "),
+		API:          APIClient.Host,
+		SearchDomain: myDNSInfo.SearchDomain,
 	}
 
 	t := template.New("Coreconfig")
@@ -219,6 +222,14 @@ bind 127.0.0.69
 dnsredir {{.}} {
    to ietf-doh://{{ $.API }}:9999/dns-query
 }
+{{ range .SearchDomain }}
+{{ if ne . "" }}
+dnsredir {{$.}}.{{.}} {
+	to ietf-doh://{{ $.API }}:9999/dns-query
+}
+{{ end }}
+{{ end }}
+
 {{ end }}
 {{ end }}
 
@@ -228,15 +239,16 @@ forward . {{ .Nameservers }} {
 }`)
 
 	t.Execute(&tpl, data)
+	spew.Dump(tpl)
 	return tpl.String()
 }
 
 func StartDNS() *godnschange.DNSStruct {
 	dnsChange := godnschange.NewDNSChange()
 
-	myDNS := dnsChange.GetDNS()
+	myDNSInfo := dnsChange.GetDNS()
 
-	buffer := GenerateCoreDNSConfig(myDNS, NamesToResolve)
+	buffer := GenerateCoreDNSConfig(myDNSInfo, NamesToResolve)
 	dnsChange.Change("127.0.0.69")
 	go func() {
 		coremain.Run(buffer)
