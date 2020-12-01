@@ -20,7 +20,8 @@ import (
 var spacePlaceholder = "                          "
 
 var statusLabel *widget.Label
-var peersTable *widget.Card
+var peersTableContainer *widget.Card
+var peersTable = NewTable()
 
 var restartBtn *widget.Button
 
@@ -198,8 +199,8 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 func PostConnect(tabs *container.AppTabs) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
 	statusLabel.Wrapping = fyne.TextWrapWord
-	peersTable = widget.NewCard("Peers", "", widget.NewVBox())
-	tabs.Items[0].Content = widget.NewVBox(statusLabel, restartBtn, peersTable)
+	peersTableContainer = widget.NewCard("Peers", "", widget.NewVBox())
+	tabs.Items[0].Content = widget.NewVBox(statusLabel, restartBtn, peersTableContainer)
 	if len(tabs.Items) > 1 {
 		tabs.RemoveIndex(1)
 	}
@@ -209,7 +210,7 @@ func PostConnect(tabs *container.AppTabs) {
 func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 	peers, err := rpc.GetPeers(ctx, &wgrpc.PeersRequest{})
 	if err != nil {
-		peersTable.SetContent(widget.NewLabel("Failed to obtain peers from local wireguard server: " + err.Error()))
+		peersTableContainer.SetContent(widget.NewLabel("Failed to obtain peers from local wireguard server: " + err.Error()))
 		return
 	}
 
@@ -222,8 +223,10 @@ func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 		peersInfos = append(peersInfos, []string{peer.Hostname, peer.IpAddress, peer.Status})
 	}
 
-	peersTable.SetContent(makeTable(
+	peersTable.Update(
 		[]string{"Host", "IP address", "State"},
 		peersInfos,
-	))
+	)
+
+	peersTableContainer.SetContent(peersTable.GetContainer())
 }

@@ -93,7 +93,7 @@ func checkTunnelStatus() {
 				}
 			} else if fails >= maxRpcFails {
 				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead. Please restart the client.")
-				peersTable.SetContent(widget.NewLabel(""))
+				peersTableContainer.SetContent(widget.NewLabel(""))
 			} else {
 				fmt.Println("Failed to contact tunnel for status update")
 				statusLabel.SetText("Tunnel seems to be inactive...")
@@ -108,7 +108,7 @@ func checkTunnelStatus() {
 				return
 			} else {
 				statusLabel.SetText(messages[status])
-				//UpdatePeers(ctx, rpc)
+				UpdatePeers(ctx, rpc)
 			}
 		}
 
