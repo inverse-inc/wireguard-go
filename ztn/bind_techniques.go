@@ -7,6 +7,25 @@ import (
 
 type BindTechnique string
 
+func (bt BindTechnique) Priority() int {
+	if p, ok := bindTechniquePriorities[bt]; ok {
+		return p
+	} else {
+		panic("Priority for " + string(bt) + " not found")
+	}
+}
+
+func (bt BindTechnique) Weight() int {
+	return 100 - bt.Priority()
+}
+
+var bindTechniquePriorities = map[BindTechnique]int{
+	BindUPNPGID:     01,
+	BindSTUN:        02,
+	BindNATPMP:      03,
+	BindThroughPeer: 31,
+}
+
 var BindTechniqueNames = map[string]BindTechnique{
 	"STUN":         BindSTUN,
 	"UPNPGID":      BindUPNPGID,
@@ -18,10 +37,10 @@ const (
 	// These will get ordered in the BindTechniques.
 	// Lower string == tried first if available
 	// NAT PMP hasn't worked well in a few places so its left to be tried last
-	BindUPNPGID     = BindTechnique("01-UPNPGID")
-	BindSTUN        = BindTechnique("02-STUN")
-	BindNATPMP      = BindTechnique("03-NATPMP")
-	BindThroughPeer = BindTechnique("99-THROUGH_PEER")
+	BindUPNPGID     = BindTechnique("UPNPGID")
+	BindSTUN        = BindTechnique("STUN")
+	BindNATPMP      = BindTechnique("NATPMP")
+	BindThroughPeer = BindTechnique("THROUGH_PEER")
 )
 
 var DefaultBindTechnique = BindSTUN
@@ -83,7 +102,7 @@ func (bts *BindTechniquesStruct) Len() int {
 }
 
 func (bts *BindTechniquesStruct) Less(i, j int) bool {
-	return bts.sorted[i] < bts.sorted[j]
+	return bts.sorted[i].Priority() < bts.sorted[j].Priority()
 }
 
 func (bts *BindTechniquesStruct) Swap(i, j int) {

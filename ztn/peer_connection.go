@@ -46,8 +46,6 @@ type PeerConnection struct {
 	Status         string
 	ConnectionType string
 
-	BindTechnique BindTechnique
-
 	networkConnection *NetworkConnection
 }
 
@@ -59,7 +57,6 @@ func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profil
 		peerID:            peerProfile.PublicKey,
 		MyProfile:         myProfile,
 		PeerProfile:       peerProfile,
-		BindTechnique:     DefaultBindTechnique,
 		networkConnection: networkConnection,
 	}
 	return pc
@@ -98,6 +95,8 @@ func (pc *PeerConnection) reset() {
 	}
 
 	pc.Status = PEER_STATUS_INITIATING_CONNECTION
+
+	pc.RemovePeer()
 }
 
 func (pc *PeerConnection) run() {
@@ -122,7 +121,7 @@ func (pc *PeerConnection) run() {
 
 				pc.HandleNetworkEndpointEvent(nee)
 
-				pc.ConnectionType = pc.FindConnectionType()
+				pc.ConnectionType = pc.FindConnectionType(nee)
 				var peerStr string
 				if pc.ConnectionType == ConnectionTypeLAN {
 					pc.Status = PEER_STATUS_CONNECT_PRIVATE
@@ -170,7 +169,6 @@ func (pc *PeerConnection) run() {
 					pc.Status = fmt.Sprintf("%s (%s)", PEER_STATUS_CONNECTED, pc.ConnectionType)
 				} else if pc.started && time.Since(pc.lastKeepalive) > pc.ConnectionLivenessTolerance() {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
-					pc.RemovePeer()
 					return false
 				}
 			}
@@ -236,6 +234,7 @@ type NetworkEndpointEvent struct {
 	Try             int           `json:"try"`
 	BindTechnique   BindTechnique `json:"bind_technique"`
 	OffersBridging  bool          `json:"offers_bridging"`
+	SentOn          time.Time     `json:"sent_on"`
 }
 
 func (nee NetworkEndpointEvent) ToJSON() []byte {
@@ -252,6 +251,7 @@ func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 		Try:             pc.try,
 		BindTechnique:   pc.networkConnection.BindTechnique,
 		OffersBridging:  sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
+		SentOn:          time.Now(),
 	}.ToJSON()}
 }
 
@@ -264,11 +264,13 @@ func (pc *PeerConnection) getPeerAddr() chan *NetworkEndpointEvent {
 	go func() {
 		c := GLPClient(p2pk)
 		c.Start(APIClientCtx)
+		defer c.Stop()
 		maxWait := time.After(PublicPortLivenessTolerance)
 		for {
 			select {
 			case <-maxWait:
 				result <- nil
+				return
 			case e := <-c.EventsChan:
 				event := Event{}
 				err := json.Unmarshal(e.Data, &event)
@@ -290,11 +292,12 @@ func (pc *PeerConnection) getPeerAddr() chan *NetworkEndpointEvent {
 }
 
 func (pc *PeerConnection) IAmTheBestTryHolder(nee *NetworkEndpointEvent) bool {
-	// TODO: change this
 	return pc.IAmTheSmallestKey()
 }
 
 func (pc *PeerConnection) HandleNetworkEndpointEvent(nee *NetworkEndpointEvent) {
+	pc.logger.Info.Printf("Received network endpoint event dated from %s. Remote info: (bind technique:%s) (can offer bridging:%s) (public endpoint:%s) (private endpoint %s) (try ID %d)", nee.SentOn, nee.BindTechnique, nee.OffersBridging, nee.PublicEndpoint, nee.PrivateEndpoint, nee.Try)
+
 	if pc.IAmTheBestTryHolder(nee) {
 		pc.logger.Info.Println("Using try from peer")
 		pc.try = nee.Try
@@ -444,18 +447,23 @@ func (pc *PeerConnection) ConnectionLivenessTolerance() time.Duration {
 	}
 }
 
-func (pc *PeerConnection) IAmTheBestWANIN() bool {
-	return pc.IAmTheSmallestKey()
+func (pc *PeerConnection) IAmTheBestWANIN(nee *NetworkEndpointEvent) bool {
+	pc.logger.Info.Println(pc.networkConnection.BindTechnique, "my weight", pc.networkConnection.BindTechnique.Weight(), "other weight", nee.BindTechnique.Weight())
+	if pc.networkConnection.BindTechnique.Weight() == nee.BindTechnique.Weight() {
+		return !pc.IAmTheSmallestKey()
+	} else {
+		return pc.networkConnection.BindTechnique.Weight() > nee.BindTechnique.Weight()
+	}
 }
 
-func (pc *PeerConnection) FindConnectionType() string {
+func (pc *PeerConnection) FindConnectionType(nee *NetworkEndpointEvent) string {
 	tryMod := pc.try % 3
 
 	switch tryMod {
 	case 0:
 		if pc.bothStunning {
 			return ConnectionTypeWANSTUN
-		} else if pc.IAmTheBestWANIN() {
+		} else if pc.IAmTheBestWANIN(nee) {
 			return ConnectionTypeWANIN
 		} else {
 			return ConnectionTypeWANOUT
@@ -465,7 +473,7 @@ func (pc *PeerConnection) FindConnectionType() string {
 	case 2:
 		if pc.bothStunning {
 			return ConnectionTypeWANSTUN
-		} else if pc.IAmTheBestWANIN() {
+		} else if pc.IAmTheBestWANIN(nee) {
 			return ConnectionTypeWANOUT
 		} else {
 			return ConnectionTypeWANIN

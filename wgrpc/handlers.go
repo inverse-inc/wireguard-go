@@ -3,7 +3,6 @@ package wgrpc
 import (
 	context "context"
 	"fmt"
-	"os"
 	sync "sync"
 	"time"
 
@@ -19,12 +18,14 @@ type WGServiceServerHandler struct {
 	UnimplementedWGServiceServer
 	connection *ztn.Connection
 	debugables []Debugable
+	onexit     func()
 }
 
-func NewWGServiceServerHandler(connection *ztn.Connection) *WGServiceServerHandler {
+func NewWGServiceServerHandler(connection *ztn.Connection, onexit func()) *WGServiceServerHandler {
 	return &WGServiceServerHandler{
 		connection: connection,
 		debugables: []Debugable{},
+		onexit:     onexit,
 	}
 }
 
@@ -62,7 +63,7 @@ func (s *WGServiceServerHandler) GetPeers(ctx context.Context, in *PeersRequest)
 
 func (s *WGServiceServerHandler) Stop(ctx context.Context, in *StopRequest) (*StopReply, error) {
 	time.Sleep(1 * time.Second)
-	os.Exit(0)
+	s.onexit()
 	return &StopReply{}, nil
 }
 
