@@ -86,6 +86,7 @@
 				</File>
 				<fwrules:FirewallException Id="WireguardException12674" Description="PacketFence Zero Trust agent port 12674" Name="PacketFence Zero Trust agent port 12674" Port="12674" Scope="any" Protocol="udp"/>
 				<fwrules:FirewallException Id="WireguardException12675" Description="PacketFence Zero Trust agent port 12675" Name="PacketFence Zero Trust agent port 12675" Port="12675" Scope="any" Protocol="udp"/>
+				<fwrules:FirewallException Id="WireguardException12676" Description="PacketFence Zero Trust agent port 12676" Name="PacketFence Zero Trust agent port 12676" Port="12676" Scope="any" Protocol="udp"/>
 			</Component>
 			<Component Directory="WireGuardFolder" Id="GUIwrapperExecutable" Guid="c3508d23-3362-47ce-9220-321bdb1a1fff">
 				<File Source="..\$(var.WIREGUARD_PLATFORM)\guiwrapper.exe" KeyPath="yes">
