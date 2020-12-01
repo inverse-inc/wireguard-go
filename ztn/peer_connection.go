@@ -19,6 +19,8 @@ type PeerConnection struct {
 	MyProfile   Profile
 	PeerProfile PeerProfile
 
+	launchedAt time.Time
+
 	device *device.Device
 	logger *device.Logger
 
@@ -58,6 +60,7 @@ func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profil
 		MyProfile:         myProfile,
 		PeerProfile:       peerProfile,
 		networkConnection: networkConnection,
+		launchedAt:        time.Now(),
 	}
 	return pc
 }
@@ -165,6 +168,7 @@ func (pc *PeerConnection) run() {
 				}
 
 				if pc.Connected() {
+					// Decrement try so that next time its used it will use the same technique that just worked
 					pc.connectedOnce = true
 					pc.Status = fmt.Sprintf("%s (%s)", PEER_STATUS_CONNECTED, pc.ConnectionType)
 				} else if pc.started && time.Since(pc.lastKeepalive) > pc.ConnectionLivenessTolerance() {
@@ -235,6 +239,7 @@ type NetworkEndpointEvent struct {
 	BindTechnique   BindTechnique `json:"bind_technique"`
 	OffersBridging  bool          `json:"offers_bridging"`
 	SentOn          time.Time     `json:"sent_on"`
+	LaunchedAt      time.Time     `json:"launched_at"`
 }
 
 func (nee NetworkEndpointEvent) ToJSON() []byte {
@@ -252,6 +257,7 @@ func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 		BindTechnique:   pc.networkConnection.BindTechnique,
 		OffersBridging:  sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
 		SentOn:          time.Now(),
+		LaunchedAt:      pc.launchedAt,
 	}.ToJSON()}
 }
 
@@ -292,19 +298,19 @@ func (pc *PeerConnection) getPeerAddr() chan *NetworkEndpointEvent {
 }
 
 func (pc *PeerConnection) IAmTheBestTryHolder(nee *NetworkEndpointEvent) bool {
-	return pc.IAmTheSmallestKey()
+	return pc.launchedAt.Before(nee.LaunchedAt)
 }
 
 func (pc *PeerConnection) HandleNetworkEndpointEvent(nee *NetworkEndpointEvent) {
-	pc.logger.Info.Printf("Received network endpoint event dated from %s. Remote info: (bind technique:%s) (can offer bridging:%s) (public endpoint:%s) (private endpoint %s) (try ID %d)", nee.SentOn, nee.BindTechnique, nee.OffersBridging, nee.PublicEndpoint, nee.PrivateEndpoint, nee.Try)
+	pc.logger.Info.Printf("Received network endpoint event dated from %s. Remote info: (launched at:%s) (bind technique:%s) (can offer bridging:%s) (public endpoint:%s) (private endpoint %s) (try ID %d)", nee.LaunchedAt, nee.SentOn, nee.BindTechnique, nee.OffersBridging, nee.PublicEndpoint, nee.PrivateEndpoint, nee.Try)
 
 	if pc.IAmTheBestTryHolder(nee) {
-		pc.logger.Info.Println("Using try from peer")
-		pc.try = nee.Try
-	} else {
 		pc.logger.Info.Println("Using my own try")
 		// I know this is pretty useless but I just wanted to make it explicit
 		pc.try = pc.try
+	} else {
+		pc.logger.Info.Println("Using try from peer")
+		pc.try = nee.Try
 	}
 	pc.logger.Info.Println("Using try ID", pc.try)
 
