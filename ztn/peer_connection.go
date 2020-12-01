@@ -302,7 +302,7 @@ func (pc *PeerConnection) IAmTheBestTryHolder(nee *NetworkEndpointEvent) bool {
 }
 
 func (pc *PeerConnection) HandleNetworkEndpointEvent(nee *NetworkEndpointEvent) {
-	pc.logger.Info.Printf("Received network endpoint event dated from %s. Remote info: (launched at:%s) (bind technique:%s) (can offer bridging:%s) (public endpoint:%s) (private endpoint %s) (try ID %d)", nee.LaunchedAt, nee.SentOn, nee.BindTechnique, nee.OffersBridging, nee.PublicEndpoint, nee.PrivateEndpoint, nee.Try)
+	pc.logger.Info.Printf("Received network endpoint event dated from %s. Remote info: (launched at:%s) (bind technique:%s) (can offer bridging:%t) (public endpoint:%s) (private endpoint %s) (try ID %d)", nee.LaunchedAt, nee.SentOn, nee.BindTechnique, nee.OffersBridging, nee.PublicEndpoint, nee.PrivateEndpoint, nee.Try)
 
 	if pc.IAmTheBestTryHolder(nee) {
 		pc.logger.Info.Println("Using my own try")
