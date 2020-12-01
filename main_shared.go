@@ -14,7 +14,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
@@ -219,12 +218,13 @@ bind 127.0.0.69
 #debug
 {{ range .Domains }}
 {{ if ne . "" }}
+{{$domain := .}}
 dnsredir {{.}} {
    to ietf-doh://{{ $.API }}:9999/dns-query
 }
-{{ range .SearchDomain }}
+{{ range $.SearchDomain }}
 {{ if ne . "" }}
-dnsredir {{$.}}.{{.}} {
+dnsredir {{$domain}}.{{.}} {
 	to ietf-doh://{{ $.API }}:9999/dns-query
 }
 {{ end }}
@@ -239,7 +239,6 @@ forward . {{ .Nameservers }} {
 }`)
 
 	t.Execute(&tpl, data)
-	spew.Dump(tpl)
 	return tpl.String()
 }
 
