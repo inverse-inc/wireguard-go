@@ -246,6 +246,7 @@ func main() {
 
 		signal.Notify(term, syscall.SIGTERM)
 		signal.Notify(term, os.Interrupt)
+		signal.Notify(term, syscall.SIGPIPE)
 
 		select {
 		case <-term:
