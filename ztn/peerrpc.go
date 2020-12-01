@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const PeerServiceServerPort = 6971
+const PeerServiceServerPort = 12676
 
 func ConnectPeerServiceClient(addr string) PeerServiceClient {
 	conn, err := grpc.Dial(
