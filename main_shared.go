@@ -19,6 +19,8 @@ import (
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
+
+	_ "net/http/pprof"
 )
 
 var connection *ztn.Connection

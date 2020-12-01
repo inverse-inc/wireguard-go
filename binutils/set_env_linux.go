@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
@@ -13,7 +14,7 @@ import (
 func init() {
 	var err error
 	tmp := os.Getenv("HOME")
-	Wgenv, err = os.OpenFile(path.Join(tmp, ".wgenv"), os.O_RDWR|os.O_CREATE, 0600)
+	Wgenv, err = os.OpenFile(path.Join(tmp, fmt.Sprintf(".wgenv-%d", time.Now().Unix())), os.O_RDWR|os.O_CREATE, 0600)
 	sharedutils.CheckError(err)
 }
 

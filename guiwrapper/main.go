@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,6 +15,8 @@ import (
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	"github.com/joho/godotenv"
+
+	_ "net/http/pprof"
 )
 
 var rpc = wgrpc.WGRPCClient()
@@ -33,6 +37,11 @@ func main() {
 	binutils.Setenv("WG_CLI", "false")
 
 	go binutils.CheckParentIsAlive(quit)
+
+	go func() {
+		//PPROF
+		log.Println(http.ListenAndServe("localhost:6061", nil))
+	}()
 
 	setupExitSignals()
 	SetupAPIClientGUI(func(runTunnel bool) {
@@ -99,7 +108,7 @@ func checkTunnelStatus() {
 				return
 			} else {
 				statusLabel.SetText(messages[status])
-				UpdatePeers(ctx, rpc)
+				//UpdatePeers(ctx, rpc)
 			}
 		}
 
