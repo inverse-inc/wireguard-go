@@ -37,6 +37,7 @@ const (
 	// These will get ordered in the BindTechniques.
 	// Lower string == tried first if available
 	// NAT PMP hasn't worked well in a few places so its left to be tried last
+	BindAutomatic   = BindTechnique("AUTOMATIC")
 	BindUPNPGID     = BindTechnique("UPNPGID")
 	BindSTUN        = BindTechnique("STUN")
 	BindNATPMP      = BindTechnique("NATPMP")

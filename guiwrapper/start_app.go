@@ -14,6 +14,7 @@ import (
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
+	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
 var spacePlaceholder = "                          "
@@ -101,6 +102,14 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	installRoutesFromServerEntry := widget.NewCheck("Install routes from server", func(bool) {})
 	installRoutesFromServerEntry.Checked = true
 
+	preferedBindTechniqueEntry := widget.NewSelect([]string{
+		string(ztn.BindUPNPGID),
+		string(ztn.BindSTUN),
+		string(ztn.BindNATPMP),
+		string(ztn.BindThroughPeer),
+	}, func(string) {})
+	preferedBindTechniqueEntry.PlaceHolder = string(ztn.BindAutomatic)
+
 	connect := func() {
 
 		showFormError := func(msg string) {
@@ -139,6 +148,10 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 		}
 		binutils.Setenv("WG_HONOR_ROUTES", honorRoutesStr)
 
+		if preferedBindTechniqueEntry.Selected != string(ztn.BindAutomatic) {
+			binutils.Setenv("WG_BIND_TECHNIQUE", preferedBindTechniqueEntry.Selected)
+		}
+
 		PostConnect(tabs)
 		callback(true)
 	}
@@ -172,6 +185,10 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	settingsTab.Content = widget.NewVBox(
 		widget.NewHBox(
 			installRoutesFromServerEntry,
+		),
+		widget.NewHBox(
+			widget.NewLabel("Bind technique"),
+			preferedBindTechniqueEntry,
 		),
 	)
 
