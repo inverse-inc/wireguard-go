@@ -139,7 +139,7 @@ func (pc *PeerConnection) run() {
 				sharedutils.CheckError(err)
 
 				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
-				GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+				GLPPublish(pc.PublishP2PKey(), pc.buildNetworkEndpointEvent())
 
 				pc.setupPeerConnection(peerStr, peerAddr)
 
@@ -201,15 +201,15 @@ func (pc *PeerConnection) listen(conn *net.UDPConn, messages chan *pkt) {
 	}()
 }
 
-func (pc *PeerConnection) buildP2PKey() string {
-	key1 := pc.MyProfile.PublicKey
-	key2 := pc.PeerProfile.PublicKey
-	if key2 < key1 {
-		key1bak := key1
-		key1 = key2
-		key2 = key1bak
-	}
+func (pc *PeerConnection) PublishP2PKey() string {
+	return pc.buildP2PKey(pc.MyProfile.PublicKey, pc.PeerProfile.PublicKey)
+}
 
+func (pc *PeerConnection) ListenP2PKey() string {
+	return pc.buildP2PKey(pc.PeerProfile.PublicKey, pc.MyProfile.PublicKey)
+}
+
+func (pc *PeerConnection) buildP2PKey(key1, key2 string) string {
 	key1dec, err := base64.StdEncoding.DecodeString(key1)
 	sharedutils.CheckError(err)
 	key2dec, err := base64.StdEncoding.DecodeString(key2)
@@ -265,7 +265,7 @@ func (pc *PeerConnection) getPeerAddr() chan *NetworkEndpointEvent {
 	result := make(chan *NetworkEndpointEvent)
 	myID := pc.MyProfile.PublicKey
 
-	p2pk := pc.buildP2PKey()
+	p2pk := pc.ListenP2PKey()
 
 	go func() {
 		c := GLPClient(p2pk)
@@ -347,7 +347,7 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan *NetworkEndp
 			case <-time.After(after[i%len(after)]):
 				i++
 				pc.logger.Debug.Println("Publishing IP for discovery with peer", pc.peerID)
-				GLPPublish(pc.buildP2PKey(), pc.buildNetworkEndpointEvent())
+				GLPPublish(pc.PublishP2PKey(), pc.buildNetworkEndpointEvent())
 			case <-foundPeer:
 				pc.logger.Info.Println("Found peer", pc.peerID, ", stopping the publishing")
 				return
