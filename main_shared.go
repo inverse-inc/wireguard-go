@@ -34,9 +34,9 @@ func startInverse(interfaceName string, device *device.Device) {
 	go func() {
 		defer binutils.CapturePanic()
 
-		if ztn.NewUPNPGID().CheckNet() == nil {
+		if ztn.NewUPNPIGD().CheckNet() == nil {
 			logger.Debug.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
-			ztn.BindTechniques.Add(ztn.BindUPNPGID)
+			ztn.BindTechniques.Add(ztn.BindUPNPIGD)
 			bindTechniqueDone <- true
 		}
 	}()

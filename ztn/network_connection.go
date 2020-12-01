@@ -167,7 +167,7 @@ func (nc *NetworkConnection) run() {
 	nc.localConn, err = net.ListenUDP(udp, nil)
 	sharedutils.CheckError(err)
 
-	peerupnpgid := NewUPNPGID()
+	peerupnpigd := NewUPNPIGD()
 	peernatpmp := NewNATPMP()
 	peerbindthroughpeer := NewBindThroughPeerAgent(nc.Connection, nc)
 
@@ -218,8 +218,8 @@ func (nc *NetworkConnection) run() {
 						nc.setPublicAddr(newaddr)
 					}
 
-				case peerupnpgid.IsMessage(message.message):
-					externalIP, externalPort, err := peerupnpgid.ParseBindRequestPkt(message.message)
+				case peerupnpigd.IsMessage(message.message):
+					externalIP, externalPort, err := peerupnpigd.ParseBindRequestPkt(message.message)
 					if err != nil {
 						nc.logger.Error.Println("Unable to decode UPNP GID message:", err)
 						return false
@@ -338,8 +338,8 @@ func (nc *NetworkConnection) run() {
 				}
 			case <-keepalive:
 				if !nc.CheckConnectionLiveness() {
-					if peerupnpgid.remotePort != 0 {
-						peerupnpgid.DelPortMapping()
+					if peerupnpigd.remotePort != 0 {
+						peerupnpigd.DelPortMapping()
 					}
 					nc.BindTechnique = nc.BindTechniques.Next()
 					return false
@@ -355,8 +355,8 @@ func (nc *NetworkConnection) run() {
 					err = peerbindthroughpeer.BindRequest(nc.localConn, nc.messageChan)
 				}
 				if nc.publicAddr == nil {
-					if nc.BindTechnique == BindUPNPGID {
-						err = peerupnpgid.BindRequest(nc.localConn, localPort, nc.messageChan)
+					if nc.BindTechnique == BindUPNPIGD {
+						err = peerupnpigd.BindRequest(nc.localConn, localPort, nc.messageChan)
 					} else if nc.BindTechnique == BindNATPMP {
 						err = peernatpmp.BindRequest(nc.localConn, localPort, nc.messageChan)
 					}

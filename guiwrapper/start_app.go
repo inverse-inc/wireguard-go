@@ -105,7 +105,7 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	installRoutesFromServerEntry.Checked = true
 
 	preferedBindTechniqueEntry := widget.NewSelect([]string{
-		string(ztn.BindUPNPGID),
+		string(ztn.BindUPNPIGD),
 		string(ztn.BindSTUN),
 		string(ztn.BindNATPMP),
 		string(ztn.BindThroughPeer),

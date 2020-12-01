@@ -20,7 +20,7 @@ func (bt BindTechnique) Weight() int {
 }
 
 var bindTechniquePriorities = map[BindTechnique]int{
-	BindUPNPGID:     01,
+	BindUPNPIGD:     01,
 	BindSTUN:        02,
 	BindNATPMP:      03,
 	BindThroughPeer: 31,
@@ -28,7 +28,7 @@ var bindTechniquePriorities = map[BindTechnique]int{
 
 var BindTechniqueNames = map[string]BindTechnique{
 	"STUN":         BindSTUN,
-	"UPNPGID":      BindUPNPGID,
+	"UPNPIGD":      BindUPNPIGD,
 	"NATPMP":       BindNATPMP,
 	"THROUGH_PEER": BindThroughPeer,
 }
@@ -38,7 +38,7 @@ const (
 	// Lower string == tried first if available
 	// NAT PMP hasn't worked well in a few places so its left to be tried last
 	BindAutomatic   = BindTechnique("AUTOMATIC")
-	BindUPNPGID     = BindTechnique("UPNPGID")
+	BindUPNPIGD     = BindTechnique("UPNPIGD")
 	BindSTUN        = BindTechnique("STUN")
 	BindNATPMP      = BindTechnique("NATPMP")
 	BindThroughPeer = BindTechnique("THROUGH_PEER")

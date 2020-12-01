@@ -21,7 +21,7 @@ type UPNPIGD struct {
 	remotePort int
 }
 
-func NewUPNPGID() *UPNPIGD {
+func NewUPNPIGD() *UPNPIGD {
 	id, err := securerandom.Uint64()
 	sharedutils.CheckError(err)
 	return &UPNPIGD{id: id, mapping: upnp.Upnp{}}
