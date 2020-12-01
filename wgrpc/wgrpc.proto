@@ -15,6 +15,7 @@ message StatusRequest {
 message StatusReply {
   string status = 1;
   string lastError = 2;
+  string currentBindTechnique = 3;
 }
 
 message PeerReply {

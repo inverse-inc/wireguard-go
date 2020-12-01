@@ -20,6 +20,7 @@ import (
 var spacePlaceholder = "                          "
 
 var statusLabel *widget.Label
+var bindTechniqueLabel = widget.NewLabel("N/A")
 var peersTableContainer *widget.Card
 var peersTable = NewTable()
 
@@ -200,7 +201,12 @@ func PostConnect(tabs *container.AppTabs) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
 	statusLabel.Wrapping = fyne.TextWrapWord
 	peersTableContainer = widget.NewCard("Peers", "", widget.NewVBox())
-	tabs.Items[0].Content = widget.NewVBox(statusLabel, restartBtn, peersTableContainer)
+	tabs.Items[0].Content = widget.NewVBox(
+		statusLabel,
+		restartBtn,
+		widget.NewHBox(widget.NewLabel("Bind Technique: "), bindTechniqueLabel),
+		peersTableContainer,
+	)
 	if len(tabs.Items) > 1 {
 		tabs.RemoveIndex(1)
 	}

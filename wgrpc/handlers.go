@@ -17,17 +17,21 @@ type Debugable interface {
 type WGServiceServerHandler struct {
 	sync.Mutex
 	UnimplementedWGServiceServer
-	connection *ztn.Connection
-	debugables []Debugable
-	onexit     func()
+	connection        *ztn.Connection
+	networkConnection *ztn.NetworkConnection
+	debugables        []Debugable
+	onexit            func()
 }
 
-func NewWGServiceServerHandler(connection *ztn.Connection, onexit func()) *WGServiceServerHandler {
-	return &WGServiceServerHandler{
-		connection: connection,
-		debugables: []Debugable{},
-		onexit:     onexit,
+func NewWGServiceServerHandler(connection *ztn.Connection, networkConnection *ztn.NetworkConnection, onexit func()) *WGServiceServerHandler {
+	s := &WGServiceServerHandler{
+		connection:        connection,
+		networkConnection: networkConnection,
+		debugables:        []Debugable{},
+		onexit:            onexit,
 	}
+	s.AddDebugable(networkConnection)
+	return s
 }
 
 func (s *WGServiceServerHandler) AddDebugable(d Debugable) {
@@ -43,7 +47,11 @@ func (s *WGServiceServerHandler) GetStatus(ctx context.Context, in *StatusReques
 	if s.connection.LastError != nil {
 		errStr = s.connection.LastError.Error()
 	}
-	return &StatusReply{Status: s.connection.Status, LastError: errStr}, nil
+	sr := &StatusReply{Status: s.connection.Status, LastError: errStr}
+	if s.networkConnection != nil {
+		sr.CurrentBindTechnique = string(s.networkConnection.BindTechnique)
+	}
+	return sr, nil
 }
 
 func (s *WGServiceServerHandler) GetPeers(ctx context.Context, in *PeersRequest) (*PeersReply, error) {

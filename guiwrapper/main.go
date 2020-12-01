@@ -102,6 +102,7 @@ func checkTunnelStatus() {
 		} else {
 			fails = 0
 			status = statusReply.Status
+			bindTechniqueLabel.SetText(statusReply.CurrentBindTechnique)
 			if status == ztn.STATUS_ERROR {
 				statusLabel.SetText(messages[status] + ": " + statusReply.LastError)
 				restartBtn.Show()
