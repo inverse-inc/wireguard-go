@@ -15,7 +15,6 @@ import (
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/filter"
-	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
@@ -78,7 +77,7 @@ func startInverse(interfaceName string, device *device.Device) {
 			connection.Status = ztn.STATUS_ERROR
 			connection.LastError = err
 		})
-		util.Pause()
+		ztn.PauseOnError(quit)
 	}
 
 	connection.Update(func() {
@@ -93,7 +92,7 @@ func startInverse(interfaceName string, device *device.Device) {
 			connection.Status = ztn.STATUS_ERROR
 			connection.LastError = err
 		})
-		util.Pause()
+		ztn.PauseOnError(quit)
 	}
 
 	networkConnection := ztn.NewNetworkConnection("MAIN", logger, mainConnectionPort)

@@ -107,3 +107,11 @@ func isPrivateIP(ip net.IP) bool {
 	}
 	return false
 }
+
+func PauseOnError(quit func()) {
+	if RunningInCLI() {
+		quit()
+	} else {
+		util.Pause()
+	}
+}
