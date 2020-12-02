@@ -20,7 +20,7 @@ cp Info.plist "build/PacketFence Zero Trust Client.app/Contents"
 
 cp ../amd64/traywrapper "build/PacketFence Zero Trust Client.app/Contents/MacOS/PacketFenceZeroTrustClient"
 cp ../amd64/guiwrapper "build/PacketFence Zero Trust Client.app/Contents/MacOS/guiwrapper"
-cp ../amd64/wireguard "build/PacketFence Zero Trust Client.app/Contents/MacOS/wireguard-go"
+cp ../amd64/wireguard "build/PacketFence Zero Trust Client.app/Contents/MacOS/wireguard"
 
 cp packetfence-zero-trust-client.icns "build/PacketFence Zero Trust Client.app/Contents/Resources/"
 
