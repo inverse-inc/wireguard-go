@@ -44,7 +44,7 @@ type NetworkConnection struct {
 	bindThroughPeerAddr *net.UDPAddr
 
 	localConn *net.UDPConn
-	port int
+	port      int
 
 	BindTechnique  BindTechnique
 	BindTechniques *BindTechniquesStruct
@@ -75,7 +75,7 @@ func NewNetworkConnection(description string, logger *device.Logger, port int) *
 	nc := &NetworkConnection{
 		logger:          logger.AddPrepend(fmt.Sprintf("(NC:%s) ", description)),
 		peerConnections: map[string]*bridge{},
-		port: port,
+		port:            port,
 	}
 	nc.WGAddr = &net.UDPAddr{IP: localWGIP, Port: localWGPort}
 
@@ -326,8 +326,8 @@ func (nc *NetworkConnection) run() {
 					}
 				}
 			case <-nc.inboundAttemptsChan:
-				nc.logger.Debug.Println("Got an inbound failure reported by a peer connection")
 				nc.inboundAttempts++
+				nc.logger.Debug.Println("Got an inbound attempt reported by a peer connection", nc.inboundAttempts, InboundAttemptsTolerance, time.Since(nc.started), InboundAttemptsTryAtLeast, nc.lastWGInbound)
 				if nc.inboundAttempts > InboundAttemptsTolerance && time.Since(nc.started) > InboundAttemptsTryAtLeast && nc.lastWGInbound.IsZero() {
 					nc.BindTechnique = nc.BindTechniques.Next()
 					return false

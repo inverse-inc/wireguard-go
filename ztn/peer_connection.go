@@ -366,6 +366,9 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 	case ConnectionTypeLAN:
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
 	case ConnectionTypeWANSTUN:
+		go func() {
+			pc.networkConnection.RecordInboundAttempt()
+		}()
 		var err error
 		pc.stunPeerConn, err = net.ListenUDP(udp, nil)
 		sharedutils.CheckError(err)
