@@ -1,7 +1,7 @@
 
 # How to build the Mac OS agent
 
-NOTE: Although you can build the binaries on any platform, you can only build the DMG on Mac OS itself.
+NOTE: Although you can build the wireguard-go binary on any platform, you can only build the DMG on Mac OS itself. Also, the guiwrapper will not build if you're not on Mac OS.
 
 First you need to build the binaries using the build script in the parent directory:
 
