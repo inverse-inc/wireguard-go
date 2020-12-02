@@ -23,6 +23,8 @@ import (
 	_ "net/http/pprof"
 )
 
+const mainConnectionPort = 12673
+
 var connection *ztn.Connection
 
 func startInverse(interfaceName string, device *device.Device) {
@@ -94,7 +96,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		util.Pause()
 	}
 
-	networkConnection := ztn.NewNetworkConnection("MAIN", logger)
+	networkConnection := ztn.NewNetworkConnection("MAIN", logger, mainConnectionPort)
 	networkConnection.Connection = connection
 
 	go wgrpc.StartRPC(logger, connection, networkConnection, quit)

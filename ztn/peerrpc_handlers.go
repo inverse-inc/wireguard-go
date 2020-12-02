@@ -52,7 +52,7 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	}
 	s.Unlock()
 
-	nc := NewNetworkConnection(fmt.Sprintf("peer-service-%s", in.Name), s.logger)
+	nc := NewNetworkConnection(fmt.Sprintf("peer-service-%s", in.Name), s.logger, 0)
 	raddr, publicAddr := nc.SetupForwarding(in.PeerConnectionType)
 
 	if raddr == nil || publicAddr == nil {

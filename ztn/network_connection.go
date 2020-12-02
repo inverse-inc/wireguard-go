@@ -44,6 +44,7 @@ type NetworkConnection struct {
 	bindThroughPeerAddr *net.UDPAddr
 
 	localConn *net.UDPConn
+	port int
 
 	BindTechnique  BindTechnique
 	BindTechniques *BindTechniquesStruct
@@ -70,10 +71,11 @@ type NetworkConnection struct {
 	wgConnRemote bool
 }
 
-func NewNetworkConnection(description string, logger *device.Logger) *NetworkConnection {
+func NewNetworkConnection(description string, logger *device.Logger, port int) *NetworkConnection {
 	nc := &NetworkConnection{
 		logger:          logger.AddPrepend(fmt.Sprintf("(NC:%s) ", description)),
 		peerConnections: map[string]*bridge{},
+		port: port,
 	}
 	nc.WGAddr = &net.UDPAddr{IP: localWGIP, Port: localWGPort}
 
@@ -164,7 +166,13 @@ func (nc *NetworkConnection) run() {
 
 	maintenance := time.Tick(1 * time.Minute)
 
-	nc.localConn, err = net.ListenUDP(udp, nil)
+	var localConnAddr *net.UDPAddr
+	if nc.port != 0 {
+		localConnAddr, err = net.ResolveUDPAddr(udp, fmt.Sprintf(":%d", nc.port))
+		sharedutils.CheckError(err)
+	}
+
+	nc.localConn, err = net.ListenUDP(udp, localConnAddr)
 	sharedutils.CheckError(err)
 
 	peerupnpigd := NewUPNPIGD()
