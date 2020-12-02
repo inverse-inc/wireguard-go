@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"sync"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
@@ -56,13 +57,16 @@ func (btp *BindThroughPeerAgent) BindRequest(conn *net.UDPConn, sendTo chan *pkt
 		return nil
 	}
 
+	hostname, err := os.Hostname()
+	sharedutils.CheckError(err)
+
 	pcs := btp.findBridgeablePeers()
 	for _, pc := range pcs {
 		btp.networkConnection.logger.Info.Println("Attempting to setup forwarding with peer", pc.PeerProfile.WireguardIP)
 
 		serverAddr := fmt.Sprintf("%s:%d", pc.PeerProfile.WireguardIP.String(), PeerServiceServerPort)
 		c := ConnectPeerServiceClient(serverAddr)
-		res, err := c.SetupForwarding(context.Background(), &SetupForwardingRequest{Name: "testing", PeerConnectionType: pc.ConnectionType})
+		res, err := c.SetupForwarding(context.Background(), &SetupForwardingRequest{Name: hostname, PeerConnectionType: pc.ConnectionType})
 		if err != nil {
 			btp.networkConnection.logger.Error.Println("Failed to setup forwarding with peer", pc.PeerProfile.WireguardIP, "due to the following error:", err)
 			continue
