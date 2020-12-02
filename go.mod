@@ -34,15 +34,6 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.1
 	github.com/miekg/dns v1.1.34
 	github.com/mitchellh/go-ps v1.0.0
-	github.com/theckman/go-securerandom v0.1.1
-	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
-	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
-	golang.org/x/sys v0.0.0-20201113233024-12cec1faf1ba
-	golang.org/x/text v0.3.4
-	google.golang.org/genproto v0.0.0-20201116144945-7adebfbe6a3f // indirect
-	google.golang.org/grpc v1.33.2
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1 // indirect
-	google.golang.org/protobuf v1.25.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.4.5
 	github.com/openzipkin/zipkin-go v0.2.2
@@ -61,6 +52,8 @@ require (
 	google.golang.org/api v0.29.0
 	google.golang.org/genproto v0.0.0-20201116144945-7adebfbe6a3f // indirect
 	google.golang.org/grpc v1.33.2
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1 // indirect
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
 	gortc.io/stun v1.22.2
 	k8s.io/api v0.19.2

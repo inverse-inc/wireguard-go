@@ -22,7 +22,6 @@ import (
 	_ "github.com/inverse-inc/wireguard-go/dns/core/plugin"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/filter"
-	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
 	ps "github.com/mitchellh/go-ps"
