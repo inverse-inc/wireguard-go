@@ -23,14 +23,12 @@ type WGServiceServerHandler struct {
 	onexit            func()
 }
 
-func NewWGServiceServerHandler(connection *ztn.Connection, networkConnection *ztn.NetworkConnection, onexit func()) *WGServiceServerHandler {
+func NewWGServiceServerHandler(connection *ztn.Connection, onexit func()) *WGServiceServerHandler {
 	s := &WGServiceServerHandler{
-		connection:        connection,
-		networkConnection: networkConnection,
-		debugables:        []Debugable{},
-		onexit:            onexit,
+		connection: connection,
+		debugables: []Debugable{},
+		onexit:     onexit,
 	}
-	s.AddDebugable(networkConnection)
 	return s
 }
 
@@ -89,4 +87,8 @@ func (s *WGServiceServerHandler) PrintDebug(ctx context.Context, in *PrintDebugR
 		d.PrintDebug()
 	}
 	return &PrintDebugReply{}, nil
+}
+
+func (s *WGServiceServerHandler) SetNetworkConnection(networkConnection *ztn.NetworkConnection) {
+	s.networkConnection = networkConnection
 }

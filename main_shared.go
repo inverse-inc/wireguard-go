@@ -32,6 +32,8 @@ func startInverse(interfaceName string, device *device.Device) {
 	connection = ztn.NewConnection(logger)
 	bindTechniqueDone := make(chan bool)
 
+	go wgrpc.StartRPC(logger, connection, quit)
+
 	go func() {
 		defer binutils.CapturePanic()
 
@@ -98,7 +100,8 @@ func startInverse(interfaceName string, device *device.Device) {
 	networkConnection := ztn.NewNetworkConnection("MAIN", logger, mainConnectionPort)
 	networkConnection.Connection = connection
 
-	go wgrpc.StartRPC(logger, connection, networkConnection, quit)
+	wgrpc.WGRPCServer.SetNetworkConnection(networkConnection)
+	wgrpc.WGRPCServer.AddDebugable(networkConnection)
 
 	go networkConnection.Start()
 

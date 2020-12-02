@@ -15,12 +15,12 @@ const ServerPort = 6970
 
 var WGRPCServer *WGServiceServerHandler
 
-func StartRPC(logger *device.Logger, connection *ztn.Connection, networkConnection *ztn.NetworkConnection, onexit func()) {
+func StartRPC(logger *device.Logger, connection *ztn.Connection, onexit func()) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", ServerPort))
 	sharedutils.CheckError(err)
 	grpcServer := grpc.NewServer()
 
-	WGRPCServer = NewWGServiceServerHandler(connection, networkConnection, onexit)
+	WGRPCServer = NewWGServiceServerHandler(connection, onexit)
 	RegisterWGServiceServer(grpcServer, WGRPCServer)
 
 	PeerServer := ztn.NewPeerServiceServerHandler(logger)
