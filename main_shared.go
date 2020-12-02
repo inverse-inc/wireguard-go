@@ -3,24 +3,20 @@ package main
 //go:generate go run dns/directives_generate.go
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"os/user"
 	"path"
-	"strings"
-	"text/template"
 	"time"
 
-	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	_ "github.com/inverse-inc/wireguard-go/dns/core/plugin"
-	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/filter"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -189,68 +185,9 @@ func findppid(pid int) int {
 	return 0
 }
 
-func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, domains []string) string {
+func quit() {
 
-	var tpl bytes.Buffer
-
-	type Data struct {
-		Domains      []string
-		Nameservers  string
-		API          string
-		SearchDomain []string
-	}
-
-	APIClient := ztn.GetAPIClient()
-
-	data := Data{
-		Domains:      domains,
-		Nameservers:  strings.Join(myDNSInfo.NameServers[:], " "),
-		API:          APIClient.Host,
-		SearchDomain: myDNSInfo.SearchDomain,
-	}
-
-	t := template.New("Coreconfig")
-
-	t, _ = t.Parse(
-		`.:53 {
-bind 127.0.0.69
-#debug
-{{ range .Domains }}
-{{ if ne . "" }}
-{{$domain := .}}
-dnsredir {{.}} {
-   to ietf-doh://{{ $.API }}:9999/dns-query
-}
-{{ range $.SearchDomain }}
-{{ if ne . "" }}
-dnsredir {{$domain}}.{{.}} {
-	to ietf-doh://{{ $.API }}:9999/dns-query
-}
-{{ end }}
-{{ end }}
-
-{{ end }}
-{{ end }}
-
-forward . {{ .Nameservers }} {
-	prefer_udp
-}
-}`)
-
-	t.Execute(&tpl, data)
-	return tpl.String()
-}
-
-func StartDNS() *godnschange.DNSStruct {
-	dnsChange := godnschange.NewDNSChange()
-
-	myDNSInfo := dnsChange.GetDNS()
-
-	buffer := GenerateCoreDNSConfig(myDNSInfo, NamesToResolve)
-	dnsChange.Change("127.0.0.69")
-	go func() {
-		coremain.Run(buffer)
-	}()
-
-	return dnsChange
+	DNSChange.RestoreDNS("127.0.0.69")
+	ztn.UPNPIGDCleanupMapped()
+	os.Exit(0)
 }

@@ -22,7 +22,6 @@ import (
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/tun"
 	"github.com/inverse-inc/wireguard-go/util"
-	"github.com/inverse-inc/wireguard-go/ztn"
 	"github.com/joho/godotenv"
 
 	_ "net/http/pprof"
@@ -269,11 +268,4 @@ func main() {
 
 func checkParentIsAlive() {
 	util.CheckGUIIsAliveUNIX(quit)
-}
-
-func quit() {
-
-	DNSChange.RestoreDNS("127.0.0.69")
-	ztn.UPNPIGDCleanupMapped()
-	os.Exit(0)
 }

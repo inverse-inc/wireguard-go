@@ -285,9 +285,4 @@ func checkParentIsAlive() {
 	util.CheckGUIIsAliveUNIX(quit)
 }
 
-func quit() {
 
-	DNSChange.RestoreDNS("127.0.0.69")
-	ztn.UPNPIGDCleanupMapped()
-	os.Exit(0)
-}
