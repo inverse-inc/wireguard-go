@@ -23,7 +23,8 @@ const (
 )
 
 const (
-	ConnectionTypeLAN     = "LAN"
+	ConnectionTypeLANIN   = "LAN IN"
+	ConnectionTypeLANOUT  = "LAN OUT"
 	ConnectionTypeWANIN   = "WAN IN"
 	ConnectionTypeWANOUT  = "WAN OUT"
 	ConnectionTypeWANSTUN = "WAN STUN"

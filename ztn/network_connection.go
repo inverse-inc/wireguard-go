@@ -149,7 +149,7 @@ func (nc *NetworkConnection) SetupForwarding(ct string) (net.Addr, *net.UDPAddr)
 	case addr := <-nc.publicAddrChan:
 		// If our peer wants the LAN address or the WAN address to talk to us
 		// And also what is the address to advertise to his own peers
-		if ct == ConnectionTypeLAN {
+		if ct == ConnectionTypeLANIN || ct == ConnectionTypeLANOUT {
 			return nc.localConn.LocalAddr(), addr
 		} else {
 			return addr, addr

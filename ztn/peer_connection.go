@@ -126,7 +126,7 @@ func (pc *PeerConnection) run() {
 
 				pc.ConnectionType = pc.FindConnectionType(nee)
 				var peerStr string
-				if pc.ConnectionType == ConnectionTypeLAN {
+				if pc.ConnectionType == ConnectionTypeLANIN || pc.ConnectionType == ConnectionTypeLANOUT {
 					pc.Status = PEER_STATUS_CONNECT_PRIVATE
 					peerStr = nee.PrivateEndpoint
 				} else {
@@ -363,8 +363,10 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 
 	conf += fmt.Sprintf("public_key=%s\n", keyToHex(pc.PeerProfile.PublicKey))
 	switch pc.ConnectionType {
-	case ConnectionTypeLAN:
+	case ConnectionTypeLANOUT:
 		conf += fmt.Sprintf("endpoint=%s\n", peerStr)
+	case ConnectionTypeLANIN:
+		//Nothing to do
 	case ConnectionTypeWANSTUN:
 		go func() {
 			pc.networkConnection.RecordInboundAttempt()
@@ -466,28 +468,58 @@ func (pc *PeerConnection) IAmTheBestWANIN(nee *NetworkEndpointEvent) bool {
 }
 
 func (pc *PeerConnection) FindConnectionType(nee *NetworkEndpointEvent) string {
-	tryMod := pc.try % 3
+	tryMod := pc.try % 6
 
 	switch tryMod {
 	case 0:
-		if pc.bothStunning {
-			return ConnectionTypeWANSTUN
-		} else if pc.IAmTheBestWANIN(nee) {
-			return ConnectionTypeWANIN
-		} else {
-			return ConnectionTypeWANOUT
-		}
+		return pc.connectionTypeWan1(nee)
 	case 1:
-		return ConnectionTypeLAN
+		return pc.connectionTypeLan1(nee)
 	case 2:
-		if pc.bothStunning {
-			return ConnectionTypeWANSTUN
-		} else if pc.IAmTheBestWANIN(nee) {
-			return ConnectionTypeWANOUT
-		} else {
-			return ConnectionTypeWANIN
-		}
+		return pc.connectionTypeWan2(nee)
+	case 3:
+		return pc.connectionTypeLan2(nee)
+	case 4:
+		return pc.connectionTypeWan1(nee)
+	case 5:
+		return pc.connectionTypeWan2(nee)
 	default:
 		panic("Unknown modulo when trying to find connection type")
+	}
+}
+
+func (pc *PeerConnection) connectionTypeLan1(nee *NetworkEndpointEvent) string {
+	if pc.IAmTheSmallestKey() {
+		return ConnectionTypeLANIN
+	} else {
+		return ConnectionTypeLANOUT
+	}
+}
+
+func (pc *PeerConnection) connectionTypeLan2(nee *NetworkEndpointEvent) string {
+	if pc.IAmTheSmallestKey() {
+		return ConnectionTypeLANOUT
+	} else {
+		return ConnectionTypeLANIN
+	}
+}
+
+func (pc *PeerConnection) connectionTypeWan1(nee *NetworkEndpointEvent) string {
+	if pc.bothStunning {
+		return ConnectionTypeWANSTUN
+	} else if pc.IAmTheBestWANIN(nee) {
+		return ConnectionTypeWANIN
+	} else {
+		return ConnectionTypeWANOUT
+	}
+}
+
+func (pc *PeerConnection) connectionTypeWan2(nee *NetworkEndpointEvent) string {
+	if pc.bothStunning {
+		return ConnectionTypeWANSTUN
+	} else if pc.IAmTheBestWANIN(nee) {
+		return ConnectionTypeWANOUT
+	} else {
+		return ConnectionTypeWANIN
 	}
 }
