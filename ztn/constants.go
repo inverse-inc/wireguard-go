@@ -16,7 +16,7 @@ var InboundAttemptsTolerance = 2
 const udp = "udp"
 const pingMsg = "ping"
 
-const stunServer = "srv.semaan.ca:3478"
+var stunServer = ""
 
 const (
 	MsgNcBindPeerBridge = uint64(1)

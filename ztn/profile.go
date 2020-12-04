@@ -95,6 +95,8 @@ type Profile struct {
 }
 
 func (p *Profile) SetupWireguard(d *device.Device, WGInterface string) error {
+	stunServer = p.STUNServer
+
 	err := p.setupInterface(d, WGInterface)
 	if err != nil {
 		return err
