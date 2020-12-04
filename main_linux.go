@@ -72,6 +72,7 @@ func main() {
 
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
 		setMasterProcess()
+		DNSChange = StartDNS()
 		go checkParentIsAlive()
 
 		for {
@@ -247,8 +248,6 @@ func main() {
 		startInverse(interfaceName, device)
 
 		// wait for program to terminate
-		DNSChange = StartDNS()
-
 		signal.Notify(term, syscall.SIGTERM)
 		signal.Notify(term, os.Interrupt)
 		signal.Notify(term, syscall.SIGPIPE)
