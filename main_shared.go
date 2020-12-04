@@ -3,11 +3,14 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"os/user"
 	"path"
+	"syscall"
 	"time"
 
 	"github.com/inverse-inc/packetfence/go/remoteclients"
@@ -25,6 +28,13 @@ import (
 const mainConnectionPort = 12673
 
 var connection *ztn.Connection
+
+var masterProcess bool
+
+func setMasterProcess() {
+	masterProcess = true
+	setupMasterQuit()
+}
 
 func startInverse(interfaceName string, device *device.Device) {
 	defer binutils.CapturePanic()
@@ -181,7 +191,27 @@ func findppid(pid int) int {
 	return 0
 }
 
+func setupMasterQuit() {
+	term := make(chan os.Signal, 1)
+	go func() {
+		signal.Notify(term, syscall.SIGTERM)
+		signal.Notify(term, os.Interrupt)
+		signal.Notify(term, syscall.SIGPIPE)
+
+		select {
+		case <-term:
+			quit()
+		}
+	}()
+
+}
+
 func quit() {
-	ztn.UPNPIGDCleanupMapped()
+	if masterProcess {
+		//DNS cleanup goes here
+		fmt.Println("Master process is exiting")
+	} else {
+		ztn.UPNPIGDCleanupMapped()
+	}
 	os.Exit(0)
 }
