@@ -39,7 +39,9 @@ func main() {
 	godotenv.Load(os.Args[1])
 
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
+		setMasterProcess()
 		go checkParentIsAlive()
+
 		for {
 			binutils.RunTunnelFG(os.Args[1])
 		}
