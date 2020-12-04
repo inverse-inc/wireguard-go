@@ -30,6 +30,7 @@ import (
 
 const mainConnectionPort = 12673
 
+
 var connection *ztn.Connection
 var NamesToResolve []string
 
