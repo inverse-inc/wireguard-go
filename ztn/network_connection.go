@@ -87,7 +87,7 @@ func NewNetworkConnection(description string, logger *device.Logger, port int) *
 
 	nc.reset()
 	nc.BindTechniques = BindTechniques.CopyNew()
-	if bt := sharedutils.EnvOrDefault("WG_BIND_TECHNIQUE", ""); bt != "" && BindTechniqueNames[bt] != "" {
+	if bt := sharedutils.EnvOrDefault(EnvBindTechnique, ""); bt != "" && BindTechniqueNames[bt] != "" {
 		nc.BindTechnique = BindTechniqueNames[bt]
 	} else {
 		nc.BindTechnique = nc.BindTechniques.Next()

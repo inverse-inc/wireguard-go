@@ -255,7 +255,7 @@ func (pc *PeerConnection) buildNetworkEndpointEvent() Event {
 		PrivateEndpoint: pc.getPrivateAddr(),
 		Try:             pc.try,
 		BindTechnique:   pc.networkConnection.BindTechnique,
-		OffersBridging:  sharedutils.EnvOrDefault("WG_OFFERS_BRIDGING", "false") == "true",
+		OffersBridging:  sharedutils.EnvOrDefault(EnvOffersBridging, "false") == "true",
 		SentOn:          time.Now(),
 		LaunchedAt:      pc.launchedAt,
 	}.ToJSON()}

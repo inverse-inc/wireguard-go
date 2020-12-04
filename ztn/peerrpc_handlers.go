@@ -23,7 +23,7 @@ func NewPeerServiceServerHandler(logger *device.Logger) *PeerServiceServerHandle
 	s := &PeerServiceServerHandler{
 		logger:         logger,
 		peerBridges:    map[uint64]*NetworkConnection{},
-		maxPeerBridges: sharedutils.EnvOrDefaultInt("WG_MAX_PEER_BRIDGES", 16),
+		maxPeerBridges: sharedutils.EnvOrDefaultInt(EnvMaxPeerBridges, 16),
 	}
 	go func() {
 		for {

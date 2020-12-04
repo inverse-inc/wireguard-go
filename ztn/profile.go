@@ -230,7 +230,7 @@ func (p *Profile) ParseRoutes() []RouteInfo {
 }
 
 func (p *Profile) SetupRoutes() error {
-	if sharedutils.EnvOrDefault("WG_HONOR_ROUTES", "true") == "true" {
+	if sharedutils.EnvOrDefault(EnvHonorRoutes, "true") == "true" {
 		for _, r := range p.ParseRoutes() {
 			p.logger.Info.Println("Installing route to", r.Network, "via", r.Gateway)
 			go func(r RouteInfo) {
@@ -249,9 +249,9 @@ func (p *Profile) SetupRoutes() error {
 }
 
 func (p *Profile) SetupGateway() error {
-	out := os.Getenv("WG_GATEWAY_OUTBOUND_INTERFACE")
+	out := os.Getenv(EnvGatewayOutboundInterface)
 	if out == "" {
-		return errors.New("WG_GATEWAY_OUTBOUND_INTERFACE is not defined. Add this to the environment to determine which interface should be used for outbound routing of the gateway")
+		return errors.New(EnvGatewayOutboundInterface + " is not defined. Add this to the environment to determine which interface should be used for outbound routing of the gateway")
 	}
 	err := exec.Command("bash", "-c", "echo 1 > /proc/sys/net/ipv4/ip_forward").Run()
 	if err != nil {
