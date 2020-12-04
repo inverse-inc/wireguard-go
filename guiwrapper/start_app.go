@@ -91,17 +91,17 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 
 	serverEntry := widget.NewEntry()
 	serverEntry.PlaceHolder = "ztn.example.com"
-	serverEntry.Text = sharedutils.EnvOrDefault("WG_SERVER", "")
+	serverEntry.Text = sharedutils.EnvOrDefault(ztn.EnvServer, "")
 
 	serverPortEntry := widget.NewEntry()
-	serverPortEntry.Text = sharedutils.EnvOrDefault("WG_SERVER_PORT", "9999")
+	serverPortEntry.Text = sharedutils.EnvOrDefault(ztn.EnvServerPort, "9999")
 
 	verifyServerEntry := widget.NewCheck("Verify server identity", func(bool) {})
-	verifyServerEntry.Checked = (sharedutils.EnvOrDefault("WG_SERVER_VERIFY_TLS", "true") == "true")
+	verifyServerEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvServerVerifyTLS, "true") == "true")
 
 	usernameEntry := widget.NewEntry()
 	usernameEntry.PlaceHolder = spacePlaceholder
-	usernameEntry.Text = sharedutils.EnvOrDefault("WG_USERNAME", "")
+	usernameEntry.Text = sharedutils.EnvOrDefault(ztn.EnvUsername, "")
 
 	formError := widget.NewLabelWithStyle("", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	formError.Hide()
@@ -110,7 +110,7 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	passwordEntry.PlaceHolder = spacePlaceholder
 
 	installRoutesFromServerEntry := widget.NewCheck("Install routes from server", func(bool) {})
-	installRoutesFromServerEntry.Checked = true
+	installRoutesFromServerEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvHonorRoutes, "true") == "true")
 
 	preferedBindTechniqueEntry := widget.NewSelect([]string{
 		string(ztn.BindUPNPIGD),
@@ -118,7 +118,7 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 		string(ztn.BindNATPMP),
 		string(ztn.BindThroughPeer),
 	}, func(string) {})
-	preferedBindTechniqueEntry.PlaceHolder = string(ztn.BindAutomatic)
+	preferedBindTechniqueEntry.SetSelected(sharedutils.EnvOrDefault(ztn.EnvBindTechnique, string(ztn.BindAutomatic)))
 
 	connect := func() {
 
@@ -142,24 +142,24 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 			return
 		}
 
-		binutils.Setenv("WG_USERNAME", usernameEntry.Text)
-		binutils.Setenv("WG_PASSWORD", base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
-		binutils.Setenv("WG_SERVER", serverEntry.Text)
-		binutils.Setenv("WG_SERVER_PORT", serverPortEntry.Text)
+		binutils.Setenv(ztn.EnvUsername, usernameEntry.Text)
+		binutils.Setenv(ztn.EnvPassword, base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
+		binutils.Setenv(ztn.EnvServer, serverEntry.Text)
+		binutils.Setenv(ztn.EnvServerPort, serverPortEntry.Text)
 		verifySslStr := "y"
 		if !verifyServerEntry.Checked {
 			verifySslStr = "n"
 		}
-		binutils.Setenv("WG_SERVER_VERIFY_TLS", verifySslStr)
+		binutils.Setenv(ztn.EnvServerVerifyTLS, verifySslStr)
 
 		honorRoutesStr := "true"
 		if !installRoutesFromServerEntry.Checked {
 			honorRoutesStr = "false"
 		}
-		binutils.Setenv("WG_HONOR_ROUTES", honorRoutesStr)
+		binutils.Setenv(ztn.EnvHonorRoutes, honorRoutesStr)
 
 		if preferedBindTechniqueEntry.Selected != string(ztn.BindAutomatic) {
-			binutils.Setenv("WG_BIND_TECHNIQUE", preferedBindTechniqueEntry.Selected)
+			binutils.Setenv(ztn.EnvBindTechnique, preferedBindTechniqueEntry.Selected)
 		}
 
 		PostConnect(tabs)

@@ -11,6 +11,7 @@ import (
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/util"
 	"github.com/inverse-inc/wireguard-go/util/icon"
+	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
 func setupSystray() {
@@ -37,7 +38,7 @@ func setupSystray() {
 func main() {
 	systray.Run(func() {
 		fmt.Println("Starting up")
-		binutils.Setenv("WG_GUI_PID", fmt.Sprintf("%d", os.Getpid()))
+		binutils.Setenv(ztn.EnvGUIPID, fmt.Sprintf("%d", os.Getpid()))
 
 		binutils.Elevate()
 		go startGUI()

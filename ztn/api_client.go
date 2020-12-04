@@ -20,7 +20,7 @@ var APIClientCtx context.Context
 
 // TODO: replace with prompts or configuration
 func SetupAPIClientCLI() {
-	server := sharedutils.EnvOrDefault("WG_SERVER", "")
+	server := sharedutils.EnvOrDefault(EnvServer, "")
 	if server == "" {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Server: ")
@@ -30,7 +30,7 @@ func SetupAPIClientCLI() {
 		fmt.Println("Using environment provided server:", server)
 	}
 
-	port := sharedutils.EnvOrDefault("WG_SERVER_PORT", "")
+	port := sharedutils.EnvOrDefault(EnvServerPort, "")
 	if port == "" {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Server port (default 9999): ")
@@ -44,7 +44,7 @@ func SetupAPIClientCLI() {
 		fmt.Println("Using environment provided server port:", port)
 	}
 
-	verifySslStr := sharedutils.EnvOrDefault("WG_SERVER_VERIFY_TLS", "")
+	verifySslStr := sharedutils.EnvOrDefault(EnvServerVerifyTLS, "")
 	if verifySslStr == "" {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Verify TLS identity of server? (Y/n): ")
@@ -58,7 +58,7 @@ func SetupAPIClientCLI() {
 		fmt.Println("Using environment provided server verify TLS:", verifySslStr)
 	}
 
-	username := sharedutils.EnvOrDefault("WG_USERNAME", "")
+	username := sharedutils.EnvOrDefault(EnvUsername, "")
 	if username == "" {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Username: ")
@@ -83,9 +83,9 @@ func mustGetenv(k string) string {
 }
 
 func SetupAPIClientEnv() {
-	pass, err := base64.StdEncoding.DecodeString(mustGetenv("WG_PASSWORD"))
+	pass, err := base64.StdEncoding.DecodeString(mustGetenv(EnvPassword))
 	sharedutils.CheckError(err)
-	setupAPIClientFromData(mustGetenv("WG_USERNAME"), string(pass), mustGetenv("WG_SERVER"), mustGetenv("WG_SERVER_PORT"), mustGetenv("WG_SERVER_VERIFY_TLS"))
+	setupAPIClientFromData(mustGetenv(EnvUsername), string(pass), mustGetenv(EnvServer), mustGetenv(EnvServerPort), mustGetenv(EnvServerVerifyTLS))
 }
 
 func setupAPIClientFromData(username, password, serverName, serverPort, verifySslStr string) {
@@ -104,7 +104,7 @@ func setupAPIClientFromData(username, password, serverName, serverPort, verifySs
 
 func GetAPIClient() *unifiedapiclient.Client {
 	if APIClient == nil {
-		if RunningInCLI() && (sharedutils.EnvOrDefault("WG_CLI_INTERACTIVE", "true") == "true") {
+		if RunningInCLI() && (sharedutils.EnvOrDefault(EnvCLIInterractive, "true") == "true") {
 			SetupAPIClientCLI()
 		} else {
 			SetupAPIClientEnv()

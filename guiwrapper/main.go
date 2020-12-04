@@ -33,8 +33,8 @@ func main() {
 		godotenv.Load(os.Args[1])
 	}
 
-	binutils.Setenv("WG_GUI_PID", os.Getenv("WG_GUI_PID"))
-	binutils.Setenv("WG_CLI", "false")
+	binutils.Setenv(ztn.EnvGUIPID, os.Getenv(ztn.EnvGUIPID))
+	binutils.Setenv(ztn.EnvCLI, "false")
 
 	go binutils.CheckParentIsAlive(quit)
 
