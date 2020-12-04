@@ -51,14 +51,14 @@ func (t *Table) Update(headings []string, rows [][]string) {
 		objects = append(objects, o)
 	}
 
-	if t.container == nil {
-		t.container = container.NewHBox(objects...)
-	} else {
-		t.container.Objects = objects
-		t.container.Refresh()
-	}
+	container := t.GetContainer()
+	container.Objects = objects
+	container.Refresh()
 }
 
 func (t *Table) GetContainer() *fyne.Container {
+	if t.container == nil {
+		t.container = container.NewHBox()
+	}
 	return t.container
 }

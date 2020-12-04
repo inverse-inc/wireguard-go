@@ -21,12 +21,20 @@ var spacePlaceholder = "                          "
 
 var statusLabel *widget.Label
 var bindTechniqueLabel = widget.NewLabel("N/A")
-var peersTableContainer *widget.Card
+
+var peersScrollContainer = container.NewVScroll(widget.NewVBox())
+var peersTableContainer = widget.NewCard("Peers", "", peersScrollContainer)
 var peersTable = NewTable()
 
 var restartBtn *widget.Button
 
 var w fyne.Window
+
+func init() {
+	peersScrollContainer.SetMinSize(fyne.Size{Height: 300})
+	peersScrollContainer.Content = peersTable.GetContainer()
+	peersScrollContainer.Direction = container.ScrollVerticalOnly
+}
 
 func Refresh() {
 	w.Content().Refresh()
@@ -200,7 +208,6 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 func PostConnect(tabs *container.AppTabs) {
 	statusLabel = widget.NewLabel("Opening tunnel process")
 	statusLabel.Wrapping = fyne.TextWrapWord
-	peersTableContainer = widget.NewCard("Peers", "", widget.NewVBox())
 	tabs.Items[0].Content = widget.NewVBox(
 		statusLabel,
 		restartBtn,
@@ -234,5 +241,4 @@ func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 		peersInfos,
 	)
 
-	peersTableContainer.SetContent(peersTable.GetContainer())
 }
