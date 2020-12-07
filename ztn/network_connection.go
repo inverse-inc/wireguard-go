@@ -97,10 +97,6 @@ func NewNetworkConnection(description string, logger *device.Logger, port int) *
 }
 
 func (nc *NetworkConnection) reset() {
-	if peerupnpigd.remotePort != 0 {
-		peerupnpigd.DelPortMapping()
-	}
-
 	nc.publicAddr = nil
 
 	nc.bindThroughPeerAddr = nil
@@ -180,6 +176,12 @@ func (nc *NetworkConnection) run() {
 	sharedutils.CheckError(err)
 
 	peerupnpigd := NewUPNPIGD()
+	defer func() {
+		if peerupnpigd.remotePort != 0 {
+			peerupnpigd.DelPortMapping()
+		}
+	}()
+
 	peernatpmp := NewNATPMP()
 	peerbindthroughpeer := NewBindThroughPeerAgent(nc.Connection, nc)
 
