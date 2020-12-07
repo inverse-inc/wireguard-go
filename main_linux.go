@@ -70,7 +70,27 @@ func main() {
 
 	godotenv.Load(os.Args[1])
 
+	// get log level (default: info)
+
+	logLevel := func() int {
+		switch os.Getenv("LOG_LEVEL") {
+		case "debug":
+			return device.LogLevelDebug
+		case "info":
+			return device.LogLevelInfo
+		case "error":
+			return device.LogLevelError
+		case "silent":
+			return device.LogLevelSilent
+		}
+		return device.LogLevelInfo
+	}()
+
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
+		logger = device.NewLogger(
+			logLevel,
+			fmt.Sprintf("(%s) ", "Master"),
+		)
 		setMasterProcess()
 		DNSChange = StartDNS()
 		go checkParentIsAlive()
@@ -86,22 +106,6 @@ func main() {
 		if !foreground {
 			foreground = os.Getenv(ENV_WG_PROCESS_FOREGROUND) == "1"
 		}
-
-		// get log level (default: info)
-
-		logLevel := func() int {
-			switch os.Getenv("LOG_LEVEL") {
-			case "debug":
-				return device.LogLevelDebug
-			case "info":
-				return device.LogLevelInfo
-			case "error":
-				return device.LogLevelError
-			case "silent":
-				return device.LogLevelSilent
-			}
-			return device.LogLevelInfo
-		}()
 
 		// open TUN device (or use supplied fd)
 

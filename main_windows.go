@@ -39,6 +39,12 @@ func main() {
 	godotenv.Load(os.Args[1])
 
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
+		logger = device.NewLogger(
+			device.LogLevelInfo,
+			fmt.Sprintf("(%s) ", "Master"),
+		)
+
+		os.Setenv("LOG_LEVEL", "info")
 		setMasterProcess()
 		DNSChange = StartDNS()
 		go checkParentIsAlive()
