@@ -2,7 +2,6 @@ package ztn
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -16,7 +15,7 @@ import (
 
 type BindThroughPeerAgent struct {
 	sync.Mutex
-	id                []byte
+	BindTechniqueMsg
 	connection        *Connection
 	networkConnection *NetworkConnection
 	remoteIP          net.IP
@@ -31,9 +30,7 @@ func NewBindThroughPeerAgent(connection *Connection, networkConnection *NetworkC
 		connection:        connection,
 		networkConnection: networkConnection,
 	}
-	btp.id = make([]byte, 64)
-	_, err := rand.Read(btp.id)
-	sharedutils.CheckError(err)
+	btp.InitID()
 	return btp
 }
 
@@ -108,29 +105,13 @@ func (btp *BindThroughPeerAgent) BindRequest(conn *net.UDPConn, sendTo chan *pkt
 
 func (btp *BindThroughPeerAgent) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
 	var buf = defaultBufferPool.Get()
-	for i, v := range btp.id {
-		buf[i] = v
-	}
+	btp.AddIDToPacket(buf)
 	buf[len(btp.id)+1] = externalIP[12]
 	buf[len(btp.id)+2] = externalIP[13]
 	buf[len(btp.id)+3] = externalIP[14]
 	buf[len(btp.id)+4] = externalIP[15]
 	binary.PutUvarint(buf[len(btp.id)+5:], uint64(externalPort))
 	return buf
-}
-
-func (btp *BindThroughPeerAgent) IsMessage(b []byte) bool {
-	if len(b) < len(btp.id) {
-		return false
-	}
-
-	for i := 0; i < len(btp.id); i++ {
-		if b[i] != btp.id[i] {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (btp *BindThroughPeerAgent) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
