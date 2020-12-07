@@ -13,6 +13,8 @@ var ConnectedConnectionLivenessTolerance = 10 * time.Second
 var InboundAttemptsTryAtLeast = 20 * time.Second
 var InboundAttemptsTolerance = 2
 
+var MaxBindFailures = 8
+
 const udp = "udp"
 const pingMsg = "ping"
 
