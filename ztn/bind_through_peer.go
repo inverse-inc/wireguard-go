@@ -15,7 +15,7 @@ import (
 
 type BindThroughPeerAgent struct {
 	sync.Mutex
-	BindTechniqueMsg
+	BindTechniqueBase
 	connection        *Connection
 	networkConnection *NetworkConnection
 	remoteIP          net.IP

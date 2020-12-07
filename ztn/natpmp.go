@@ -15,7 +15,7 @@ import (
 
 type NATPMP struct {
 	sync.Mutex
-	BindTechniqueMsg
+	BindTechniqueBase
 	mapping    natpmp.Client
 	remotePort int
 }
