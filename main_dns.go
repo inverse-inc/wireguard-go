@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"strings"
 	"text/template"
+	"time"
 
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
@@ -66,11 +67,16 @@ func StartDNS() *godnschange.DNSStruct {
 	dnsChange := godnschange.NewDNSChange()
 
 	myDNSInfo := dnsChange.GetDNS()
-
-	buffer := GenerateCoreDNSConfig(myDNSInfo, NamesToResolve)
-	dnsChange.Change("127.0.0.69")
 	go func() {
-		coremain.Run(buffer)
+		for len(NamesToResolve) == 0 {
+			time.Sleep(1 * time.Second)
+		}
+		buffer := GenerateCoreDNSConfig(myDNSInfo, NamesToResolve)
+		dnsChange.Change("127.0.0.69")
+		go func() {
+			coremain.Run(buffer)
+		}()
+
 	}()
 
 	return dnsChange
