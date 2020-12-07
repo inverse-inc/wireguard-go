@@ -97,6 +97,10 @@ func NewNetworkConnection(description string, logger *device.Logger, port int) *
 }
 
 func (nc *NetworkConnection) reset() {
+	if peerupnpigd.remotePort != 0 {
+		peerupnpigd.DelPortMapping()
+	}
+
 	nc.publicAddr = nil
 
 	nc.bindThroughPeerAddr = nil
@@ -346,9 +350,6 @@ func (nc *NetworkConnection) run() {
 				}
 			case <-keepalive:
 				if !nc.CheckConnectionLiveness() {
-					if peerupnpigd.remotePort != 0 {
-						peerupnpigd.DelPortMapping()
-					}
 					nc.BindTechnique = nc.BindTechniques.Next()
 					return false
 				}
