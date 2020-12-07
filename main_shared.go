@@ -31,7 +31,6 @@ import (
 const mainConnectionPort = 12673
 
 var connection *ztn.Connection
-var NamesToResolve []string
 
 var masterProcess bool
 
@@ -121,7 +120,7 @@ func startInverse(interfaceName string, device *device.Device) {
 
 	filter := filter.NewFilterFromAcls(profile.ACLs)
 	device.SetReceiveFilter(filter)
-	NamesToResolve = profile.NamesToResolve
+
 	for _, peerID := range profile.AllowedPeers {
 		connection.StartPeer(device, profile, peerID, networkConnection)
 	}

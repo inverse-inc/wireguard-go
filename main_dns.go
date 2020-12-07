@@ -2,9 +2,9 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"strings"
 	"text/template"
-	"time"
 
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
@@ -67,16 +67,26 @@ func StartDNS() *godnschange.DNSStruct {
 	dnsChange := godnschange.NewDNSChange()
 
 	myDNSInfo := dnsChange.GetDNS()
-	go func() {
-		for len(NamesToResolve) == 0 {
-			time.Sleep(1 * time.Second)
-		}
-		buffer := GenerateCoreDNSConfig(myDNSInfo, NamesToResolve)
-		dnsChange.Change("127.0.0.69")
-		go func() {
-			coremain.Run(buffer)
-		}()
 
+	privateKey, publicKey := getKeys()
+
+	profile := ztn.Profile{}
+	profile.PrivateKey = base64.StdEncoding.EncodeToString(privateKey[:])
+	profile.PublicKey = base64.StdEncoding.EncodeToString(publicKey[:])
+	err := profile.FillProfileFromServer(connection, logger)
+	if err != nil {
+		logger.Error.Println("Got error when filling profile from server", err)
+		connection.Update(func() {
+			connection.Status = ztn.STATUS_ERROR
+			connection.LastError = err
+		})
+		ztn.PauseOnError(quit)
+	}
+
+	buffer := GenerateCoreDNSConfig(myDNSInfo, profile.NamesToResolve)
+	dnsChange.Change("127.0.0.69")
+	go func() {
+		coremain.Run(buffer)
 	}()
 
 	return dnsChange
