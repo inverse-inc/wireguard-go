@@ -32,7 +32,7 @@ func (pp *PublicPort) BindRequest(conn *net.UDPConn, sendTo chan *pkt) error {
 	if pp.remoteIP == nil {
 		return errors.New(EnvPublicPortIP + " is not defined in the environment or is not a valid IPv4 address")
 	}
-	pp.remotePort = conn.LocalAddr().(*net.UDPAddr).Port
+	pp.remotePort = localWGPort
 
 	go func() {
 		sendTo <- &pkt{message: pp.BindRequestPkt(pp.remoteIP, pp.remotePort)}
