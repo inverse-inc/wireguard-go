@@ -113,10 +113,11 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	installRoutesFromServerEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvHonorRoutes, "true") == "true")
 
 	preferedBindTechniqueEntry := widget.NewSelect([]string{
-		string(ztn.BindUPNPIGD),
-		string(ztn.BindSTUN),
+		string(ztn.BindDirectPublic),
 		string(ztn.BindNATPMP),
+		string(ztn.BindSTUN),
 		string(ztn.BindThroughPeer),
+		string(ztn.BindUPNPIGD),
 	}, func(string) {})
 	preferedBindTechniqueEntry.SetSelected(sharedutils.EnvOrDefault(ztn.EnvBindTechnique, string(ztn.BindAutomatic)))
 
