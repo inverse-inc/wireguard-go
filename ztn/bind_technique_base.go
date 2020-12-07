@@ -2,9 +2,15 @@ package ztn
 
 import (
 	"crypto/rand"
+	"encoding/binary"
+	"net"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
+
+type BindTechniqueInterface interface {
+	ParseBindRequestPkt([]byte) (net.IP, int, error)
+}
 
 type BindTechniqueBase struct {
 	id     []byte
@@ -40,4 +46,21 @@ func (btm *BindTechniqueBase) AddIDToPacket(buf []byte) {
 	for i, v := range btm.id {
 		buf[i] = v
 	}
+}
+
+func (btm *BindTechniqueBase) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
+	var buf = defaultBufferPool.Get()
+	btm.AddIDToPacket(buf)
+	buf[len(btm.id)+1] = externalIP[12]
+	buf[len(btm.id)+2] = externalIP[13]
+	buf[len(btm.id)+3] = externalIP[14]
+	buf[len(btm.id)+4] = externalIP[15]
+	binary.PutUvarint(buf[len(btm.id)+5:], uint64(externalPort))
+	return buf
+}
+
+func (btb *BindTechniqueBase) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
+	ip := net.IPv4(buf[len(btb.id)+1], buf[len(btb.id)+2], buf[len(btb.id)+3], buf[len(btb.id)+4])
+	port, _ := binary.Uvarint(buf[len(btb.id)+5:])
+	return ip, int(port), nil
 }

@@ -103,17 +103,6 @@ func (btp *BindThroughPeerAgent) BindRequest(conn *net.UDPConn, sendTo chan *pkt
 	return errors.New("Couldn't find a peer to bridge through")
 }
 
-func (btp *BindThroughPeerAgent) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
-	var buf = defaultBufferPool.Get()
-	btp.AddIDToPacket(buf)
-	buf[len(btp.id)+1] = externalIP[12]
-	buf[len(btp.id)+2] = externalIP[13]
-	buf[len(btp.id)+3] = externalIP[14]
-	buf[len(btp.id)+4] = externalIP[15]
-	binary.PutUvarint(buf[len(btp.id)+5:], uint64(externalPort))
-	return buf
-}
-
 func (btp *BindThroughPeerAgent) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
 	ip := net.IPv4(buf[len(btp.id)+1], buf[len(btp.id)+2], buf[len(btp.id)+3], buf[len(btp.id)+4])
 	port, _ := binary.Uvarint(buf[len(btp.id)+5:])

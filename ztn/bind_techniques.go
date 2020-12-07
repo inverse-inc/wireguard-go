@@ -28,10 +28,11 @@ var bindTechniquePriorities = map[BindTechnique]int{
 }
 
 var BindTechniqueNames = map[string]BindTechnique{
-	"STUN":         BindSTUN,
-	"UPNPIGD":      BindUPNPIGD,
-	"NATPMP":       BindNATPMP,
-	"THROUGH_PEER": BindThroughPeer,
+	"DIRECT_PUBLIC": BindDirectPublic,
+	"NATPMP":        BindNATPMP,
+	"STUN":          BindSTUN,
+	"THROUGH_PEER":  BindThroughPeer,
+	"UPNPIGD":       BindUPNPIGD,
 }
 
 const (
