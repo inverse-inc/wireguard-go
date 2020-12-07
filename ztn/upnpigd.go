@@ -16,7 +16,7 @@ var upnpigdMapped = []UPNPIGD{}
 
 type UPNPIGD struct {
 	sync.Mutex
-	BindTechniqueMsg
+	BindTechniqueBase
 	mapping    upnp.Upnp
 	remotePort int
 }
