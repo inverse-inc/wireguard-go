@@ -16,15 +16,15 @@ var upnpigdMapped = []UPNPIGD{}
 
 type UPNPIGD struct {
 	sync.Mutex
-	id         uint64
+	BindTechniqueMsg
 	mapping    upnp.Upnp
 	remotePort int
 }
 
 func NewUPNPIGD() *UPNPIGD {
-	id, err := securerandom.Uint64()
-	sharedutils.CheckError(err)
-	return &UPNPIGD{id: id, mapping: upnp.Upnp{}}
+	u := &UPNPIGD{mapping: upnp.Upnp{}}
+	u.InitID()
+	return u
 }
 
 func UPNPIGDCleanupMapped() {
@@ -74,29 +74,20 @@ func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
 	}
 }
 
-func (u *UPNPIGD) IsMessage(b []byte) bool {
-	id, _ := binary.Uvarint(b[0:binary.MaxVarintLen64])
-	if id == u.id {
-		return true
-	} else {
-		return false
-	}
-}
-
 func (u *UPNPIGD) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
 	var buf = defaultBufferPool.Get()
-	binary.PutUvarint(buf, u.id)
-	buf[binary.MaxVarintLen64+1] = externalIP[12]
-	buf[binary.MaxVarintLen64+2] = externalIP[13]
-	buf[binary.MaxVarintLen64+3] = externalIP[14]
-	buf[binary.MaxVarintLen64+4] = externalIP[15]
-	binary.PutUvarint(buf[binary.MaxVarintLen64+5:], uint64(externalPort))
+	u.AddIDToPacket(buf)
+	buf[len(u.id)+1] = externalIP[12]
+	buf[len(u.id)+2] = externalIP[13]
+	buf[len(u.id)+3] = externalIP[14]
+	buf[len(u.id)+4] = externalIP[15]
+	binary.PutUvarint(buf[len(u.id)+5:], uint64(externalPort))
 	return buf
 }
 
 func (u *UPNPIGD) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
-	ip := net.IPv4(buf[binary.MaxVarintLen64+1], buf[binary.MaxVarintLen64+2], buf[binary.MaxVarintLen64+3], buf[binary.MaxVarintLen64+4])
-	port, _ := binary.Uvarint(buf[binary.MaxVarintLen64+5:])
+	ip := net.IPv4(buf[len(u.id)+1], buf[len(u.id)+2], buf[len(u.id)+3], buf[len(u.id)+4])
+	port, _ := binary.Uvarint(buf[len(u.id)+5:])
 	return ip, int(port), nil
 }
 
