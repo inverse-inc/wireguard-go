@@ -30,20 +30,6 @@ const (
 	ConnectionTypeWANSTUN = "WAN STUN"
 )
 
-var EnvGUIPID = ""
-var EnvCLI = ""
-var EnvServer = ""
-var EnvServerPort = ""
-var EnvServerVerifyTLS = ""
-var EnvUsername = ""
-var EnvHonorRoutes = ""
-var EnvBindTechnique = ""
-var EnvPassword = ""
-var EnvCLIInterractive = ""
-var EnvOffersBridging = ""
-var EnvMaxPeerBridges = ""
-var EnvGatewayOutboundInterface = ""
-
 func PublicPortTTL() int {
 	// 30 days
 	return 30 * 24 * 60 * 60
