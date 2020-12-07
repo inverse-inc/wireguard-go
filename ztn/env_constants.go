@@ -12,6 +12,8 @@ const (
 
 	EnvBindTechnique = "WG_BIND_TECHNIQUE"
 
+	EnvPublicPortIP = "WG_PUBLIC_PORT_IP"
+
 	EnvOffersBridging = "WG_OFFERS_BRIDGING"
 	EnvMaxPeerBridges = "WG_MAX_PEER_BRIDGES"
 

@@ -2,6 +2,7 @@ package ztn
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -185,8 +186,10 @@ func (nc *NetworkConnection) run() {
 	}()
 
 	peernatpmp := NewNATPMP()
-	peerbindthroughpeer := NewBindThroughPeerAgent(nc.Connection, nc)
 
+	peerdirectpublic := NewPublicPort()
+
+	peerbindthroughpeer := NewBindThroughPeerAgent(nc.Connection, nc)
 	peerbindthroughpeerCheck := time.Tick(2 * time.Second)
 
 	a := strings.Split(nc.localConn.LocalAddr().String(), ":")
@@ -221,43 +224,21 @@ func (nc *NetworkConnection) run() {
 				switch {
 				case nc.IsMessage(message.message):
 					nc.handleMessage(message.conn, message.raddr, message.message)
+				case peerdirectpublic.IsMessage(message.message):
+					if nc.bindRequestPktIPUpdate(peerdirectpublic, message.message) != nil {
+						return false
+					}
 				case peerbindthroughpeer.IsMessage(message.message):
-					externalIP, externalPort, err := peerbindthroughpeer.ParseBindRequestPkt(message.message)
-					if err != nil {
-						nc.logger.Error.Println("Unable to decode Bind through peer message:", err)
+					if nc.bindRequestPktIPUpdate(peerbindthroughpeer, message.message) != nil {
 						return false
 					}
-
-					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
-					sharedutils.CheckError(err)
-					if newaddr.String() != nc.publicAddr.String() {
-						nc.setPublicAddr(newaddr)
-					}
-
 				case peerupnpigd.IsMessage(message.message):
-					fmt.Println("its a upnp igd message", len(message.message))
-					externalIP, externalPort, err := peerupnpigd.ParseBindRequestPkt(message.message)
-					if err != nil {
-						nc.logger.Error.Println("Unable to decode UPNP GID message:", err)
+					if nc.bindRequestPktIPUpdate(peerupnpigd, message.message) != nil {
 						return false
-					}
-
-					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
-					sharedutils.CheckError(err)
-					if newaddr.String() != nc.publicAddr.String() {
-						nc.setPublicAddr(newaddr)
 					}
 				case peernatpmp.IsMessage(message.message):
-					externalIP, externalPort, err := peernatpmp.ParseBindRequestPkt(message.message)
-					if err != nil {
-						nc.logger.Error.Println("Unable to decode UPNP GID message:", err)
+					if nc.bindRequestPktIPUpdate(peernatpmp, message.message) != nil {
 						return false
-					}
-
-					newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
-					sharedutils.CheckError(err)
-					if newaddr.String() != nc.publicAddr.String() {
-						nc.setPublicAddr(newaddr)
 					}
 				case stun.IsMessage(message.message):
 					m := new(stun.Message)
@@ -373,6 +354,8 @@ func (nc *NetworkConnection) run() {
 						err = peerupnpigd.BindRequest(nc.localConn, localPort, nc.messageChan)
 					} else if nc.BindTechnique == BindNATPMP {
 						err = peernatpmp.BindRequest(nc.localConn, localPort, nc.messageChan)
+					} else if nc.BindTechnique == BindDirectPublic {
+						err = peerdirectpublic.BindRequest(nc.localConn, nc.messageChan)
 					}
 				}
 
@@ -597,4 +580,20 @@ func (nc *NetworkConnection) infoFromMarker(message []byte) *net.UDPAddr {
 func (nc *NetworkConnection) stripMarker(message []byte) ([]byte, []byte) {
 	//TODO: this needs to be optimized
 	return message[:markerLength], message[markerLength:]
+}
+
+func (nc *NetworkConnection) bindRequestPktIPUpdate(method BindTechniqueInterface, message []byte) error {
+	externalIP, externalPort, err := method.ParseBindRequestPkt(message)
+	if err != nil {
+		err = errors.New("Unable to decode Bind through peer message: " + err.Error())
+		nc.logger.Error.Println(err)
+		return err
+	}
+
+	newaddr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", externalIP, externalPort))
+	sharedutils.CheckError(err)
+	if newaddr.String() != nc.publicAddr.String() {
+		nc.setPublicAddr(newaddr)
+	}
+	return nil
 }

@@ -1,7 +1,6 @@
 package ztn
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"net"
@@ -72,23 +71,6 @@ func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
 		u.remotePort = 0
 		return errors.New("Fail to add the port mapping")
 	}
-}
-
-func (u *UPNPIGD) BindRequestPkt(externalIP net.IP, externalPort int) []byte {
-	var buf = defaultBufferPool.Get()
-	u.AddIDToPacket(buf)
-	buf[len(u.id)+1] = externalIP[12]
-	buf[len(u.id)+2] = externalIP[13]
-	buf[len(u.id)+3] = externalIP[14]
-	buf[len(u.id)+4] = externalIP[15]
-	binary.PutUvarint(buf[len(u.id)+5:], uint64(externalPort))
-	return buf
-}
-
-func (u *UPNPIGD) ParseBindRequestPkt(buf []byte) (net.IP, int, error) {
-	ip := net.IPv4(buf[len(u.id)+1], buf[len(u.id)+2], buf[len(u.id)+3], buf[len(u.id)+4])
-	port, _ := binary.Uvarint(buf[len(u.id)+5:])
-	return ip, int(port), nil
 }
 
 func (u *UPNPIGD) BindRequest(localPeerConn *net.UDPConn, localPeerPort int, sendTo chan *pkt) error {
