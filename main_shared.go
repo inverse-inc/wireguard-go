@@ -40,13 +40,6 @@ func setMasterProcess() {
 	setupMasterQuit()
 }
 
-var masterProcess bool
-
-func setMasterProcess() {
-	masterProcess = true
-	setupMasterQuit()
-}
-
 func startInverse(interfaceName string, device *device.Device) {
 	defer binutils.CapturePanic()
 
