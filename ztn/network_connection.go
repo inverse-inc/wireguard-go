@@ -175,6 +175,8 @@ func (nc *NetworkConnection) run() {
 	nc.localConn, err = net.ListenUDP(udp, localConnAddr)
 	sharedutils.CheckError(err)
 
+	bindFail := 0
+
 	peerupnpigd := NewUPNPIGD()
 	defer func() {
 		if peerupnpigd.remotePort != 0 {
@@ -380,6 +382,13 @@ func (nc *NetworkConnection) run() {
 
 				if err != nil {
 					nc.logger.Error.Println("keepalive:", err)
+
+					bindFail++
+					if bindFail > MaxBindFailures {
+						nc.logger.Error.Println("Maximum amount of bind failures reached")
+						nc.BindTechnique = nc.BindTechniques.Next()
+						return false
+					}
 				}
 
 			}
