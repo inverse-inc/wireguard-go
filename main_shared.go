@@ -40,6 +40,13 @@ func setMasterProcess() {
 	setupMasterQuit()
 }
 
+var masterProcess bool
+
+func setMasterProcess() {
+	masterProcess = true
+	setupMasterQuit()
+}
+
 func startInverse(interfaceName string, device *device.Device) {
 	defer binutils.CapturePanic()
 
@@ -211,7 +218,6 @@ func setupMasterQuit() {
 }
 
 func quit() {
-
 	if masterProcess {
 		DNSChange.RestoreDNS("127.0.0.69")
 		fmt.Println("Master process is exiting")
