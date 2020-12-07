@@ -7,16 +7,22 @@ import (
 )
 
 type BindTechniqueMsg struct {
-	id []byte
+	id     []byte
+	inited bool
 }
 
 func (btm *BindTechniqueMsg) InitID() {
 	btm.id = make([]byte, 64)
 	_, err := rand.Read(btm.id)
+	btm.inited = true
 	sharedutils.CheckError(err)
 }
 
 func (btm *BindTechniqueMsg) IsMessage(b []byte) bool {
+	if !btm.inited {
+		panic("BindTechniqueMsg ID uninitilized")
+	}
+
 	if len(b) < len(btm.id) {
 		return false
 	}

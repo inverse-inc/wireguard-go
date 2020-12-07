@@ -233,6 +233,7 @@ func (nc *NetworkConnection) run() {
 					}
 
 				case peerupnpigd.IsMessage(message.message):
+					fmt.Println("its a upnp igd message", len(message.message))
 					externalIP, externalPort, err := peerupnpigd.ParseBindRequestPkt(message.message)
 					if err != nil {
 						nc.logger.Error.Println("Unable to decode UPNP GID message:", err)
