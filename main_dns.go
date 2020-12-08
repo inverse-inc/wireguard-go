@@ -7,7 +7,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/davecgh/go-spew/spew"
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -69,7 +68,7 @@ dnsredir {{$domain}}.{{.}} {
 {{ end }}
 {{ end }}
 
-{{ if .ZTNAddr }}
+{{ if .ZTNServer }}
 forward {{ .API }} {{ .Nameservers }} {
 	prefer_udp
 }
@@ -81,7 +80,7 @@ forward . {{ .Nameservers }} {
 }`)
 
 	t.Execute(&tpl, data)
-	spew.Dump(tpl)
+	logger.Debug.Println(tpl.String())
 	return tpl.String()
 }
 
