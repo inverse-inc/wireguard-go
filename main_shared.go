@@ -211,7 +211,9 @@ func setupMasterQuit() {
 
 func quit() {
 	if masterProcess {
-		DNSChange.RestoreDNS("127.0.0.69")
+		if DNSChange.Success {
+			DNSChange.RestoreDNS("127.0.0.69")
+		}
 		fmt.Println("Master process is exiting")
 	} else {
 		ztn.UPNPIGDCleanupMapped()

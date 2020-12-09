@@ -98,18 +98,19 @@ func StartDNS() *godnschange.DNSStruct {
 	err := profile.FillProfileFromServer(connection, logger)
 	if err != nil {
 		logger.Error.Println("Got error when filling profile from server", err)
-		connection.Update(func() {
-			connection.Status = ztn.STATUS_ERROR
-			connection.LastError = err
-		})
-		ztn.PauseOnError(quit)
+		dnsChange.Success = false
+	} else {
+
+		buffer := GenerateCoreDNSConfig(myDNSInfo, profile.NamesToResolve)
+		err := dnsChange.Change("127.0.0.69")
+		if err != nil {
+			dnsChange.Success = false
+		} else {
+			dnsChange.Success = true
+			go func() {
+				coremain.Run(buffer)
+			}()
+		}
 	}
-
-	buffer := GenerateCoreDNSConfig(myDNSInfo, profile.NamesToResolve)
-	dnsChange.Change("127.0.0.69")
-	go func() {
-		coremain.Run(buffer)
-	}()
-
 	return dnsChange
 }

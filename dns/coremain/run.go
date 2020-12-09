@@ -34,7 +34,6 @@ func init() {
 
 // Run is CoreDNS's main() function.
 func Run(config ...string) {
-	caddy.TrapSignals()
 
 	// Reset flag.CommandLine to get rid of unwanted flags for instance from glog (used in kubernetes).
 	// And read the ones we want to keep.
