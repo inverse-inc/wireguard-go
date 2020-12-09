@@ -12,13 +12,14 @@ import (
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
-func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, domains []string) string {
+func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) string {
 
 	var tpl bytes.Buffer
 
 	type Data struct {
 		Domains      []string
 		Nameservers  string
+		ZTNPeers     []string
 		API          string
 		SearchDomain []string
 		ZTNServer    bool
@@ -38,7 +39,8 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, domains []string) str
 	}
 
 	data := Data{
-		Domains:      domains,
+		Domains:      profile.DomainsToResolve,
+		ZTNPeers:     profile.NamesToResolve,
 		Nameservers:  strings.Join(myDNSInfo.NameServers[:], " "),
 		API:          APIClient.Host,
 		SearchDomain: myDNSInfo.SearchDomain,
@@ -57,11 +59,24 @@ bind 127.0.0.69
 dnsredir {{.}} {
    to ietf-doh://{{ $.API }}:9999/dns-query
 }
+{{ end }}
+{{ end }}
+
+{{ range .ZTNPeers }}
+{{ if ne . "" }}
+{{$ztnpeer := .}}
+
+dnsredir {{.}} {
+	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
+}
+
 {{ range $.SearchDomain }}
 {{ if ne . "" }}
-dnsredir {{$domain}}.{{.}} {
-	to ietf-doh://{{ $.API }}:9999/dns-query
+
+dnsredir {{$ztnpeer}}.{{.}} {
+	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
 }
+
 {{ end }}
 {{ end }}
 
@@ -101,7 +116,7 @@ func StartDNS() *godnschange.DNSStruct {
 		dnsChange.Success = false
 	} else {
 
-		buffer := GenerateCoreDNSConfig(myDNSInfo, profile.NamesToResolve)
+		buffer := GenerateCoreDNSConfig(myDNSInfo, profile)
 		err := dnsChange.Change("127.0.0.69")
 		if err != nil {
 			dnsChange.Success = false
