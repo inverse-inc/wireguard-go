@@ -519,6 +519,8 @@ github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126152059-80eaf3c0f7de h1:Sf+
 github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126152059-80eaf3c0f7de/go.mod h1:OAdbY/EXrPbAh1WHci0y9zGMxU6ScSpiJFMUqfkeoCU=
 github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126153337-171152e671af h1:Vs/ohI3NTFBwNAyzKjnPhlCVsZJhCxInWV/G5HpjTfQ=
 github.com/inverse-inc/coredns-caddy v1.1.1-0.20201126153337-171152e671af/go.mod h1:OAdbY/EXrPbAh1WHci0y9zGMxU6ScSpiJFMUqfkeoCU=
+github.com/inverse-inc/coredns-caddy v1.1.1-0.20201209165850-d4860c69a2fe h1:2hvYorbwRdnRb/hhOxNsS6oC46mWSedlHZU6sC4ZrhI=
+github.com/inverse-inc/coredns-caddy v1.1.1-0.20201209165850-d4860c69a2fe/go.mod h1:OAdbY/EXrPbAh1WHci0y9zGMxU6ScSpiJFMUqfkeoCU=
 github.com/inverse-inc/dhcp4 v0.0.0-20200625173842-2c4d1e50d7ca/go.mod h1:lvc5S3uPg6xat1wRFAA0ru/DfIV6YOmMK6E754FUEuo=
 github.com/inverse-inc/dhcp4 v0.0.0-20200625173842-2c4d1e50d7ca/go.mod h1:lvc5S3uPg6xat1wRFAA0ru/DfIV6YOmMK6E754FUEuo=
 github.com/inverse-inc/dhcp4 v0.0.0-20200625173842-2c4d1e50d7ca/go.mod h1:lvc5S3uPg6xat1wRFAA0ru/DfIV6YOmMK6E754FUEuo=
