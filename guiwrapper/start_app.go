@@ -31,7 +31,7 @@ var restartBtn *widget.Button
 var w fyne.Window
 
 func init() {
-	peersScrollContainer.SetMinSize(fyne.Size{Height: 300})
+	peersScrollContainer.SetMinSize(fyne.Size{Height: 300, Width: 500})
 	peersScrollContainer.Content = peersTable.GetContainer()
 	peersScrollContainer.Direction = container.ScrollVerticalOnly
 }
