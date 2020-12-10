@@ -6,11 +6,14 @@ import (
 	"net"
 	"strings"
 	"text/template"
+	"time"
 
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
+
+var CoreDNSConfig *string
 
 func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) string {
 
@@ -52,6 +55,7 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 	t, _ = t.Parse(
 		`.:53 {
 bind 127.0.0.69
+reload
 #debug
 {{ range .Domains }}
 {{ if ne . "" }}
@@ -100,6 +104,8 @@ forward . {{ .Nameservers }} {
 }
 
 func StartDNS() *godnschange.DNSStruct {
+	CoreDNSConfig = nil
+
 	dnsChange := godnschange.NewDNSChange()
 
 	myDNSInfo := dnsChange.GetDNS()
@@ -115,17 +121,30 @@ func StartDNS() *godnschange.DNSStruct {
 		logger.Error.Println("Got error when filling profile from server", err)
 		dnsChange.Success = false
 	} else {
-
-		buffer := GenerateCoreDNSConfig(myDNSInfo, profile)
+		conf := GenerateCoreDNSConfig(myDNSInfo, profile)
+		CoreDNSConfig = &conf
 		err := dnsChange.Change("127.0.0.69")
 		if err != nil {
 			dnsChange.Success = false
 		} else {
 			dnsChange.Success = true
 			go func() {
-				coremain.Run(buffer)
+				coremain.Run(*CoreDNSConfig)
+			}()
+			go func() {
+				for {
+					time.Sleep(10 * time.Second)
+					err := profile.FillProfileFromServer(connection, logger)
+					if err != nil {
+						logger.Error.Println("Something went wrong on profile refresh", err)
+						dnsChange.Success = false
+					}
+					conf = GenerateCoreDNSConfig(myDNSInfo, profile)
+					CoreDNSConfig = &conf
+				}
 			}()
 		}
 	}
+
 	return dnsChange
 }
