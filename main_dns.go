@@ -123,7 +123,7 @@ func StartDNS() *godnschange.DNSStruct {
 	} else {
 		conf := GenerateCoreDNSConfig(myDNSInfo, profile)
 		CoreDNSConfig = &conf
-		err := dnsChange.Change("127.0.0.69")
+		err := dnsChange.Change("127.0.0.69", profile.DomainsToResolve, profile.NamesToResolve)
 		if err != nil {
 			dnsChange.Success = false
 		} else {
