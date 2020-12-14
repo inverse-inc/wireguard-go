@@ -9,13 +9,21 @@ import (
 	"time"
 
 	godnschange "github.com/inverse-inc/go-dnschange"
+	"github.com/inverse-inc/packetfence/go/timedlock"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
 var CoreDNSConfig *string
 
+// GlobalTransactionLock global var
+var GlobalTransactionLock *timedlock.RWLock
+
 func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) string {
+
+	id, _ := GlobalTransactionLock.RLock()
+
+	defer GlobalTransactionLock.RUnlock(id)
 
 	var tpl bytes.Buffer
 
@@ -90,7 +98,9 @@ forward . {{ .Nameservers }} {
 
 func StartDNS() *godnschange.DNSStruct {
 	CoreDNSConfig = nil
-
+	GlobalTransactionLock = timedlock.NewRWLock()
+	GlobalTransactionLock.Panic = false
+	GlobalTransactionLock.PrintErrors = true
 	dnsChange := godnschange.NewDNSChange()
 
 	myDNSInfo := dnsChange.GetDNS()
