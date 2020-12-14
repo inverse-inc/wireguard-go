@@ -20,12 +20,13 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 	var tpl bytes.Buffer
 
 	type Data struct {
-		Domains      []string
-		Nameservers  string
-		ZTNPeers     []string
-		API          string
-		SearchDomain []string
-		ZTNServer    bool
+		Domains        []string
+		Nameservers    string
+		ZTNPeers       []string
+		API            string
+		SearchDomain   []string
+		InternalDomain string
+		ZTNServer      bool
 	}
 
 	APIClient := ztn.GetAPIClient()
@@ -42,12 +43,13 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 	}
 
 	data := Data{
-		Domains:      profile.DomainsToResolve,
-		ZTNPeers:     profile.NamesToResolve,
-		Nameservers:  strings.Join(myDNSInfo.NameServers[:], " "),
-		API:          APIClient.Host,
-		SearchDomain: myDNSInfo.SearchDomain,
-		ZTNServer:    ZTNAddr,
+		Domains:        profile.DomainsToResolve,
+		ZTNPeers:       profile.NamesToResolve,
+		Nameservers:    strings.Join(myDNSInfo.NameServers[:], " "),
+		API:            APIClient.Host,
+		SearchDomain:   myDNSInfo.SearchDomain,
+		ZTNServer:      ZTNAddr,
+		InternalDomain: profile.InternalDomainToResolve,
 	}
 
 	t := template.New("Coreconfig")
@@ -70,7 +72,7 @@ dnsredir {{.}} {
 {{ if ne . "" }}
 {{$ztnpeer := .}}
 
-dnsredir {{.}} {
+dnsredir {{.}}.{{$.InternalDomain}} {
 	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
 }
 
@@ -123,7 +125,7 @@ func StartDNS() *godnschange.DNSStruct {
 	} else {
 		conf := GenerateCoreDNSConfig(myDNSInfo, profile)
 		CoreDNSConfig = &conf
-		err := dnsChange.Change("127.0.0.69", profile.DomainsToResolve, profile.NamesToResolve)
+		err := dnsChange.Change("127.0.0.69", profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
 		if err != nil {
 			dnsChange.Success = false
 		} else {
