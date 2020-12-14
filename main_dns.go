@@ -8,7 +8,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -60,42 +59,25 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 bind 127.0.0.69
 reload
 #debug
-{{ range .Domains }}
-{{ if ne . "" }}
-{{$domain := .}}
+{{ range .Domains }}{{ if ne . "" }}{{$domain := .}}
 dnsredir {{.}} {
    to ietf-doh://{{ $.API }}:9999/dns-query
 }
-{{ end }}
-{{ end }}
-
-{{ range .ZTNPeers }}
-{{ if ne . "" }}
-{{$ztnpeer := .}}
-
+{{ end }}{{ end }}
+{{ range .ZTNPeers }}{{ if ne . "" }}{{$ztnpeer := .}}
 dnsredir {{$ztnpeer}}.{{$.InternalDomain}} {
 	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
 }
-
-{{ range $.SearchDomain }}
-{{ if ne . "" }}
-
+{{ range $.SearchDomain }}{{ if ne . "" }}
 dnsredir {{$ztnpeer}}.{{.}} {
 	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
 }
-
-{{ end }}
-{{ end }}
-
-{{ end }}
-{{ end }}
-
+{{ end }}{{ end }}{{ end }}{{ end }}
 {{ if .ZTNServer }}
 forward {{ .API }} {{ .Nameservers }} {
 	prefer_udp
 }
 {{ end }}
-
 forward . {{ .Nameservers }} {
 	prefer_udp
 }
@@ -103,7 +85,6 @@ forward . {{ .Nameservers }} {
 
 	t.Execute(&tpl, data)
 	logger.Debug.Println(tpl.String())
-	spew.Dump(tpl)
 	return tpl.String()
 }
 
@@ -132,9 +113,9 @@ func StartDNS() *godnschange.DNSStruct {
 			dnsChange.Success = false
 		} else {
 			dnsChange.Success = true
-			go func() {
+			go func(CoreDNSConfig *string) {
 				coremain.Run(*CoreDNSConfig)
-			}()
+			}(CoreDNSConfig)
 			go func() {
 				for {
 					time.Sleep(10 * time.Second)
