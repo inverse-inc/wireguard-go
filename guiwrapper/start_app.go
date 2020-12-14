@@ -228,7 +228,11 @@ func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 	}
 
 	sort.Slice(peers.Peers, func(i, j int) bool {
-		return peers.Peers[i].Hostname < peers.Peers[j].Hostname
+		if peers.Peers[i].Hostname == peers.Peers[j].Hostname {
+			return peers.Peers[i].IpAddress < peers.Peers[j].IpAddress
+		} else {
+			return peers.Peers[i].Hostname < peers.Peers[j].Hostname
+		}
 	})
 
 	peersInfos := [][]string{}
