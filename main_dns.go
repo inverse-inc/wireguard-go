@@ -135,7 +135,14 @@ func StartDNS() *godnschange.DNSStruct {
 						dnsChange.Success = false
 					}
 					conf = GenerateCoreDNSConfig(myDNSInfo, profile)
-					CoreDNSConfig = &conf
+					if conf != *CoreDNSConfig {
+						CoreDNSConfig = &conf
+						dnsChange.RestoreDNS("127.0.0.69")
+						err := dnsChange.Change("127.0.0.69", profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+						if err != nil {
+							dnsChange.Success = false
+						}
+					}
 				}
 			}()
 		}
