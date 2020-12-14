@@ -8,6 +8,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -72,7 +73,7 @@ dnsredir {{.}} {
 {{ if ne . "" }}
 {{$ztnpeer := .}}
 
-dnsredir {{.}}.{{$.InternalDomain}} {
+dnsredir {{$ztnpeer}}.{{$.InternalDomain}} {
 	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
 }
 
@@ -102,6 +103,7 @@ forward . {{ .Nameservers }} {
 
 	t.Execute(&tpl, data)
 	logger.Debug.Println(tpl.String())
+	spew.Dump(tpl)
 	return tpl.String()
 }
 
