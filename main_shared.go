@@ -92,6 +92,8 @@ func startInverse(interfaceName string, device *device.Device) {
 		ztn.PauseOnError(quit)
 	}
 
+	connection.Profile = &profile
+
 	connection.Update(func() {
 		connection.Status = ztn.STATUS_FETCHING_PEERS
 		connection.LastError = err

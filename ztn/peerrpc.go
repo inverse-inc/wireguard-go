@@ -22,12 +22,12 @@ func ConnectPeerServiceClient(addr string) PeerServiceClient {
 	return client
 }
 
-func StartPeerServiceRPC(ip net.IP, logger *device.Logger) {
+func StartPeerServiceRPC(ip net.IP, logger *device.Logger, profile Profile) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", ip, PeerServiceServerPort))
 	sharedutils.CheckError(err)
 	grpcServer := grpc.NewServer()
 
-	PeerServer := NewPeerServiceServerHandler(logger)
+	PeerServer := NewPeerServiceServerHandler(logger, profile)
 	RegisterPeerServiceServer(grpcServer, PeerServer)
 
 	reflection.Register(grpcServer)
