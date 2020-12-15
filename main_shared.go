@@ -75,6 +75,7 @@ func startInverse(interfaceName string, device *device.Device) {
 	}
 
 	ztn.BindTechniques.Add(ztn.BindSTUN)
+	ztn.BindTechniques.Add(ztn.BindThroughPeer)
 
 	if !ztn.RunningInCLI() {
 		go checkParentIsAlive()
