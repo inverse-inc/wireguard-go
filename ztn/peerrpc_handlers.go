@@ -16,12 +16,14 @@ type PeerServiceServerHandler struct {
 	UnimplementedPeerServiceServer
 	logger         *device.Logger
 	peerBridges    map[uint64]*NetworkConnection
+	profile        Profile
 	maxPeerBridges int
 }
 
-func NewPeerServiceServerHandler(logger *device.Logger) *PeerServiceServerHandler {
+func NewPeerServiceServerHandler(logger *device.Logger, profile Profile) *PeerServiceServerHandler {
 	s := &PeerServiceServerHandler{
 		logger:         logger,
+		profile:        profile,
 		peerBridges:    map[uint64]*NetworkConnection{},
 		maxPeerBridges: sharedutils.EnvOrDefaultInt(EnvMaxPeerBridges, 16),
 	}
@@ -53,9 +55,9 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	s.Unlock()
 
 	nc := NewNetworkConnection(fmt.Sprintf("peer-service-%s", in.Name), s.logger, 0)
-	raddr, publicAddr := nc.SetupForwarding(in.PeerConnectionType)
+	raddr, publicAddr := nc.SetupForwarding(in.PeerConnectionType, s.profile)
 
-	if raddr == nil || publicAddr == nil {
+	if publicAddr == nil {
 		return nil, errors.New("Unable to setup the forwarding")
 	}
 
@@ -63,7 +65,7 @@ func (s *PeerServiceServerHandler) SetupForwarding(ctx context.Context, in *Setu
 	defer s.Unlock()
 	s.peerBridges[nc.Token()] = nc
 
-	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr.String(), PublicIP: publicAddr.IP[12:16], PublicPort: int32(publicAddr.Port)}, nil
+	return &SetupForwardingReply{Id: nc.ID(), Token: nc.Token(), Raddr: raddr, PublicIP: publicAddr.IP[12:16], PublicPort: int32(publicAddr.Port)}, nil
 }
 
 func (s *PeerServiceServerHandler) ForwardingIsAlive(ctx context.Context, in *ForwardingIsAliveRequest) (*ForwardingIsAliveReply, error) {

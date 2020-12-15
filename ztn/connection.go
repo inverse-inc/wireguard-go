@@ -9,6 +9,7 @@ import (
 
 type Connection struct {
 	sync.Mutex
+	Profile   *Profile
 	Peers     map[string]*PeerConnection
 	Status    string
 	LastError error

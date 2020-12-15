@@ -23,11 +23,6 @@ func StartRPC(logger *device.Logger, connection *ztn.Connection, onexit func()) 
 	WGRPCServer = NewWGServiceServerHandler(connection, onexit)
 	RegisterWGServiceServer(grpcServer, WGRPCServer)
 
-	PeerServer := ztn.NewPeerServiceServerHandler(logger)
-	ztn.RegisterPeerServiceServer(grpcServer, PeerServer)
-
-	WGRPCServer.AddDebugable(PeerServer)
-
 	reflection.Register(grpcServer)
 	grpcServer.Serve(lis)
 }

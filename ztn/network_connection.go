@@ -139,22 +139,18 @@ func (nc *NetworkConnection) Start() {
 	}
 }
 
-func (nc *NetworkConnection) SetupForwarding(ct string) (net.Addr, *net.UDPAddr) {
+func (nc *NetworkConnection) SetupForwarding(ct string, profile Profile) (string, *net.UDPAddr) {
 	nc.publicAddrChan = make(chan *net.UDPAddr)
 
 	go nc.run()
 
 	select {
 	case <-time.After(5 * time.Second):
-		return nil, nil
+		return "", nil
 	case addr := <-nc.publicAddrChan:
 		// If our peer wants the LAN address or the WAN address to talk to us
 		// And also what is the address to advertise to his own peers
-		if ct == ConnectionTypeLANIN || ct == ConnectionTypeLANOUT {
-			return nc.localConn.LocalAddr(), addr
-		} else {
-			return addr, addr
-		}
+		return fmt.Sprintf("%s:%d", profile.WireguardIP, nc.localConn.LocalAddr().(*net.UDPAddr).Port), addr
 	}
 }
 
