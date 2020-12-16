@@ -97,6 +97,7 @@ forward . {{ .Nameservers }} {
 }
 
 func StartDNS() *godnschange.DNSStruct {
+
 	CoreDNSConfig = nil
 	GlobalTransactionLock = timedlock.NewRWLock()
 	GlobalTransactionLock.Panic = false
@@ -126,6 +127,7 @@ func StartDNS() *godnschange.DNSStruct {
 		} else {
 			dnsChange.Success = true
 			go func(CoreDNSConfig *string) {
+				defer recoverDns(CoreDNSConfig)
 				coremain.Run(*CoreDNSConfig)
 			}(CoreDNSConfig)
 			go func() {
@@ -151,4 +153,13 @@ func StartDNS() *godnschange.DNSStruct {
 	}
 
 	return dnsChange
+}
+
+func recoverDns(CoreDNSConfig *string) {
+	if r := recover(); r != nil {
+		go func(CoreDNSConfig *string) {
+			defer recoverDns(CoreDNSConfig)
+			coremain.Run(*CoreDNSConfig)
+		}(CoreDNSConfig)
+	}
 }
