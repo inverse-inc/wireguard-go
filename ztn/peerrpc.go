@@ -12,14 +12,14 @@ import (
 
 const PeerServiceServerPort = 12676
 
-func ConnectPeerServiceClient(addr string) PeerServiceClient {
+func ConnectPeerServiceClient(addr string) (PeerServiceClient, *grpc.ClientConn) {
 	conn, err := grpc.Dial(
 		addr,
 		grpc.WithInsecure(),
 	)
 	sharedutils.CheckError(err)
 	client := NewPeerServiceClient(conn)
-	return client
+	return client, conn
 }
 
 func StartPeerServiceRPC(ip net.IP, logger *device.Logger, profile Profile) {

@@ -62,7 +62,8 @@ func (btp *BindThroughPeerAgent) BindRequest(conn *net.UDPConn, sendTo chan *pkt
 		btp.networkConnection.logger.Info.Println("Attempting to setup forwarding with peer", pc.PeerProfile.WireguardIP)
 
 		serverAddr := fmt.Sprintf("%s:%d", pc.PeerProfile.WireguardIP.String(), PeerServiceServerPort)
-		c := ConnectPeerServiceClient(serverAddr)
+		c, pscConn := ConnectPeerServiceClient(serverAddr)
+		defer pscConn.Close()
 		res, err := c.SetupForwarding(context.Background(), &SetupForwardingRequest{Name: hostname, PeerConnectionType: pc.ConnectionType})
 		if err != nil {
 			btp.networkConnection.logger.Error.Println("Failed to setup forwarding with peer", pc.PeerProfile.WireguardIP, "due to the following error:", err)
@@ -112,7 +113,8 @@ func (btp *BindThroughPeerAgent) ParseBindRequestPkt(buf []byte) (net.IP, int, e
 func (btp *BindThroughPeerAgent) StillAlive() bool {
 	btp.Lock()
 	defer btp.Unlock()
-	c := ConnectPeerServiceClient(btp.remotePSC)
+	c, conn := ConnectPeerServiceClient(btp.remotePSC)
+	defer conn.Close()
 	res, err := c.ForwardingIsAlive(context.Background(), &ForwardingIsAliveRequest{Id: btp.remoteID, Token: btp.remoteToken})
 	if err != nil {
 		btp.networkConnection.logger.Error.Println("Unable to connect to remote BTP peer", btp.remotePSC, ". Error:", err)
