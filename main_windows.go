@@ -30,7 +30,7 @@ var logger *device.Logger
 func main() {
 	defer binutils.CapturePanic()
 
-	outputlog.RedirectOutputToFilePrefix("C:\\Program Files\\PacketFence-Zero-Trust-Client\\wireguard")
+	outputlog.RedirectOutputToFile("C:\\Program Files\\PacketFence-Zero-Trust-Client\\wireguard.log")
 
 	godotenv.Load(os.Args[1])
 

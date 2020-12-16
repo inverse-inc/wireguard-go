@@ -70,7 +70,7 @@ func main() {
 
 	godotenv.Load(os.Args[1])
 
-	outputlog.RedirectOutputToFilePrefix("/tmp/wireguard")
+	outputlog.RedirectOutputToFile("/var/log/wireguard.log")
 
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
 		setMasterProcess()
