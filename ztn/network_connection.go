@@ -273,7 +273,7 @@ func (nc *NetworkConnection) run() {
 							msg = nc.addMarker(writeBack.marker, msg)
 						}
 						n := len(message.message)
-						nc.logger.Info.Printf("send to peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(writeBack.marker))
+						nc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(writeBack.marker))
 						udpSend(msg, writeBack.conn, writeBack.raddr)
 						if err != nil {
 							nc.logger.Error.Printf("Error sending packet to peer %s from WG server %s: %s", writeBack.raddr.String(), message.raddr, err)
@@ -285,7 +285,7 @@ func (nc *NetworkConnection) run() {
 						// strip our special header
 						marker, msg := nc.stripMarker(message.message)
 
-						nc.logger.Info.Printf("send to remote peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(marker))
+						nc.logger.Debug.Printf("send to remote peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(marker))
 						udpSend(msg, writeBack.conn, writeBack.raddr)
 						if err != nil {
 							nc.logger.Error.Printf("Error sending packet to peer %s from WG server %s: %s", writeBack.raddr.String(), message.raddr, err)
@@ -297,7 +297,7 @@ func (nc *NetworkConnection) run() {
 						if nc.wgConnRemote {
 							nc.setupRemoteBridge(message.conn, message.raddr)
 							msg := nc.addMarkerFromAddr(message.raddr, message.message)
-							nc.logger.Info.Printf("send to remote WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(msg))
+							nc.logger.Debug.Printf("send to remote WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(msg))
 							err = udpSend(msg, nc.wgRemoteConn, nc.WGAddr)
 						} else {
 							var marker []byte
@@ -308,7 +308,7 @@ func (nc *NetworkConnection) run() {
 							writeBack := nc.setupBridge(message.conn, message.raddr, nc.WGAddr, nc.messageChan, marker)
 							// recompute length so that its refreshed if a marker was removed
 							n = len(msg)
-							nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(marker))
+							nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(marker))
 							_, err = writeBack.conn.Write(msg)
 						}
 						if err != nil {
