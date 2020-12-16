@@ -74,7 +74,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		logger.Info.Println("Timeout trying to find a bind technique")
 	}
 
-	ztn.BindTechniques.Add(ztn.BindSTUN)
+	//ztn.BindTechniques.Add(ztn.BindSTUN)
 	ztn.BindTechniques.Add(ztn.BindThroughPeer)
 
 	if !ztn.RunningInCLI() {

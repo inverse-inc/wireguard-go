@@ -150,7 +150,12 @@ func (nc *NetworkConnection) SetupForwarding(ct string, profile Profile) (string
 	case addr := <-nc.publicAddrChan:
 		// If our peer wants the LAN address or the WAN address to talk to us
 		// And also what is the address to advertise to his own peers
-		return fmt.Sprintf("%s:%d", profile.WireguardIP, nc.localConn.LocalAddr().(*net.UDPAddr).Port), addr
+		if ct == ConnectionTypeLANIN || ct == ConnectionTypeLANOUT {
+			s := strings.Split(nc.localConn.LocalAddr().String(), ":")
+			return fmt.Sprintf("%s:%d", nc.GetPrivateIP().String(), s[len(s)-1]), addr
+		} else {
+			return addr.String(), addr
+		}
 	}
 }
 
@@ -268,7 +273,7 @@ func (nc *NetworkConnection) run() {
 							msg = nc.addMarker(writeBack.marker, msg)
 						}
 						n := len(message.message)
-						nc.logger.Debug.Printf("send to peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(writeBack.marker))
+						nc.logger.Info.Printf("send to peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(writeBack.marker))
 						udpSend(msg, writeBack.conn, writeBack.raddr)
 						if err != nil {
 							nc.logger.Error.Printf("Error sending packet to peer %s from WG server %s: %s", writeBack.raddr.String(), message.raddr, err)
@@ -278,9 +283,9 @@ func (nc *NetworkConnection) run() {
 						n := len(message.message)
 
 						// strip our special header
-						_, msg := nc.stripMarker(message.message)
+						marker, msg := nc.stripMarker(message.message)
 
-						nc.logger.Debug.Printf("send to remote peer WG server: [%s]: %d bytes from %s\n", writeBack.raddr.String(), n, message.raddr)
+						nc.logger.Info.Printf("send to remote peer WG server: [%s]: %d bytes from %s (marker:%s)\n", writeBack.raddr.String(), n, message.raddr, nc.infoFromMarker(marker))
 						udpSend(msg, writeBack.conn, writeBack.raddr)
 						if err != nil {
 							nc.logger.Error.Printf("Error sending packet to peer %s from WG server %s: %s", writeBack.raddr.String(), message.raddr, err)
@@ -292,7 +297,7 @@ func (nc *NetworkConnection) run() {
 						if nc.wgConnRemote {
 							nc.setupRemoteBridge(message.conn, message.raddr)
 							msg := nc.addMarkerFromAddr(message.raddr, message.message)
-							nc.logger.Debug.Printf("send to remote WG server: [%s]: %d bytes from %s\n", nc.WGAddr.String(), n, message.raddr)
+							nc.logger.Info.Printf("send to remote WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(msg))
 							err = udpSend(msg, nc.wgRemoteConn, nc.WGAddr)
 						} else {
 							var marker []byte
@@ -303,7 +308,7 @@ func (nc *NetworkConnection) run() {
 							writeBack := nc.setupBridge(message.conn, message.raddr, nc.WGAddr, nc.messageChan, marker)
 							// recompute length so that its refreshed if a marker was removed
 							n = len(msg)
-							nc.logger.Debug.Printf("send to my WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(marker))
+							nc.logger.Info.Printf("send to my WG server: [%s]: %d bytes from %s (marker:%s)\n", nc.WGAddr.String(), n, message.raddr, nc.infoFromMarker(marker))
 							_, err = writeBack.conn.Write(msg)
 						}
 						if err != nil {
@@ -400,16 +405,23 @@ func (nc *NetworkConnection) listen(conn *net.UDPConn, messages chan *pkt) {
 }
 
 func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAddr, toAddr *net.UDPAddr, messages chan *pkt, marker []byte) *bridge {
-	if nc.peerConnections[raddr.String()] == nil {
+	var id string
+	if nc.BindTechnique == BindThroughPeer {
+		info := nc.infoFromMarker(marker)
+		id = fmt.Sprintf("%s:%d", info.IP, info.Port)
+	} else {
+		id = raddr.String()
+	}
+	if nc.peerConnections[id] == nil {
 		conn, err := net.DialUDP("udp4", nil, toAddr)
 		sharedutils.CheckError(err)
 		markerCopy := make([]byte, len(marker))
 		copy(markerCopy, marker)
-		nc.peerConnections[raddr.String()] = &bridge{conn: conn, raddr: raddr, marker: markerCopy}
+		nc.peerConnections[id] = &bridge{conn: conn, raddr: raddr, marker: markerCopy}
 		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr, marker: markerCopy}
 		nc.listen(conn, messages)
 	}
-	return nc.peerConnections[raddr.String()]
+	return nc.peerConnections[id]
 }
 
 func (nc *NetworkConnection) findBridge(addr net.Addr) *bridge {
@@ -592,4 +604,12 @@ func (nc *NetworkConnection) bindRequestPktIPUpdate(method BindTechniqueInterfac
 		nc.setPublicAddr(newaddr)
 	}
 	return nil
+}
+
+func (nc *NetworkConnection) GetPrivateIP() net.IP {
+	conn, err := net.Dial("udp", stunServer)
+	sharedutils.CheckError(err)
+	defer conn.Close()
+
+	return conn.LocalAddr().(*net.UDPAddr).IP
 }
