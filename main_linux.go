@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"syscall"
 
+	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
@@ -40,6 +41,7 @@ const (
 var ENV_ID = sharedutils.EnvOrDefault("ID", "")
 
 var logger *device.Logger
+var DNSChange *godnschange.DNSStruct
 
 func printUsage() {
 	fmt.Printf("usage:\n")
@@ -68,8 +70,29 @@ func main() {
 
 	godotenv.Load(os.Args[1])
 
+	// get log level (default: info)
+
+	logLevel := func() int {
+		switch os.Getenv("LOG_LEVEL") {
+		case "debug":
+			return device.LogLevelDebug
+		case "info":
+			return device.LogLevelInfo
+		case "error":
+			return device.LogLevelError
+		case "silent":
+			return device.LogLevelSilent
+		}
+		return device.LogLevelInfo
+	}()
+
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
+		logger = device.NewLogger(
+			logLevel,
+			fmt.Sprintf("(%s) ", "Master"),
+		)
 		setMasterProcess()
+		DNSChange = StartDNS()
 		go checkParentIsAlive()
 
 		for {
@@ -83,22 +106,6 @@ func main() {
 		if !foreground {
 			foreground = os.Getenv(ENV_WG_PROCESS_FOREGROUND) == "1"
 		}
-
-		// get log level (default: info)
-
-		logLevel := func() int {
-			switch os.Getenv("LOG_LEVEL") {
-			case "debug":
-				return device.LogLevelDebug
-			case "info":
-				return device.LogLevelInfo
-			case "error":
-				return device.LogLevelError
-			case "silent":
-				return device.LogLevelSilent
-			}
-			return device.LogLevelInfo
-		}()
 
 		// open TUN device (or use supplied fd)
 
@@ -245,7 +252,6 @@ func main() {
 		startInverse(interfaceName, device)
 
 		// wait for program to terminate
-
 		signal.Notify(term, syscall.SIGTERM)
 		signal.Notify(term, os.Interrupt)
 		signal.Notify(term, syscall.SIGPIPE)
@@ -260,8 +266,6 @@ func main() {
 
 		uapi.Close()
 		device.Close()
-
-		logger.Info.Println("Shutting down")
 
 		quit()
 	}

@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run dns/directives_generate.go
+
 import (
 	"encoding/base64"
 	"encoding/json"
@@ -17,6 +19,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
+	_ "github.com/inverse-inc/wireguard-go/dns/core/plugin"
 	"github.com/inverse-inc/wireguard-go/filter"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -211,7 +214,9 @@ func setupMasterQuit() {
 
 func quit() {
 	if masterProcess {
-		//DNS cleanup goes here
+		if DNSChange.Success {
+			DNSChange.RestoreDNS("127.0.0.69")
+		}
 		fmt.Println("Master process is exiting")
 	} else {
 		ztn.UPNPIGDCleanupMapped()

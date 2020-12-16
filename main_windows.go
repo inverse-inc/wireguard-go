@@ -1,3 +1,5 @@
+// +build windows
+
 /* SPDX-License-Identifier: MIT
  *
  * Copyright (C) 2017-2020 WireGuard LLC. All Rights Reserved.
@@ -11,6 +13,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/ipc"
@@ -26,6 +29,7 @@ const (
 )
 
 var logger *device.Logger
+var DNSChange *godnschange.DNSStruct
 
 func main() {
 	defer binutils.CapturePanic()
@@ -35,7 +39,14 @@ func main() {
 	godotenv.Load(os.Args[1])
 
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
+		logger = device.NewLogger(
+			device.LogLevelInfo,
+			fmt.Sprintf("(%s) ", "Master"),
+		)
+
+		os.Setenv("LOG_LEVEL", "info")
 		setMasterProcess()
+		DNSChange = StartDNS()
 		go checkParentIsAlive()
 
 		for {
