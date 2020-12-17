@@ -336,10 +336,9 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan *NetworkEndp
 	go func() {
 		after := []time.Duration{
 			1 * time.Second,
-			2 * time.Second,
-			5 * time.Second,
 			10 * time.Second,
 			30 * time.Second,
+			300 * time.Second,
 		}
 		i := 0
 		for {
