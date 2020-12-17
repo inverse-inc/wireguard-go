@@ -334,11 +334,9 @@ func (pc *PeerConnection) Connected() bool {
 
 func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan *NetworkEndpointEvent {
 	go func() {
+		GLPPublish(pc.PublishP2PKey(), pc.buildNetworkEndpointEvent())
 		after := []time.Duration{
-			1 * time.Second,
-			10 * time.Second,
-			30 * time.Second,
-			300 * time.Second,
+			60 * time.Second,
 		}
 		i := 0
 		for {
