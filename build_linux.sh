@@ -1,6 +1,12 @@
 #!/bin/bash
 
-mkdir -p amd64
+if [ -z "$ARCH" ]; then
+	ARCH=amd64
+fi
+
+export ARCH=$ARCH
+
+mkdir -p $ARCH
 
 if [ ! -f .deps/prepared ]; then
   if which apt-get; then
@@ -10,11 +16,11 @@ if [ ! -f .deps/prepared ]; then
 fi
 
 GOOS=linux \
-  GOARCH=amd64 \
-  BIN_OUTPUT=amd64/wireguard \
-  GUIWRAPPER_BIN_OUTPUT=../amd64/guiwrapper \
-  TRAYWRAPPER_BIN_OUTPUT=../amd64/traywrapper \
+  GOARCH=$ARCH \
+  BIN_OUTPUT=$ARCH/wireguard \
+  GUIWRAPPER_BIN_OUTPUT=../$ARCH/guiwrapper \
+  TRAYWRAPPER_BIN_OUTPUT=../$ARCH/traywrapper \
   ./build.sh
 
-cp util/icon/logo.png amd64/
+cp util/icon/logo.png $ARCH/
 

@@ -4,9 +4,13 @@ if [ -z "$GOOS" ]; then
 	GOOS=linux
 fi
 
+if [ -z "$ARCH" ]; then
+	ARCH=amd64
+fi
+
 if ! [ -f .deps/prepared ]; then
   mkdir .deps
-  curl -L https://golang.org/dl/go1.15.1.$GOOS-amd64.tar.gz > .deps/go.tar.gz
+  curl -L https://golang.org/dl/go1.15.1.$GOOS-$ARCH.tar.gz > .deps/go.tar.gz
   cd .deps/
   tar -xvf go.tar.gz
   cd -
