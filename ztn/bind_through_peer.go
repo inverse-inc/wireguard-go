@@ -90,6 +90,8 @@ func (btp *BindThroughPeerAgent) BindRequest(conn *net.UDPConn, sendTo chan *pkt
 			btp.remoteID = res.Id
 			btp.remoteToken = res.Token
 
+			btp.networkConnection.logger.Info.Println("Succeeded setting up forwarding with peer", pc.PeerProfile.WireguardIP)
+
 			go func() {
 				sendTo <- &pkt{message: btp.BindRequestPkt(btp.remoteIP, btp.remotePort)}
 			}()
