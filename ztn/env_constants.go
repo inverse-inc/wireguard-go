@@ -10,7 +10,8 @@ const (
 
 	EnvHonorRoutes = "WG_HONOR_ROUTES"
 
-	EnvBindTechnique = "WG_BIND_TECHNIQUE"
+	EnvBindTechnique       = "WG_BIND_TECHNIQUE"
+	EnvStaticBindTechnique = "WG_STATIC_BIND_TECHNIQUE"
 
 	EnvPublicPortIP = "WG_PUBLIC_PORT_IP"
 

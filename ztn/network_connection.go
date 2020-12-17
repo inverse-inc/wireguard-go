@@ -93,7 +93,7 @@ func NewNetworkConnection(description string, logger *device.Logger, port int) *
 		nc.BindTechnique = BindTechniqueNames[bt]
 		nc.UserDefinedBindTechnique = nc.BindTechnique
 		// If we're configured to use a static bind technique, we replace the bind techniques list with one will only contain our current bind technique
-		if sharedutils.IsEnabled(sharedutils.EnvOrDefault("STATIC_BIND_TECHNIQUE", "false")) {
+		if sharedutils.IsEnabled(sharedutils.EnvOrDefault(EnvStaticBindTechnique, "false")) {
 			nc.logger.Info.Println("Using static bind technique", nc.BindTechnique)
 			nc.BindTechniques = &BindTechniquesStruct{}
 		}
