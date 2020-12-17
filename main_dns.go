@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"net"
+	"os"
 	"strings"
 	"text/template"
 	"time"
@@ -56,9 +57,17 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 		}
 	}
 
+	// Add local machine
+	hostname, err := os.Hostname()
+	var Peers []string
+	if err != nil {
+		Peers = profile.NamesToResolve
+	} else {
+		Peers = append(profile.NamesToResolve, hostname)
+	}
 	data := Data{
 		Domains:        profile.DomainsToResolve,
-		ZTNPeers:       profile.NamesToResolve,
+		ZTNPeers:       Peers,
 		Nameservers:    strings.Join(myDNSInfo.NameServers[:], " "),
 		API:            APIClient.Host,
 		SearchDomain:   myDNSInfo.SearchDomain,
