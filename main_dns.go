@@ -40,6 +40,7 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 		SearchDomain   []string
 		InternalDomain string
 		ZTNServer      bool
+		Port           string
 	}
 
 	APIClient := ztn.GetAPIClient()
@@ -63,6 +64,7 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 		SearchDomain:   myDNSInfo.SearchDomain,
 		ZTNServer:      ZTNAddr,
 		InternalDomain: profile.InternalDomainToResolve,
+		Port:           APIClient.Port,
 	}
 
 	t := template.New("Coreconfig")
@@ -74,16 +76,16 @@ reload
 #debug
 {{ range .Domains }}{{ if ne . "" }}{{$domain := .}}
 dnsredir {{.}} {
-   to ietf-doh://{{ $.API }}:9999/dns-query
+   to ietf-doh://{{ $.API }}:{{$.Port}}/dns-query
 }
 {{ end }}{{ end }}
 {{ range .ZTNPeers }}{{ if ne . "" }}{{$ztnpeer := .}}
 dnsredir {{$ztnpeer}}.{{$.InternalDomain}} {
-	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
+	to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
 }
 {{ range $.SearchDomain }}{{ if ne . "" }}
 dnsredir {{$ztnpeer}}.{{.}} {
-	to ietf-doh://{{ $.API }}:9999/dns-ztn-query
+	to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
 }
 {{ end }}{{ end }}{{ end }}{{ end }}
 {{ if .ZTNServer }}
