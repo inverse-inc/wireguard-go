@@ -128,7 +128,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		connection.StartPeer(device, profile, peerID, networkConnection)
 	}
 
-	go listenEvents(device, profile, networkConnection)
+	go listenMyEvents(profile, connectNewPeerHandler(device, networkConnection, profile))
 
 	go func() {
 		//PPROF
@@ -147,14 +147,30 @@ func getKeys() ([32]byte, [32]byte) {
 	return remoteclients.GetKeysFromFile(authFile)
 }
 
-func listenEvents(device *device.Device, profile ztn.Profile, networkConnection *ztn.NetworkConnection) {
+func connectNewPeerHandler(device *device.Device, networkConnection *ztn.NetworkConnection, profile ztn.Profile) func(ztn.Event) {
+	pub, err := remoteclients.B64KeyToBytes(profile.PublicKey)
+	sharedutils.CheckError(err)
+	myID := base64.URLEncoding.EncodeToString(pub[:])
+	return func(event ztn.Event) {
+		data := map[string]interface{}{}
+		err = json.Unmarshal(event.Data, &data)
+		if event.Type == "new_peer" && data["id"].(string) != myID {
+			logger.Info.Println("Received new peer from pub/sub", data["id"].(string))
+			connection.StartPeer(device, profile, data["id"].(string), networkConnection)
+		}
+	}
+}
+
+func listenMyEvents(profile ztn.Profile, eventHandler func(e ztn.Event)) {
 	chal, err := ztn.GetServerChallenge(&profile)
 	if err != nil {
 		logger.Error.Println("Got an error while starting to listen events", err)
-		connection.Update(func() {
-			connection.Status = ztn.STATUS_ERROR
-			connection.LastError = err
-		})
+		if connection != nil {
+			connection.Update(func() {
+				connection.Status = ztn.STATUS_ERROR
+				connection.LastError = err
+			})
+		}
 	}
 
 	priv, err := remoteclients.B64KeyToBytes(profile.PrivateKey)
@@ -164,7 +180,6 @@ func listenEvents(device *device.Device, profile ztn.Profile, networkConnection 
 	serverPub, err := remoteclients.URLB64KeyToBytes(chal.PublicKey)
 	sharedutils.CheckError(err)
 
-	myID := base64.URLEncoding.EncodeToString(pub[:])
 	c := ztn.GLPPrivateClient(priv, pub, serverPub)
 	c.LogErrors = true
 	c.Start(ztn.APIClientCtx)
@@ -174,12 +189,7 @@ func listenEvents(device *device.Device, profile ztn.Profile, networkConnection 
 			event := ztn.Event{}
 			err := json.Unmarshal(e.Data, &event)
 			sharedutils.CheckError(err)
-			data := map[string]interface{}{}
-			err = json.Unmarshal(event.Data, &data)
-			if event.Type == "new_peer" && data["id"].(string) != myID {
-				logger.Info.Println("Received new peer from pub/sub", data["id"].(string))
-				connection.StartPeer(device, profile, data["id"].(string), networkConnection)
-			}
+			eventHandler(event)
 		}
 	}
 }

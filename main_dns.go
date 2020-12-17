@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"net"
 	"os"
 	"strings"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	godnschange "github.com/inverse-inc/go-dnschange"
+	"github.com/inverse-inc/packetfence/go/remoteclients"
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/packetfence/go/timedlock"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
@@ -24,6 +27,8 @@ var CoreDNSConfig *string
 
 // GlobalTransactionLock global var
 var GlobalTransactionLock *timedlock.RWLock
+
+var newPeer = make(chan string)
 
 func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) string {
 
@@ -133,6 +138,8 @@ func StartDNS() *godnschange.DNSStruct {
 		logger.Error.Println("Got error when filling profile from server", err)
 		dnsChange.Success = false
 	} else {
+		go listenMyEvents(profile, dnsNewPeerHandler(profile))
+
 		conf := GenerateCoreDNSConfig(myDNSInfo, profile)
 		CoreDNSConfig = &conf
 		// Clean old modifications
@@ -148,19 +155,37 @@ func StartDNS() *godnschange.DNSStruct {
 			}(CoreDNSConfig)
 			go func() {
 				for {
-					defer recoverPooling(connection, logger, myDNSInfo, &profile, dnsChange)
-					time.Sleep(10 * time.Second)
-					err := profile.FillProfileFromServer(connection, logger)
-					if err != nil {
-						logger.Error.Println("Something went wrong on profile refresh", err)
-					}
-					conf = GenerateCoreDNSConfig(myDNSInfo, profile)
-					if conf != *CoreDNSConfig {
-						CoreDNSConfig = &conf
-						dnsChange.RestoreDNS(LocalDNS)
-						err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+					select {
+					case <-newPeer:
+						logger.Info.Println("Discovered new peer, reload DNS configuration")
+						defer recoverPooling(connection, logger, myDNSInfo, &profile, dnsChange)
+						err := profile.FillProfileFromServer(connection, logger)
 						if err != nil {
-							logger.Error.Println("Unable to change the dns configuration ", err)
+							logger.Error.Println("Something went wrong on profile refresh", err)
+						}
+						conf = GenerateCoreDNSConfig(myDNSInfo, profile)
+						if conf != *CoreDNSConfig {
+							CoreDNSConfig = &conf
+							dnsChange.RestoreDNS(LocalDNS)
+							err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+							if err != nil {
+								logger.Error.Println("Unable to change the dns configuration ", err)
+							}
+						}
+					case <-time.After(10 * time.Minute):
+						defer recoverPooling(connection, logger, myDNSInfo, &profile, dnsChange)
+						err := profile.FillProfileFromServer(connection, logger)
+						if err != nil {
+							logger.Error.Println("Something went wrong on profile refresh", err)
+						}
+						conf = GenerateCoreDNSConfig(myDNSInfo, profile)
+						if conf != *CoreDNSConfig {
+							CoreDNSConfig = &conf
+							dnsChange.RestoreDNS(LocalDNS)
+							err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+							if err != nil {
+								logger.Error.Println("Unable to change the dns configuration ", err)
+							}
 						}
 					}
 				}
@@ -184,21 +209,54 @@ func recoverPooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo
 	if r := recover(); r != nil {
 		go func() {
 			for {
-				time.Sleep(10 * time.Second)
-				err := profile.FillProfileFromServer(connection, logger)
-				if err != nil {
-					logger.Error.Println("Something went wrong on profile refresh", err)
-				}
-				conf := GenerateCoreDNSConfig(myDNSInfo, *profile)
-				if conf != *CoreDNSConfig {
-					CoreDNSConfig = &conf
-					dnsChange.RestoreDNS(LocalDNS)
-					err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+				select {
+				case <-newPeer:
+					logger.Info.Println("Discovered new peer, reload DNS configuration")
+					err := profile.FillProfileFromServer(connection, logger)
 					if err != nil {
-						logger.Error.Println("Unable to change the dns configuration ", err)
+						logger.Error.Println("Something went wrong on profile refresh", err)
+					}
+					conf := GenerateCoreDNSConfig(myDNSInfo, *profile)
+					if conf != *CoreDNSConfig {
+						CoreDNSConfig = &conf
+						dnsChange.RestoreDNS(LocalDNS)
+						err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+						if err != nil {
+							logger.Error.Println("Unable to change the dns configuration ", err)
+						}
+					}
+				case <-time.After(10 * time.Minute):
+					err := profile.FillProfileFromServer(connection, logger)
+					if err != nil {
+						logger.Error.Println("Something went wrong on profile refresh", err)
+					}
+					conf := GenerateCoreDNSConfig(myDNSInfo, *profile)
+					if conf != *CoreDNSConfig {
+						CoreDNSConfig = &conf
+						dnsChange.RestoreDNS(LocalDNS)
+						err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+						if err != nil {
+							logger.Error.Println("Unable to change the dns configuration ", err)
+						}
 					}
 				}
 			}
 		}()
+	}
+}
+
+func dnsNewPeerHandler(profile ztn.Profile) func(ztn.Event) {
+	pub, err := remoteclients.B64KeyToBytes(profile.PublicKey)
+	sharedutils.CheckError(err)
+	myID := base64.URLEncoding.EncodeToString(pub[:])
+	return func(event ztn.Event) {
+		data := map[string]interface{}{}
+		err = json.Unmarshal(event.Data, &data)
+		if event.Type == "new_peer" && data["id"].(string) != myID {
+			logger.Info.Println("Received new peer from pub/sub", data["id"].(string))
+			go func() {
+				newPeer <- data["id"].(string)
+			}()
+		}
 	}
 }
