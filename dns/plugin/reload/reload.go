@@ -88,10 +88,12 @@ func hook(event caddy.EventName, info interface{}) error {
 			select {
 			case <-tick.C:
 				corefile, err := caddy.LoadCaddyfile(instance.Caddyfile().ServerType())
+
 				if err != nil {
 					continue
 				}
 				parsedCorefile, err := parse(corefile)
+
 				if err != nil {
 					log.Warningf("Corefile parse failed: %s", err)
 					continue

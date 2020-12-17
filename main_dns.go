@@ -151,7 +151,7 @@ func StartDNS() *godnschange.DNSStruct {
 			dnsChange.Success = true
 			go func(CoreDNSConfig *string) {
 				defer recoverDns(CoreDNSConfig)
-				coremain.Run(*CoreDNSConfig)
+				coremain.Run(CoreDNSConfig)
 			}(CoreDNSConfig)
 			go func() {
 				for {
@@ -200,7 +200,7 @@ func recoverDns(CoreDNSConfig *string) {
 	if r := recover(); r != nil {
 		go func(CoreDNSConfig *string) {
 			defer recoverDns(CoreDNSConfig)
-			coremain.Run(*CoreDNSConfig)
+			coremain.Run(CoreDNSConfig)
 		}(CoreDNSConfig)
 	}
 }

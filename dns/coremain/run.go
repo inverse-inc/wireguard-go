@@ -32,8 +32,10 @@ func init() {
 	caddy.AppVersion = CoreVersion
 }
 
+var CoreDNSConfig *string
+
 // Run is CoreDNS's main() function.
-func Run(config ...string) {
+func Run(config ...*string) {
 
 	// Reset flag.CommandLine to get rid of unwanted flags for instance from glog (used in kubernetes).
 	// And read the ones we want to keep.
@@ -70,12 +72,12 @@ func Run(config ...string) {
 	var err error
 
 	if len(config) > 0 {
-		conf = config[0]
+		CoreDNSConfig = config[0]
 		corefile, err = caddy.CaddyfileFromString(config[0], serverType)
 		if err != nil {
 			mustLogFatal(err)
 		}
-		caddy.RegisterCaddyfileLoader("flag", caddy.LoaderFunc(confLoader))
+		caddy.RegisterCaddyfileLoader("ZTN", caddy.LoaderFunc(ztnLoader))
 
 	} else {
 		// Get Corefile input
@@ -113,6 +115,7 @@ func mustLogFatal(args ...interface{}) {
 
 // confLoader loads the Caddyfile using the -conf flag.
 func confLoader(serverType string) (caddy.Input, error) {
+
 	if conf == "" {
 		return nil, nil
 	}
@@ -130,6 +133,17 @@ func confLoader(serverType string) (caddy.Input, error) {
 		Filepath:       conf,
 		ServerTypeName: serverType,
 	}, nil
+}
+
+// ztnLoader loads the Caddyfile from a buffer.
+func ztnLoader(serverType string) (caddy.Input, error) {
+
+	return caddy.CaddyfileInput{
+		Contents:       []byte(*CoreDNSConfig),
+		Filepath:       "ZTN",
+		ServerTypeName: serverType,
+	}, nil
+
 }
 
 // defaultLoader loads the Corefile from the current working directory.
