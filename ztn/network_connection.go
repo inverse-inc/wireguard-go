@@ -47,8 +47,9 @@ type NetworkConnection struct {
 	localConn *net.UDPConn
 	port      int
 
-	BindTechnique  BindTechnique
-	BindTechniques *BindTechniquesStruct
+	BindTechnique            BindTechnique
+	UserDefinedBindTechnique BindTechnique
+	BindTechniques           *BindTechniquesStruct
 
 	peerConnections map[string]*bridge
 
@@ -90,6 +91,8 @@ func NewNetworkConnection(description string, logger *device.Logger, port int) *
 	nc.BindTechniques = BindTechniques.CopyNew()
 	if bt := sharedutils.EnvOrDefault(EnvBindTechnique, ""); bt != "" && BindTechniqueNames[bt] != "" {
 		nc.BindTechnique = BindTechniqueNames[bt]
+		nc.BindTechniques.Add(nc.BindTechnique)
+		nc.UserDefinedBindTechnique = nc.BindTechnique
 	} else {
 		nc.BindTechnique = nc.BindTechniques.Next()
 	}
@@ -368,8 +371,8 @@ func (nc *NetworkConnection) run() {
 					nc.logger.Error.Println("keepalive:", err)
 
 					bindFail++
-					if bindFail > MaxBindFailures {
-						nc.logger.Error.Println("Maximum amount of bind failures reached")
+					if bindFail > nc.MaxBindFailures() {
+						nc.logger.Error.Printf("Maximum amount of bind failures reached (%d)", bindFail)
 						nc.BindTechnique = nc.BindTechniques.Next()
 						return false
 					}
@@ -612,4 +615,12 @@ func (nc *NetworkConnection) GetPrivateIP() net.IP {
 	defer conn.Close()
 
 	return conn.LocalAddr().(*net.UDPAddr).IP
+}
+
+func (nc *NetworkConnection) MaxBindFailures() int {
+	if nc.BindTechnique == nc.UserDefinedBindTechnique {
+		return UserDefinedMaxBindFailures
+	} else {
+		return AutomatedMaxBindFailures
+	}
 }
