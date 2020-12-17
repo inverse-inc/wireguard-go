@@ -25,7 +25,7 @@ func init() {
 	flag.BoolVar(&version, "version", false, "Show version")
 	flag.BoolVar(&dnsserver.Quiet, "quiet", false, "Quiet mode (no initialization output)")
 
-	caddy.RegisterCaddyfileLoader("flag", caddy.LoaderFunc(confLoader))
+	// caddy.RegisterCaddyfileLoader("flag", caddy.LoaderFunc(confLoader))
 	caddy.SetDefaultCaddyfileLoader("default", caddy.LoaderFunc(defaultLoader))
 
 	caddy.AppName = coreName
@@ -70,10 +70,12 @@ func Run(config ...string) {
 	var err error
 
 	if len(config) > 0 {
+		conf = config[0]
 		corefile, err = caddy.CaddyfileFromString(config[0], serverType)
 		if err != nil {
 			mustLogFatal(err)
 		}
+		caddy.RegisterCaddyfileLoader("flag", caddy.LoaderFunc(confLoader))
 
 	} else {
 		// Get Corefile input

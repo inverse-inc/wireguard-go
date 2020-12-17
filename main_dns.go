@@ -10,10 +10,15 @@ import (
 
 	godnschange "github.com/inverse-inc/go-dnschange"
 	"github.com/inverse-inc/packetfence/go/timedlock"
+	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ztn"
 )
 
+// LocalDNS is the ip address CoreDNS will listen
+const LocalDNS = "127.0.0.69"
+
+// CoreDNSConfig contain the dns configuration
 var CoreDNSConfig *string
 
 // GlobalTransactionLock global var
@@ -120,8 +125,8 @@ func StartDNS() *godnschange.DNSStruct {
 		conf := GenerateCoreDNSConfig(myDNSInfo, profile)
 		CoreDNSConfig = &conf
 		// Clean old modifications
-		dnsChange.RestoreDNS("127.0.0.69")
-		err := dnsChange.Change("127.0.0.69", profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+		dnsChange.RestoreDNS(LocalDNS)
+		err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
 		if err != nil {
 			dnsChange.Success = false
 		} else {
@@ -132,19 +137,19 @@ func StartDNS() *godnschange.DNSStruct {
 			}(CoreDNSConfig)
 			go func() {
 				for {
+					defer recoverPooling(connection, logger, myDNSInfo, &profile, dnsChange)
 					time.Sleep(10 * time.Second)
 					err := profile.FillProfileFromServer(connection, logger)
 					if err != nil {
 						logger.Error.Println("Something went wrong on profile refresh", err)
-						dnsChange.Success = false
 					}
 					conf = GenerateCoreDNSConfig(myDNSInfo, profile)
 					if conf != *CoreDNSConfig {
 						CoreDNSConfig = &conf
-						dnsChange.RestoreDNS("127.0.0.69")
-						err := dnsChange.Change("127.0.0.69", profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+						dnsChange.RestoreDNS(LocalDNS)
+						err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
 						if err != nil {
-							dnsChange.Success = false
+							logger.Error.Println("Unable to change the dns configuration ", err)
 						}
 					}
 				}
@@ -161,5 +166,28 @@ func recoverDns(CoreDNSConfig *string) {
 			defer recoverDns(CoreDNSConfig)
 			coremain.Run(*CoreDNSConfig)
 		}(CoreDNSConfig)
+	}
+}
+
+func recoverPooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godnschange.DNSInfo, profile *ztn.Profile, dnsChange *godnschange.DNSStruct) {
+	if r := recover(); r != nil {
+		go func() {
+			for {
+				time.Sleep(10 * time.Second)
+				err := profile.FillProfileFromServer(connection, logger)
+				if err != nil {
+					logger.Error.Println("Something went wrong on profile refresh", err)
+				}
+				conf := GenerateCoreDNSConfig(myDNSInfo, *profile)
+				if conf != *CoreDNSConfig {
+					CoreDNSConfig = &conf
+					dnsChange.RestoreDNS(LocalDNS)
+					err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+					if err != nil {
+						logger.Error.Println("Unable to change the dns configuration ", err)
+					}
+				}
+			}
+		}()
 	}
 }
