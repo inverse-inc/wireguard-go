@@ -93,10 +93,11 @@ dnsredir {{.}} {
    to ietf-doh://{{ $.API }}:{{$.Port}}/dns-query
 }
 {{ end }}{{ end }}
-{{ range .ZTNPeers }}{{ if ne . "" }}{{$ztnpeer := .}}
-dnsredir {{$ztnpeer}}.{{$.InternalDomain}} {
+dnsredir {{$.InternalDomain}} {
 	to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
 }
+
+{{ range .ZTNPeers }}{{ if ne . "" }}{{$ztnpeer := .}}
 {{ range $.SearchDomain }}{{ if ne . "" }}
 dnsredir {{$ztnpeer}}.{{.}} {
 	to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
