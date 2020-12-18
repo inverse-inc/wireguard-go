@@ -146,7 +146,7 @@ func StartDNS() *godnschange.DNSStruct {
 		CoreDNSConfig = &conf
 		// Clean old modifications
 		dnsChange.RestoreDNS(LocalDNS)
-		err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+		err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve, APIClient.Host)
 		if err != nil {
 			dnsChange.Success = false
 		} else {
@@ -187,7 +187,7 @@ func pooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godns
 			if *conf != *CoreDNSConfig {
 				CoreDNSConfig = conf
 				dnsChange.RestoreDNS(LocalDNS)
-				err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+				err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve, APIClient.Host)
 				if err != nil {
 					logger.Error.Println("Unable to change the dns configuration ", err)
 				}
@@ -202,7 +202,7 @@ func pooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godns
 			if *conf != *CoreDNSConfig {
 				CoreDNSConfig = conf
 				dnsChange.RestoreDNS(LocalDNS)
-				err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve)
+				err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve, APIClient.Host)
 				if err != nil {
 					logger.Error.Println("Unable to change the dns configuration ", err)
 				}
