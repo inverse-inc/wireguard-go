@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	sync "sync"
+	"syscall"
 	"time"
 
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -73,7 +74,8 @@ func (s *WGServiceServerHandler) Stop(ctx context.Context, in *StopRequest) (*St
 	if len(os.Args[2]) >= 2 && os.Args[2] == "--master-controlled" {
 		p, err := os.FindProcess(os.Getppid())
 		if err == nil {
-			p.Kill()
+			fmt.Println("Killing", p.Pid)
+			p.Signal(syscall.SIGTERM)
 		}
 	}
 	time.Sleep(1 * time.Second)

@@ -223,6 +223,7 @@ func setupMasterQuit() {
 }
 
 func quit() {
+	fmt.Println("quit called in", os.Getpid())
 	if masterProcess {
 		if DNSChange.Success {
 			DNSChange.RestoreDNS("127.0.0.69")
