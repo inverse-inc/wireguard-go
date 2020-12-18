@@ -122,6 +122,9 @@ func (pc *PeerConnection) run() {
 					return true
 				}
 
+				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
+				GLPPublish(pc.PublishP2PKey(), pc.buildNetworkEndpointEvent())
+
 				pc.HandleNetworkEndpointEvent(nee)
 
 				pc.ConnectionType = pc.FindConnectionType(nee)
@@ -136,10 +139,12 @@ func (pc *PeerConnection) run() {
 
 				var err error
 				peerAddr, err = net.ResolveUDPAddr(udp, peerStr)
-				sharedutils.CheckError(err)
-
-				pc.logger.Debug.Println("Publishing for peer join", pc.peerID)
-				GLPPublish(pc.PublishP2PKey(), pc.buildNetworkEndpointEvent())
+				if err != nil {
+					dummyPeerPublicIP := "100.64.0.0:65535"
+					pc.logger.Info.Println("Peer didn't provide a valid public IP, defaulting to", dummyPeerPublicIP)
+					peerAddr, err = net.ResolveUDPAddr(udp, dummyPeerPublicIP)
+					sharedutils.CheckError(err)
+				}
 
 				pc.setupPeerConnection(peerStr, peerAddr)
 
@@ -336,7 +341,7 @@ func (pc *PeerConnection) StartConnection(foundPeer chan bool) chan *NetworkEndp
 	go func() {
 		GLPPublish(pc.PublishP2PKey(), pc.buildNetworkEndpointEvent())
 		after := []time.Duration{
-			5 * time.Second,
+			300 * time.Second,
 		}
 		i := 0
 		for {

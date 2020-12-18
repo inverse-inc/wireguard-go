@@ -7,7 +7,7 @@ import (
 )
 
 var PublicPortLivenessTolerance = 10 * time.Minute
-var InitialConnectionLivenessTolerance = device.RekeyTimeout * 2
+var InitialConnectionLivenessTolerance = device.RekeyTimeout * 5
 var ConnectedConnectionLivenessTolerance = 10 * time.Second
 
 var InboundAttemptsTryAtLeast = 20 * time.Second

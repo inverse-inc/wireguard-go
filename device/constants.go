@@ -14,9 +14,9 @@ import (
 const (
 	RekeyAfterMessages      = (1 << 60)
 	RejectAfterMessages     = (1 << 64) - (1 << 13) - 1
-	RekeyAfterTime          = time.Second * 120
+	RekeyAfterTime          = time.Second * 10
 	RekeyAttemptTime        = time.Second * 90
-	RekeyTimeout            = time.Second * 3
+	RekeyTimeout            = time.Second * 1
 	MaxTimerHandshakes      = 90 / 5 /* RekeyAttemptTime / RekeyTimeout */
 	RekeyTimeoutJitterMaxMs = 334
 	RejectAfterTime         = time.Second * 180
