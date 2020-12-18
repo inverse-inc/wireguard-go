@@ -565,7 +565,7 @@ const (
 	defaultUrlReloadInterval  = 30 * time.Minute
 	defaultUrlReadTimeout     = 30 * time.Second
 
-	defaultHcInterval = 2000 * time.Millisecond
+	defaultHcInterval = 600 * time.Minute
 	defaultHcTimeout  = 5000 * time.Millisecond
 )
 
