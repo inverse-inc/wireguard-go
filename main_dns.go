@@ -14,6 +14,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/packetfence/go/timedlock"
+	"github.com/inverse-inc/packetfence/go/unifiedapiclient"
 	"github.com/inverse-inc/wireguard-go/device"
 	"github.com/inverse-inc/wireguard-go/dns/coremain"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -30,7 +31,7 @@ var GlobalTransactionLock *timedlock.RWLock
 
 var newPeer = make(chan string)
 
-func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) string {
+func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile, APIClient *unifiedapiclient.Client) string {
 
 	id, _ := GlobalTransactionLock.RLock()
 
@@ -48,8 +49,6 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile) 
 		ZTNServer      bool
 		Port           string
 	}
-
-	APIClient := ztn.GetAPIClient()
 
 	ZTNAddr := false
 
@@ -130,6 +129,8 @@ func StartDNS() *godnschange.DNSStruct {
 
 	privateKey, publicKey := getKeys()
 
+	APIClient := ztn.GetAPIClient()
+
 	profile := ztn.Profile{}
 	profile.PrivateKey = base64.StdEncoding.EncodeToString(privateKey[:])
 	profile.PublicKey = base64.StdEncoding.EncodeToString(publicKey[:])
@@ -141,7 +142,7 @@ func StartDNS() *godnschange.DNSStruct {
 	} else {
 		go listenMyEvents(profile, dnsNewPeerHandler(profile))
 
-		conf := GenerateCoreDNSConfig(myDNSInfo, profile)
+		conf := GenerateCoreDNSConfig(myDNSInfo, profile, APIClient)
 		CoreDNSConfig = &conf
 		// Clean old modifications
 		dnsChange.RestoreDNS(LocalDNS)
@@ -155,7 +156,7 @@ func StartDNS() *godnschange.DNSStruct {
 				coremain.Run(CoreDNSConfig)
 			}(CoreDNSConfig)
 			go func() {
-				pooling(connection, logger, myDNSInfo, &profile, dnsChange, &conf)
+				pooling(connection, logger, myDNSInfo, &profile, dnsChange, &conf, APIClient)
 			}()
 		}
 	}
@@ -172,17 +173,17 @@ func recoverDns(CoreDNSConfig *string) {
 	}
 }
 
-func pooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godnschange.DNSInfo, profile *ztn.Profile, dnsChange *godnschange.DNSStruct, conf *string) {
+func pooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godnschange.DNSInfo, profile *ztn.Profile, dnsChange *godnschange.DNSStruct, conf *string, APIClient *unifiedapiclient.Client) {
 	for {
 		select {
 		case <-newPeer:
 			logger.Info.Println("Discovered new peer, reload DNS configuration")
-			defer recoverPooling(connection, logger, myDNSInfo, profile, dnsChange, conf)
+			defer recoverPooling(connection, logger, myDNSInfo, profile, dnsChange, conf, APIClient)
 			err := profile.FillProfileFromServer(connection, logger)
 			if err != nil {
 				logger.Error.Println("Something went wrong on profile refresh", err)
 			}
-			*conf = GenerateCoreDNSConfig(myDNSInfo, *profile)
+			*conf = GenerateCoreDNSConfig(myDNSInfo, *profile, APIClient)
 			if *conf != *CoreDNSConfig {
 				CoreDNSConfig = conf
 				dnsChange.RestoreDNS(LocalDNS)
@@ -192,12 +193,12 @@ func pooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godns
 				}
 			}
 		case <-time.After(10 * time.Minute):
-			defer recoverPooling(connection, logger, myDNSInfo, profile, dnsChange, conf)
+			defer recoverPooling(connection, logger, myDNSInfo, profile, dnsChange, conf, APIClient)
 			err := profile.FillProfileFromServer(connection, logger)
 			if err != nil {
 				logger.Error.Println("Something went wrong on profile refresh", err)
 			}
-			*conf = GenerateCoreDNSConfig(myDNSInfo, *profile)
+			*conf = GenerateCoreDNSConfig(myDNSInfo, *profile, APIClient)
 			if *conf != *CoreDNSConfig {
 				CoreDNSConfig = conf
 				dnsChange.RestoreDNS(LocalDNS)
@@ -210,10 +211,10 @@ func pooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godns
 	}
 }
 
-func recoverPooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godnschange.DNSInfo, profile *ztn.Profile, dnsChange *godnschange.DNSStruct, conf *string) {
+func recoverPooling(connection *ztn.Connection, logger *device.Logger, myDNSInfo *godnschange.DNSInfo, profile *ztn.Profile, dnsChange *godnschange.DNSStruct, conf *string, APIClient *unifiedapiclient.Client) {
 	if r := recover(); r != nil {
 		go func() {
-			pooling(connection, logger, myDNSInfo, profile, dnsChange, conf)
+			pooling(connection, logger, myDNSInfo, profile, dnsChange, conf, APIClient)
 		}()
 	}
 }
