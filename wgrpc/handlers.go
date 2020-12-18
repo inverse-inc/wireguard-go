@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	sync "sync"
-	"syscall"
 	"time"
 
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -72,11 +71,7 @@ func (s *WGServiceServerHandler) GetPeers(ctx context.Context, in *PeersRequest)
 func (s *WGServiceServerHandler) Stop(ctx context.Context, in *StopRequest) (*StopReply, error) {
 	// Kill the master process if we're master controlled
 	if len(os.Args[2]) >= 2 && os.Args[2] == "--master-controlled" {
-		p, err := os.FindProcess(os.Getppid())
-		if err == nil {
-			fmt.Println("Killing", p.Pid)
-			p.Signal(syscall.SIGTERM)
-		}
+		stopMasterProcess()
 	}
 	time.Sleep(1 * time.Second)
 	s.onexit()
