@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strconv"
 	"sync"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/upnp"
-	"github.com/theckman/go-securerandom"
+	securerandom "github.com/theckman/go-securerandom"
 )
 
 var upnpigdMapped = []UPNPIGD{}
@@ -63,7 +64,7 @@ func (u *UPNPIGD) DelPortMapping() error {
 }
 
 func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
-	if err := u.mapping.AddPortMapping(localPort, remotePort, PublicPortTTL(), "UDP", "PacketFence-Zero-Trust-Client"); err == nil {
+	if err := u.mapping.AddPortMapping(localPort, remotePort, PublicPortTTL(), "UDP", "ZTN-"+strconv.Itoa(remotePort)+"-"+strconv.Itoa(localPort)); err == nil {
 		fmt.Println("Port mapped successfully", localPort, remotePort)
 		upnpigdMapped = append(upnpigdMapped, *u)
 		return nil
