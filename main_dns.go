@@ -118,7 +118,6 @@ forward . {{ .Nameservers }} {
 }
 
 func StartDNS() *godnschange.DNSStruct {
-
 	CoreDNSConfig = nil
 	GlobalTransactionLock = timedlock.NewRWLock()
 	GlobalTransactionLock.Panic = false
@@ -126,6 +125,11 @@ func StartDNS() *godnschange.DNSStruct {
 	dnsChange := godnschange.NewDNSChange()
 
 	myDNSInfo := dnsChange.GetDNS()
+
+	if !sharedutils.IsEnabled(sharedutils.EnvOrDefault(ztn.EnvSetupDNS, "true")) {
+		logger.Info.Println("Not setting up DNS due to environment variable " + ztn.EnvSetupDNS)
+		return dnsChange
+	}
 
 	privateKey, publicKey := getKeys()
 

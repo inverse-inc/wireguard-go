@@ -125,6 +125,9 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	failoverBindTechniqueEntry := widget.NewCheck("Automatically switch bind technique on failure", func(bool) {})
 	failoverBindTechniqueEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvStaticBindTechnique, "false") == "false")
 
+	setupDNSEntry := widget.NewCheck("Setup DNS on this system", func(bool) {})
+	setupDNSEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvSetupDNS, "true") == "true")
+
 	connect := func() {
 
 		showFormError := func(msg string) {
@@ -173,6 +176,12 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 		}
 		binutils.Setenv(ztn.EnvStaticBindTechnique, staticBindTechniqueStr)
 
+		setupDNSStr := "true"
+		if !setupDNSEntry.Checked {
+			setupDNSStr = "false"
+		}
+		binutils.Setenv(ztn.EnvSetupDNS, setupDNSStr)
+
 		PostConnect(tabs)
 		callback(true)
 	}
@@ -210,6 +219,7 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 			preferedBindTechniqueEntry,
 		),
 		failoverBindTechniqueEntry,
+		setupDNSEntry,
 	)
 
 	Refresh()

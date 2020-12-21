@@ -24,4 +24,6 @@ const (
 	EnvCLI             = "WG_CLI"
 
 	EnvGUIPID = "WG_GUI_PID"
+
+	EnvSetupDNS = "WG_SETUP_DNS"
 )
