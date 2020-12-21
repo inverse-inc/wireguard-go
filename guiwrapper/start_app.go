@@ -122,6 +122,9 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	}, func(string) {})
 	preferedBindTechniqueEntry.SetSelected(sharedutils.EnvOrDefault(ztn.EnvBindTechnique, string(ztn.BindAutomatic)))
 
+	failoverBindTechniqueEntry := widget.NewCheck("Automatically switch bind technique on failure", func(bool) {})
+	failoverBindTechniqueEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvStaticBindTechnique, "false") == "false")
+
 	connect := func() {
 
 		showFormError := func(msg string) {
@@ -164,6 +167,12 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 			binutils.Setenv(ztn.EnvBindTechnique, preferedBindTechniqueEntry.Selected)
 		}
 
+		staticBindTechniqueStr := "false"
+		if !failoverBindTechniqueEntry.Checked {
+			staticBindTechniqueStr = "true"
+		}
+		binutils.Setenv(ztn.EnvStaticBindTechnique, staticBindTechniqueStr)
+
 		PostConnect(tabs)
 		callback(true)
 	}
@@ -195,13 +204,12 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	)
 
 	settingsTab.Content = widget.NewVBox(
-		widget.NewHBox(
-			installRoutesFromServerEntry,
-		),
+		installRoutesFromServerEntry,
 		widget.NewHBox(
 			widget.NewLabel("Bind technique"),
 			preferedBindTechniqueEntry,
 		),
+		failoverBindTechniqueEntry,
 	)
 
 	Refresh()
