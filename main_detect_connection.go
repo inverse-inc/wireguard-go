@@ -12,7 +12,7 @@ func detectNetworkChange(serverHost string, onchange func()) {
 		lastFail := time.Time{}
 		lastSuccess := time.Time{}
 		lastIP := zeroIP
-		failTolerance := 5 * time.Second
+		failTolerance := 60 * time.Second
 		sleepDetectTolerance := failTolerance
 
 		for {
