@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"sort"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -232,10 +233,12 @@ func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 	peersTable.Show()
 
 	sort.Slice(peers.Peers, func(i, j int) bool {
-		if peers.Peers[i].Hostname == peers.Peers[j].Hostname {
+		h1 := strings.ToLower(peers.Peers[i].Hostname)
+		h2 := strings.ToLower(peers.Peers[j].Hostname)
+		if h1 == h2 {
 			return peers.Peers[i].IpAddress < peers.Peers[j].IpAddress
 		} else {
-			return peers.Peers[i].Hostname < peers.Peers[j].Hostname
+			return h1 < h2
 		}
 	})
 
