@@ -16,6 +16,7 @@ func detectNetworkChange(serverHost string, onchange func()) {
 		sleepDetectTolerance := failTolerance
 
 		for {
+			time.Sleep(1 * time.Second)
 			conn, err := net.Dial("udp", serverHost)
 			if err != nil {
 				lastSuccess = time.Time{}
