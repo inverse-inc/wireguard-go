@@ -9,7 +9,7 @@ import (
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/jackpal/gateway"
 	natpmp "github.com/jackpal/go-nat-pmp"
-	"github.com/theckman/go-securerandom"
+	securerandom "github.com/theckman/go-securerandom"
 )
 
 type NATPMP struct {
@@ -42,6 +42,18 @@ func (u *NATPMP) CheckNet() error {
 	if isPrivateIP(myExternalIP) {
 		return errors.New("External IP is a private ip")
 	}
+
+	// Test if the port mapping works, open random port for 5s and test the return error
+	r, err := securerandom.Uint64()
+	randomPort := int(r%10000 + 30000)
+
+	if _, err := u.mapping.AddPortMapping("udp", randomPort, randomPort, 5); err == nil {
+		fmt.Println("Port mapped successfully")
+		return nil
+	} else {
+		return errors.New("Not able to open a port via NATPMP")
+	}
+
 	return nil
 }
 

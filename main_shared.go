@@ -51,7 +51,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		defer binutils.CapturePanic()
 
 		if ztn.NewUPNPIGD().CheckNet() == nil {
-			logger.Debug.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
+			logger.Info.Println("Router supports UPNP IGD, it will be used to create public P2P connections")
 			ztn.BindTechniques.Add(ztn.BindUPNPIGD)
 			bindTechniqueDone <- true
 		}
@@ -61,7 +61,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		defer binutils.CapturePanic()
 
 		if ztn.NewNATPMP().CheckNet() == nil {
-			logger.Debug.Println("Router supports NAT PMP, it will be used to create public P2P connections")
+			logger.Info.Println("Router supports NAT PMP, it will be used to create public P2P connections")
 			ztn.BindTechniques.Add(ztn.BindNATPMP)
 			bindTechniqueDone <- true
 		}
