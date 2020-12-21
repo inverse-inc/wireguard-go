@@ -72,8 +72,6 @@ func main() {
 
 	godotenv.Load(os.Args[1])
 
-	outputlog.RedirectOutputToFile("/var/log/wireguard.log")
-
 	// get log level (default: info)
 
 	logLevel := func() int {
@@ -91,6 +89,8 @@ func main() {
 	}()
 
 	if len(os.Args) > 2 && os.Args[2] == "--master" {
+		outputlog.RedirectOutputToRotatedLog("/var/log/wireguard-master.log")
+
 		logger = device.NewLogger(
 			logLevel,
 			fmt.Sprintf("(%s) ", "Master"),
@@ -103,6 +103,8 @@ func main() {
 			binutils.RunTunnelFG(os.Args[1])
 		}
 	} else {
+		outputlog.RedirectOutputToRotatedLog("/var/log/wireguard.log")
+
 		warning()
 
 		foreground := true

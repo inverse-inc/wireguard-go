@@ -26,7 +26,7 @@ func RunTunnel() {
 
 func Elevate() {
 	if amAdmin() {
-		outputlog.RedirectOutputToFile("C:\\Program Files\\PacketFence-Zero-Trust-Client\\guiwrapper.log")
+		outputlog.RedirectOutputToRotatedLog("C:\\Program Files\\PacketFence-Zero-Trust-Client\\guiwrapper.log")
 		return
 	}
 

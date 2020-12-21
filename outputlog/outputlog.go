@@ -1,11 +1,12 @@
 package outputlog
 
-import(
+import (
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func RedirectOutputToFilePrefix(fname string) {
@@ -16,4 +17,25 @@ func RedirectOutputToFile(fname string) {
 	sharedutils.CheckError(err)
 	os.Stdout = f
 	os.Stderr = f
+}
+func RedirectOutputToRotatedLog(fname string) {
+	r, w, err := os.Pipe()
+	sharedutils.CheckError(err)
+
+	l := &lumberjack.Logger{
+		Filename:   fname,
+		MaxSize:    10, //megabytes
+		MaxBackups: 5,
+	}
+	os.Stdout = w
+	os.Stderr = w
+
+	go func() {
+		buf := make([]byte, 5000)
+		for {
+			n, err := r.Read(buf)
+			sharedutils.CheckError(err)
+			l.Write(buf[:n])
+		}
+	}()
 }

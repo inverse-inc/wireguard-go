@@ -34,7 +34,7 @@ var DNSChange *godnschange.DNSStruct
 func main() {
 	defer binutils.CapturePanic()
 
-	outputlog.RedirectOutputToFile("C:\\Program Files\\PacketFence-Zero-Trust-Client\\wireguard.log")
+	outputlog.RedirectOutputToRotatedLog("C:\\Program Files\\PacketFence-Zero-Trust-Client\\wireguard.log")
 
 	godotenv.Load(os.Args[1])
 
