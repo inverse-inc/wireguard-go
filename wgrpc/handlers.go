@@ -69,9 +69,11 @@ func (s *WGServiceServerHandler) GetPeers(ctx context.Context, in *PeersRequest)
 }
 
 func (s *WGServiceServerHandler) Stop(ctx context.Context, in *StopRequest) (*StopReply, error) {
-	// Kill the master process if we're master controlled
-	if len(os.Args[2]) >= 2 && os.Args[2] == "--master-controlled" {
-		stopMasterProcess()
+	if in.KillMasterProcess {
+		// Kill the master process if we're master controlled
+		if len(os.Args[2]) >= 2 && os.Args[2] == "--master-controlled" {
+			stopMasterProcess()
+		}
 	}
 	time.Sleep(1 * time.Second)
 	s.onexit()

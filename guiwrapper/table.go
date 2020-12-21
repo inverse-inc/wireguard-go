@@ -62,3 +62,11 @@ func (t *Table) GetContainer() *fyne.Container {
 	}
 	return t.container
 }
+
+func (t *Table) Hide() {
+	t.container.Hide()
+}
+
+func (t *Table) Show() {
+	t.container.Show()
+}

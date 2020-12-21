@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/wireguard-go/binutils"
 	"github.com/inverse-inc/wireguard-go/wgrpc"
 	"github.com/inverse-inc/wireguard-go/ztn"
@@ -83,6 +82,15 @@ func checkTunnelStatus() {
 	started := time.Now()
 	status := ""
 	fails := 0
+	connectedOnce := false
+
+	rst := func() {
+		fails = 0
+		status = ""
+		peersTable.Hide()
+		started = time.Now()
+	}
+
 	for {
 		statusReply, err := rpc.GetStatus(ctx, &wgrpc.StatusRequest{})
 		if err != nil {
@@ -93,10 +101,16 @@ func checkTunnelStatus() {
 				}
 			} else if fails >= maxRpcFails {
 				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead. Please restart the client.")
-				peersTableContainer.SetContent(widget.NewLabel(""))
+				rst()
+				restartBtn.Show()
+				return
 			} else {
 				fmt.Println("Failed to contact tunnel for status update")
-				statusLabel.SetText("Tunnel seems to be inactive...")
+				if connectedOnce {
+					statusLabel.SetText("Tunnel seems to be inactive, attempting to reconnect")
+				} else {
+					statusLabel.SetText("Tunnel seems to be inactive...")
+				}
 				fails++
 			}
 		} else {
@@ -104,10 +118,18 @@ func checkTunnelStatus() {
 			status = statusReply.Status
 			bindTechniqueLabel.SetText(statusReply.CurrentBindTechnique)
 			if status == ztn.STATUS_ERROR {
-				statusLabel.SetText(messages[status] + ": " + statusReply.LastError)
-				restartBtn.Show()
-				return
+				if connectedOnce {
+					rst()
+					rpc.Stop(context.Background(), &wgrpc.StopRequest{KillMasterProcess: false})
+				} else {
+					rst()
+					restartBtn.Show()
+					statusLabel.SetText(messages[status] + ": " + statusReply.LastError)
+					return
+				}
 			} else {
+				restartBtn.Hide()
+				connectedOnce = true
 				statusLabel.SetText(messages[status])
 				UpdatePeers(ctx, rpc)
 			}

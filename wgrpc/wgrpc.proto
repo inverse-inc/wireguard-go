@@ -32,6 +32,7 @@ message PeersReply {
 }
 
 message StopRequest {
+  bool killMasterProcess = 1;
 }
 
 message StopReply {

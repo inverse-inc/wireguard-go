@@ -25,6 +25,7 @@ var bindTechniqueLabel = widget.NewLabel("N/A")
 var peersScrollContainer = container.NewVScroll(widget.NewVBox())
 var peersTableContainer = widget.NewCard("Peers", "", peersScrollContainer)
 var peersTable = NewTable()
+var peersTableHeadings = []string{"Host", "IP address", "State"}
 
 var restartBtn *widget.Button
 
@@ -63,7 +64,7 @@ func Start(w fyne.Window, callback func(bool)) {
 	tabs := container.NewAppTabs(tab1)
 
 	restartBtn = widget.NewButton("Restart", func() {
-		_, err := rpc.Stop(context.Background(), &wgrpc.StopRequest{})
+		_, err := rpc.Stop(context.Background(), &wgrpc.StopRequest{KillMasterProcess: true})
 		if err != nil {
 			fmt.Println("Failed to stop the tunnel", err)
 		}
@@ -223,9 +224,12 @@ func PostConnect(tabs *container.AppTabs) {
 func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 	peers, err := rpc.GetPeers(ctx, &wgrpc.PeersRequest{})
 	if err != nil {
-		peersTableContainer.SetContent(widget.NewLabel("Failed to obtain peers from local wireguard server: " + err.Error()))
+		statusLabel.SetText("Failed to obtain peers from local wireguard server: " + err.Error())
+		peersTable.Hide()
 		return
 	}
+
+	peersTable.Show()
 
 	sort.Slice(peers.Peers, func(i, j int) bool {
 		if peers.Peers[i].Hostname == peers.Peers[j].Hostname {
@@ -241,7 +245,7 @@ func UpdatePeers(ctx context.Context, rpc wgrpc.WGServiceClient) {
 	}
 
 	peersTable.Update(
-		[]string{"Host", "IP address", "State"},
+		peersTableHeadings,
 		peersInfos,
 	)
 
