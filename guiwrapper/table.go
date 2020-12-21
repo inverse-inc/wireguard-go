@@ -29,7 +29,14 @@ func (t *Table) Update(headings []string, rows [][]string) {
 				row = append(row, widget.NewLabel(elem))
 			}
 			row[j].Text = elem
+			row[j].Show()
 		}
+
+		// Hide any additional rows
+		for j := len(columnData); j < len(row); j++ {
+			row[j].Hide()
+		}
+
 		t.columnsRows[i] = row
 
 		if len(t.columns) <= i {
