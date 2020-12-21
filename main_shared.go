@@ -98,6 +98,11 @@ func startInverse(interfaceName string, device *device.Device) {
 
 	connection.Profile = &profile
 
+	detectNetworkChange(profile.STUNServer, func() {
+		logger.Info.Println("Detected a network change, exiting...")
+		quit()
+	})
+
 	connection.Update(func() {
 		connection.Status = ztn.STATUS_FETCHING_PEERS
 		connection.LastError = err

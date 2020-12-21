@@ -144,6 +144,10 @@ func StartDNS() *godnschange.DNSStruct {
 		logger.Error.Println("Got error when filling profile from server", err)
 		dnsChange.Success = false
 	} else {
+		detectNetworkChange(profile.STUNServer, func() {
+			// Handle network change for DNS
+		})
+
 		go listenMyEvents(profile, dnsNewPeerHandler(profile))
 
 		conf := GenerateCoreDNSConfig(myDNSInfo, profile, APIClient)
