@@ -97,6 +97,9 @@ func (pc *PeerConnection) reset() {
 		pc.stunPeerConn.Close()
 	}
 
+	pc.lastTX = 0
+	pc.lastRX = 0
+
 	pc.Status = PEER_STATUS_INITIATING_CONNECTION
 
 	pc.RemovePeer()
