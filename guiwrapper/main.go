@@ -102,7 +102,6 @@ func checkTunnelStatus() {
 			} else if fails >= maxRpcFails {
 				statusLabel.SetText("Too many failures communicating with RPC server. Tunnel seems to be dead. Please restart the client.")
 				rst()
-				restartBtn.Show()
 				return
 			} else {
 				fmt.Println("Failed to contact tunnel for status update")
