@@ -145,7 +145,18 @@ func StartDNS() *godnschange.DNSStruct {
 		dnsChange.Success = false
 	} else {
 		detectNetworkChange(profile.STUNServer, func() {
-			// Handle network change for DNS
+			// Recover dns configuration
+			dnsChange.RestoreDNS(LocalDNS)
+			dnsChange := godnschange.NewDNSChange()
+			myDNSInfo := dnsChange.GetDNS()
+			conf := GenerateCoreDNSConfig(myDNSInfo, profile, APIClient)
+			CoreDNSConfig = &conf
+			err := dnsChange.Change(LocalDNS, profile.DomainsToResolve, profile.NamesToResolve, profile.InternalDomainToResolve, APIClient.Host)
+			if err != nil {
+				dnsChange.Success = false
+			} else {
+				dnsChange.Success = true
+			}
 		})
 
 		go listenMyEvents(profile, dnsNewPeerHandler(profile))
