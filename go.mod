@@ -21,7 +21,7 @@ require (
 	github.com/inverse-inc/go-dnschange v0.0.0-20201218192432-07f49f466e1b
 	github.com/inverse-inc/packetfence v10.2.1-0.20201204184054-13570c183c25+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20201214182518-cf77f7346ad3
-	github.com/inverse-inc/upnp v0.0.0-20201222143503-391fd7da1df6
+	github.com/inverse-inc/upnp v0.0.0-20201222200833-2abce6aa7e72
 	github.com/jackpal/gateway v1.0.6
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/jcuga/golongpoll v1.1.1-0.20200305163037-04fafece69ca // indirect
