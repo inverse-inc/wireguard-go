@@ -36,7 +36,7 @@ func UPNPIGDCleanupMapped() {
 	// Remove all the mapping
 	var mapping = new(upnp.Upnp)
 	mapping.SearchGateway()
-	ExistingMapping := mapping.GetListOfPortMappings()
+	ExistingMapping := mapping.GetListOfPortMappings("UDP")
 	NetworkInterfaces, err := net.Interfaces()
 	if err == nil {
 		for _, Int := range NetworkInterfaces {
