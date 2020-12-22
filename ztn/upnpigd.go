@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"regexp"
 	"strconv"
 	"sync"
 
@@ -31,6 +32,33 @@ func UPNPIGDCleanupMapped() {
 	for _, u := range upnpigdMapped {
 		fmt.Println("Clearing UPNPIGD mapping", u.remotePort)
 		u.DelPortMapping()
+	}
+	// Remove all the mapping
+	var mapping = new(upnp.Upnp)
+	mapping.SearchGateway()
+	ExistingMapping := mapping.GetListOfPortMappings()
+	NetworkInterfaces, err := net.Interfaces()
+	if err == nil {
+		for _, Int := range NetworkInterfaces {
+			eth, err := net.InterfaceByName(Int.Name)
+			if err != nil {
+				continue
+			}
+			adresses, _ := eth.Addrs()
+			for _, adresse := range adresses {
+				for _, Mapping := range ExistingMapping {
+					IP, _, _ := net.ParseCIDR(adresse.String())
+					if Mapping.NewInternalClient == IP.String() {
+						match, _ := regexp.MatchString("ZTN", Mapping.NewDescription)
+						if match {
+							fmt.Println("Clearing UPNPIGD mapping", Mapping.NewExternalPort)
+							port, _ := strconv.Atoi(Mapping.NewExternalPort)
+							mapping.DelPortMapping(port, "UDP")
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -64,6 +92,7 @@ func (u *UPNPIGD) DelPortMapping() error {
 }
 
 func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
+
 	if err := u.mapping.AddPortMapping(localPort, remotePort, PublicPortTTL(), "UDP", "ZTN-"+strconv.Itoa(remotePort)+"-"+strconv.Itoa(localPort)); err == nil {
 		fmt.Println("Port mapped successfully", localPort, remotePort)
 		upnpigdMapped = append(upnpigdMapped, *u)
