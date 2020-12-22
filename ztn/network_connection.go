@@ -12,7 +12,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/device"
-	"github.com/theckman/go-securerandom"
+	securerandom "github.com/theckman/go-securerandom"
 	"gortc.io/stun"
 )
 
@@ -425,7 +425,7 @@ func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAd
 		sharedutils.CheckError(err)
 		markerCopy := make([]byte, len(marker))
 		copy(markerCopy, marker)
-		nc.peerConnections[id] = &bridge{conn: conn, raddr: raddr, marker: markerCopy}
+		nc.peerConnections[id] = &bridge{conn: conn, raddr: raddr, marker: markerCopy, autoClose: true}
 		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr, marker: markerCopy}
 		nc.listen(conn, messages)
 	}
@@ -493,7 +493,7 @@ func (nc *NetworkConnection) maintenance() {
 				nc.logger.Info.Println("Closing inactive connection to", raddr)
 				br.conn.Close()
 			} else {
-				nc.logger.Debug.Println("Deleting inactive peer connection to", raddr)
+				nc.logger.Info.Println("Deleting inactive peer connection to", raddr)
 			}
 			toDel = append(toDel, raddr)
 		}
