@@ -9,10 +9,14 @@ import (
 	"bytes"
 	"encoding/binary"
 	"net"
+	"os"
+	"regexp"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
@@ -615,7 +619,14 @@ func (peer *Peer) RoutineSequentialSender() {
 			device.PutOutboundElement(elem)
 			if err != nil {
 				logError.Println(peer, "- Failed to send data packet", err)
-				continue
+				if regexp.MustCompile(`network is (down|unreachable)`).MatchString(err.Error()) {
+					logError.Println("Network is down, exiting")
+					p, err := os.FindProcess(os.Getpid())
+					sharedutils.CheckError(err)
+					p.Signal(syscall.SIGTERM)
+				} else {
+					continue
+				}
 			}
 
 			peer.keepKeyFreshSending()
