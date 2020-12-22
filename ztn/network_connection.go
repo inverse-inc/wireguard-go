@@ -429,6 +429,7 @@ func (nc *NetworkConnection) setupBridge(fromConn *net.UDPConn, raddr *net.UDPAd
 		nc.peerConnections[conn.LocalAddr().String()] = &bridge{conn: fromConn, raddr: raddr, marker: markerCopy}
 		nc.listen(conn, messages)
 	}
+	nc.peerConnections[id].lastUsed = time.Now()
 	return nc.peerConnections[id]
 }
 
@@ -450,6 +451,8 @@ func (nc *NetworkConnection) setupRemoteBridge(fromConn *net.UDPConn, raddr *net
 		nc.peerConnections[remotePrefix+raddr.String()] = &bridge{conn: conn, raddr: raddr}
 		nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix] = &bridge{conn: fromConn, raddr: raddr}
 	}
+	nc.peerConnections[remotePrefix+raddr.String()].lastUsed = time.Now()
+	nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix].lastUsed = time.Now()
 }
 
 func (nc *NetworkConnection) findRemoteBridge(addr net.Addr, message []byte) *bridge {
@@ -461,6 +464,7 @@ func (nc *NetworkConnection) findRemoteBridge(addr net.Addr, message []byte) *br
 	if conn.IP.Equal(nc.wgRemoteConn.LocalAddr().(*net.UDPAddr).IP) && conn.Port == nc.wgRemoteConn.LocalAddr().(*net.UDPAddr).Port {
 		if nc.wgConnRemote {
 			raddr := nc.infoFromMarker(message)
+			nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix].lastUsed = time.Now()
 			return nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix]
 		}
 	}
