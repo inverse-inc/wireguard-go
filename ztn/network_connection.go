@@ -464,7 +464,9 @@ func (nc *NetworkConnection) findRemoteBridge(addr net.Addr, message []byte) *br
 	if conn.IP.Equal(nc.wgRemoteConn.LocalAddr().(*net.UDPAddr).IP) && conn.Port == nc.wgRemoteConn.LocalAddr().(*net.UDPAddr).Port {
 		if nc.wgConnRemote {
 			raddr := nc.infoFromMarker(message)
-			nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix].lastUsed = time.Now()
+			if nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix] != nil {
+				nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix].lastUsed = time.Now()
+			}
 			return nc.peerConnections[remotePrefix+raddr.String()+remoteBackSuffix]
 		}
 	}
