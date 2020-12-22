@@ -22,6 +22,7 @@ import (
 	"github.com/inverse-inc/wireguard-go/ipc"
 	"github.com/inverse-inc/wireguard-go/tun"
 	"github.com/inverse-inc/wireguard-go/util"
+	"github.com/inverse-inc/wireguard-go/ztn"
 	"github.com/joho/godotenv"
 
 	_ "net/http/pprof"
@@ -272,5 +273,7 @@ func main() {
 }
 
 func checkParentIsAlive() {
-	util.CheckGUIIsAliveUNIX(quit)
+	if !ztn.RunningInCLI() {
+		util.CheckGUIIsAliveUNIX(quit)
+	}
 }
