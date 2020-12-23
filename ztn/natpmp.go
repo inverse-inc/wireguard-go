@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/jackpal/gateway"
@@ -69,6 +70,14 @@ func (u *NATPMP) AddPortMapping(localPort, remotePort int) error {
 
 	if _, err := u.mapping.AddPortMapping("udp", localPort, remotePort, PublicPortTTL()); err == nil {
 		fmt.Println("Port mapped successfully")
+
+		// Refresh the port translation
+		go func() {
+			for {
+				time.Sleep((time.Duration(PublicPortTTL()) + 10*time.Second) * time.Second)
+				_, err = u.mapping.AddPortMapping("udp", localPort, remotePort, PublicPortTTL())
+			}
+		}()
 		return nil
 	}
 	return errors.New("Fail to add the port mapping")

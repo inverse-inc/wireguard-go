@@ -34,6 +34,6 @@ const (
 )
 
 func PublicPortTTL() int {
-	// 30 days
-	return 30 * 24 * 60 * 60
+	// 1 day
+	return 24 * 60 * 60
 }

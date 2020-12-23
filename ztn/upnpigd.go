@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/upnp"
@@ -96,6 +97,22 @@ func (u *UPNPIGD) AddPortMapping(localPort, remotePort int) error {
 	if err := u.mapping.AddPortMapping(localPort, remotePort, PublicPortTTL(), "UDP", "ZTN-"+strconv.Itoa(remotePort)+"-"+strconv.Itoa(localPort)); err == nil {
 		fmt.Println("Port mapped successfully", localPort, remotePort)
 		upnpigdMapped = append(upnpigdMapped, *u)
+		// Refresh the port translation
+		go func() {
+			for {
+				time.Sleep(time.Duration(PublicPortTTL()) * time.Second)
+				issucess := u.mapping.DelPortMapping(remotePort, "UDP")
+				if issucess {
+					fmt.Println("Successufully closed the mapped port", localPort, remotePort)
+					err = u.mapping.AddPortMapping(localPort, remotePort, PublicPortTTL(), "UDP", "ZTN-"+strconv.Itoa(remotePort)+"-"+strconv.Itoa(localPort))
+					if err != nil {
+						fmt.Println("Failed to reopen the mapped port", localPort, remotePort)
+					} else {
+						fmt.Println("Port reopen successfully", localPort, remotePort)
+					}
+				}
+			}
+		}()
 		return nil
 	} else {
 		u.remotePort = 0
