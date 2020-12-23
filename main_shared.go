@@ -43,9 +43,15 @@ func tryFindBindTechnique(todo func() bool) {
 	done := false
 	for !done {
 		func() {
-			defer binutils.CapturePanic()
-			done = todo()
-			time.Sleep(500 * time.Millisecond)
+			for i := 1; i < 20; i++ {
+				defer binutils.CapturePanic()
+				done = todo()
+				if done {
+					break
+				}
+				time.Sleep(500 * time.Millisecond)
+			}
+			done = true
 		}()
 	}
 }
