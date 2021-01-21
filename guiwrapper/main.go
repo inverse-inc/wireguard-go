@@ -116,6 +116,10 @@ func checkTunnelStatus() {
 			fails = 0
 			status = statusReply.Status
 			bindTechniqueLabel.SetText(statusReply.CurrentBindTechnique)
+			if status == ztn.STATUS_CONNECTED {
+				connectedOnce = true
+			}
+			
 			if status == ztn.STATUS_ERROR {
 				if connectedOnce {
 					rst()
@@ -128,7 +132,6 @@ func checkTunnelStatus() {
 				}
 			} else {
 				restartBtn.Hide()
-				connectedOnce = true
 				statusLabel.SetText(messages[status])
 				UpdatePeers(ctx, rpc)
 			}
