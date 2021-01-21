@@ -29,5 +29,5 @@ if '%errorlevel%' NEQ '0' (
     CD /D "%~dp0"
 :--------------------------------------   
 
-"C:\Program Files\PacketFence-Zero-Trust-Client\PsExec.exe" -h -u "nt authority\network service" -s "C:\Program Files\PacketFence-Zero-Trust-Client\wireguard.exe" %1 --master
+"C:\Program Files\PacketFence-Zero-Trust-Client\PsExec.exe" -accepteula -h -u "nt authority\network service" -s "C:\Program Files\PacketFence-Zero-Trust-Client\wireguard.exe" %1 --master
 pause
