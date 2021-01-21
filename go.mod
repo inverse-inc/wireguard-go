@@ -19,8 +19,8 @@ require (
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
 	github.com/inverse-inc/coredns-caddy v1.1.1-0.20201218123235-18d2d15a1452
 	github.com/inverse-inc/go-dnschange v0.0.0-20201218192432-07f49f466e1b
-	github.com/inverse-inc/packetfence v10.2.1-0.20201204184054-13570c183c25+incompatible
-	github.com/inverse-inc/packetfence/go v0.0.0-20201214182518-cf77f7346ad3
+	github.com/inverse-inc/packetfence v10.2.1-0.20210121141640-49103b1c822f+incompatible
+	github.com/inverse-inc/packetfence/go v0.0.0-20210121141640-49103b1c822f
 	github.com/inverse-inc/upnp v0.0.0-20201222212413-bcc73e2a6122
 	github.com/jackpal/gateway v1.0.6
 	github.com/jackpal/go-nat-pmp v1.0.2
