@@ -47,7 +47,10 @@ func main() {
 
 		os.Setenv("LOG_LEVEL", "info")
 		setMasterProcess()
-		DNSChange = StartDNS()
+		go func() {
+			defer binutils.CapturePanic()
+			DNSChange = StartDNS()
+		}()
 		go checkParentIsAlive()
 
 		for {

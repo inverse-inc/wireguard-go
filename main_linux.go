@@ -93,7 +93,10 @@ func main() {
 			fmt.Sprintf("(%s) ", "Master"),
 		)
 		setMasterProcess()
-		DNSChange = StartDNS()
+		go func() {
+			defer binutils.CapturePanic()
+			DNSChange = StartDNS()
+		}()		
 		go checkParentIsAlive()
 
 		for {
