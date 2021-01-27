@@ -267,7 +267,15 @@ func (p *Profile) SetupGateway() error {
 	if err != nil {
 		return err
 	}
-	err = exec.Command("iptables", "-t", "nat", "-A", "POSTROUTING", "-o", out, "-j", "MASQUERADE").Run()
+	err = exec.Command("iptables", "-t", "nat", "-A", "POSTROUTING", "-o", out, "-p", "udp", "!", "--dport", "5060", "-j", "MASQUERADE").Run()
+	if err != nil {
+		return err
+	}
+	err = exec.Command("iptables", "-t", "nat", "-A", "POSTROUTING", "-o", out, "!", "-p", "udp", "-j", "MASQUERADE").Run()
+	if err != nil {
+		return err
+	}
+	err = exec.Command("iptables", "-A FORWARD", "-i", out, "-o", "wg0", "-p", "udp", "--dport", "5060", "-j", "ACCEPT").Run()
 	if err != nil {
 		return err
 	}
