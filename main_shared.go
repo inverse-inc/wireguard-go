@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"os/user"
 	"path"
+	"runtime/debug"
 	"syscall"
 	"time"
 
@@ -240,7 +241,6 @@ func setupMasterQuit() {
 	go func() {
 		signal.Notify(term, syscall.SIGTERM)
 		signal.Notify(term, os.Interrupt)
-		signal.Notify(term, syscall.SIGPIPE)
 
 		select {
 		case <-term:
@@ -252,6 +252,7 @@ func setupMasterQuit() {
 
 func quit() {
 	fmt.Println("quit called in", os.Getpid())
+	debug.PrintStack()
 	if masterProcess {
 		if DNSChange.Success {
 			DNSChange.RestoreDNS("127.0.0.69")
