@@ -275,7 +275,7 @@ func (p *Profile) SetupGateway() error {
 	if err != nil {
 		return err
 	}
-	err = exec.Command("iptables", "-A FORWARD", "-i", out, "-o", "wg0", "-p", "udp", "--dport", "5060", "-j", "ACCEPT").Run()
+	err = exec.Command("iptables", "-A", "FORWARD", "-i", out, "-o", "wg0", "-p", "udp", "--dport", "5060", "-j", "ACCEPT").Run()
 	if err != nil {
 		return err
 	}
