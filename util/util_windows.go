@@ -3,11 +3,14 @@
 package util
 
 import (
-	"os/exec"
 	"fmt"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"syscall"
+
+	"github.com/inverse-inc/packetfence/go/sharedutils"
 )
 
 func CheckPIDIsAlive(pid int) bool {
@@ -25,4 +28,13 @@ func CheckPIDIsAlive(pid int) bool {
 		}
 	}
 	return false
+}
+
+func KillProcess(p *os.Process) {
+	fmt.Println("Killing", p.Pid)
+	h, err := syscall.OpenProcess(syscall.PROCESS_TERMINATE, false, uint32(p.Pid))
+	sharedutils.CheckError(err)
+	defer syscall.CloseHandle(h)
+	err = syscall.TerminateProcess(h, uint32(1))
+	sharedutils.CheckError(err)
 }

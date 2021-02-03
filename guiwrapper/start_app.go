@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
@@ -54,6 +56,19 @@ func SetupAPIClientGUI(callback func(bool)) {
 
 	w = a.NewWindow(util.AppName)
 	Start(w, callback)
+
+	w.SetCloseIntercept(func() {
+		dialog.ShowCustomConfirm("PacketFence Zero Trust Client", "Minimize", "Exit", widget.NewVBox(widget.NewLabel("Exit or minimize the client?")), func(minimize bool) {
+			if minimize {
+				quit()
+			} else {
+				p, err := os.FindProcess(sharedutils.EnvOrDefaultInt(ztn.EnvGUIPID, 0))
+				sharedutils.CheckError(err)
+				util.KillProcess(p)
+			}
+		}, w)
+	})
+
 	w.ShowAndRun()
 }
 

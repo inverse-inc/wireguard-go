@@ -3,15 +3,14 @@
 package wgrpc
 
 import (
-	"fmt"
 	"os"
-	"syscall"
+
+	"github.com/inverse-inc/wireguard-go/util"
 )
 
 func stopMasterProcess() {
 	p, err := os.FindProcess(os.Getppid())
-    if err == nil {
-      fmt.Println("Killing", p.Pid)
-      p.Signal(syscall.SIGTERM)
-    }
+	if err == nil {
+		util.KillProcess(p)
+	}
 }

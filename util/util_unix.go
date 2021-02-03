@@ -3,6 +3,7 @@
 package util
 
 import (
+	"fmt"
 	"os"
 	"syscall"
 )
@@ -15,4 +16,9 @@ func CheckPIDIsAlive(pid int) bool {
 		return false
 	}
 	return true
+}
+
+func KillProcess(p *os.Process) {
+	fmt.Println("Killing", p.Pid)
+	p.Signal(syscall.SIGTERM)
 }
