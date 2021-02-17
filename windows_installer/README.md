@@ -1,4 +1,8 @@
 
+# Bumping the version
+
+In order to adjust the version of the installer, modify traywrapper/version/version.h
+
 # How to build the Windows agent
 
 NOTE: Although you can build the wireguard-go binary on any platform, you can only build the DMG on Windows itself. Also, the guiwrapper will not build if you're not on Windows.
