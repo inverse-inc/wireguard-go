@@ -5,7 +5,7 @@ import (
 )
 
 var rulePackets = [][]byte{
-	[]byte{69, 0, 0, 60, 203, 131, 64, 0, 64, 6, 99, 226, 192, 168, 69, 3, 192, 168, 69, 2, 153, 222, 17, 92, 31, 232, 147, 213, 0, 0, 0, 0, 160, 2, 107, 208, 25, 66, 0, 0, 2, 4, 5, 100, 4, 2, 8, 10, 0, 153, 88, 86, 0, 0, 0, 0, 1, 3, 3, 7},
+	[]byte{69, 0, 0, 60, 203, 131, 64, 0, 64, 6, 99, 226, 192, 168, 69, 3, 192, 168, 68, 2, 153, 222, 17, 92, 31, 232, 147, 213, 0, 0, 0, 0, 160, 2, 107, 208, 25, 66, 0, 0, 2, 4, 5, 100, 4, 2, 8, 10, 0, 153, 88, 86, 0, 0, 0, 0, 1, 3, 3, 7},
 	[]byte{69, 0, 0, 52, 203, 132, 64, 0, 64, 6, 99, 233, 192, 168, 69, 3, 192, 168, 69, 2, 153, 222, 17, 92, 31, 232, 147, 214, 181, 110, 17, 81, 128, 16, 0, 216, 252, 127, 0, 0, 1, 1, 8, 10, 0, 153, 88, 88, 0, 151, 238, 205},
 	[]byte{69, 0, 0, 58, 203, 133, 64, 0, 64, 6, 99, 226, 192, 168, 69, 3, 192, 168, 69, 2, 153, 222, 17, 92, 31, 232, 147, 214, 181, 110, 17, 81, 128, 24, 0, 216, 184, 149, 0, 0, 1, 1, 8, 10, 0, 153, 88, 88, 0, 151, 238, 205, 104, 101, 108, 108, 111, 10},
 	[]byte{69, 0, 0, 52, 203, 134, 64, 0, 64, 6, 99, 231, 192, 168, 69, 3, 192, 168, 69, 2, 153, 222, 17, 92, 31, 232, 147, 220, 181, 110, 17, 81, 128, 17, 0, 216, 252, 120, 0, 0, 1, 1, 8, 10, 0, 153, 88, 88, 0, 151, 238, 205},
@@ -88,10 +88,6 @@ func TestDenyAllRule(t *testing.T) {
 	}
 }
 
-func toIpv4(a, b, c, d uint8) uint32 {
-	return (uint32(a) << 24) | (uint32(b) << 16) | (uint32(c) << 8) | uint32(d)
-}
-
 func TestIpv4NetworkMask(t *testing.T) {
 	nm := Ipv4NetworkMask{toIpv4(192, 168, 2, 0), toIpv4(255, 255, 255, 0)}
 	if !nm.Match(toIpv4(192, 168, 2, 1)) {
@@ -100,5 +96,33 @@ func TestIpv4NetworkMask(t *testing.T) {
 
 	if nm.Match(toIpv4(192, 168, 3, 1)) {
 		t.Error("192,168,3,1 match 192,168,2,0/255,255,255,0")
+	}
+}
+
+func TestPermitSrcIpRule(t *testing.T) {
+	rule := PermitSrcIpRule(toIpv4(192, 168, 69, 0), toIpv4(255, 255, 255, 0))
+	if rule(rulePackets[0]) != Permit {
+		t.Error("Packet was not allowed")
+	}
+}
+
+func TestDenySrcIpRule(t *testing.T) {
+	rule := DenySrcIpRule(toIpv4(192, 168, 69, 0), toIpv4(255, 255, 255, 0))
+	if rule(rulePackets[0]) != Deny {
+		t.Error("Packet was not denied")
+	}
+}
+
+func TestDenyDstIpRule(t *testing.T) {
+	rule := DenyDstIpRule(toIpv4(192, 168, 68, 0), toIpv4(255, 255, 255, 0))
+	if rule(rulePackets[0]) != Deny {
+		t.Error("Packet was not denied")
+	}
+}
+
+func TestPermitDstIpRule(t *testing.T) {
+	rule := PermitDstIpRule(toIpv4(192, 168, 68, 0), toIpv4(255, 255, 255, 0))
+	if rule(rulePackets[0]) != Permit {
+		t.Error("Packet was not denied")
 	}
 }
