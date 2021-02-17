@@ -52,7 +52,7 @@ if exist .deps\prepared goto :build
 	if "%SigningCertificate%"=="" goto :success
 	if "%TimestampServer%"=="" goto :success
 	echo [+] Signing
-	signtool sign /sha1 "%SigningCertificate%" /fd sha256 /tr "%TimestampServer%" /td sha256 /d "WireGuard Setup" "dist\wireguard-*-%WIREGUARD_VERSION%.msi" || goto :error
+	signtool sign /sha1 "%SigningCertificate%" /fd sha256 /tr "%TimestampServer%" /td sha256 /d "PacketFence Zero Trust Client Setup" "dist\packetfence-zero-trust-client-*-%WIREGUARD_VERSION%.msi" || goto :error
 
 :success
 	echo [+] Success.
@@ -73,7 +73,7 @@ if exist .deps\prepared goto :build
 	%CC% %CFLAGS% %LDFLAGS% -o "%~1\customactions.dll" customactions.c %LDLIBS% || exit /b 1
 	"%WIX%bin\candle" %WIX_CANDLE_FLAGS% -dWIREGUARD_PLATFORM="%~1" -out "%~1\wireguard.wixobj" -arch %3 wireguard.wxs -ext WixFirewallExtension  || exit /b %errorlevel%
 	echo [+] Linking %1
-	"%WIX%bin\light" %WIX_LIGHT_FLAGS%  -ext WixFirewallExtension -out "dist\wireguard-%~1-%WIREGUARD_VERSION%.msi" "%~1\wireguard.wixobj" || exit /b %errorlevel%
+	"%WIX%bin\light" %WIX_LIGHT_FLAGS%  -ext WixFirewallExtension -out "dist\packetfence-zero-trust-client-%~1-%WIREGUARD_VERSION%.msi" "%~1\wireguard.wixobj" || exit /b %errorlevel%
 	goto :eof
 
 :error
