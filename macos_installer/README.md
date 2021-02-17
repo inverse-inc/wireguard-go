@@ -1,4 +1,8 @@
 
+# How to bump the version
+
+Edit macos_installer/Info.plist and change the string value below the property CFBundleShortVersionString
+
 # How to build the Mac OS agent
 
 NOTE: Although you can build the wireguard-go binary on any platform, you can only build the DMG on Mac OS itself. Also, the guiwrapper will not build if you're not on Mac OS.
