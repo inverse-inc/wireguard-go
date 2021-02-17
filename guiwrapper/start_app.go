@@ -32,6 +32,7 @@ var peersTableHeadings = []string{"Host", "IP address", "State"}
 
 var restartBtn *widget.Button
 
+var a fyne.App
 var w fyne.Window
 
 func init() {
@@ -44,8 +45,48 @@ func Refresh() {
 	w.Content().Refresh()
 }
 
+const envPreferencePrefix = "_ENV_"
+const envPreferenceTrackKey = "_ENV_LIST"
+
+func resetEnvPreferences() {
+	for _, key := range strings.Split(a.Preferences().String(envPreferenceTrackKey), ",") {
+		a.Preferences().SetString(envPreferencePrefix+key, "")
+		os.Setenv(key, "")
+	}
+}
+
+func loadEnvPreference(name, defaultVal string) string {
+	if val := a.Preferences().String(envPreferencePrefix + name); val != "" {
+		os.Setenv(name, val)
+	} else if val := os.Getenv(name); val != "" {
+		os.Setenv(name, val)
+	} else {
+		os.Setenv(name, defaultVal)
+	}
+	return os.Getenv(name)
+}
+
+func setEnv(name, val string, recordPreference bool) {
+	if recordPreference {
+		a.Preferences().SetString(envPreferencePrefix+name, val)
+		keys := strings.Split(a.Preferences().String(envPreferenceTrackKey), ",")
+		found := false
+		for _, key := range keys {
+			if key == name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			keys = append(keys, name)
+			a.Preferences().SetString(envPreferenceTrackKey, strings.Join(keys, ","))
+		}
+	}
+	binutils.Setenv(name, val)
+}
+
 func SetupAPIClientGUI(callback func(bool)) {
-	a := app.New()
+	a = app.NewWithID("org.packetfence.zero-trust-client")
 
 	icon, err := fyne.LoadResourceFromPath("logo.png")
 	if err != nil {
@@ -108,17 +149,17 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 
 	serverEntry := widget.NewEntry()
 	serverEntry.PlaceHolder = "ztn.example.com"
-	serverEntry.Text = sharedutils.EnvOrDefault(ztn.EnvServer, "")
+	serverEntry.Text = loadEnvPreference(ztn.EnvServer, "")
 
 	serverPortEntry := widget.NewEntry()
-	serverPortEntry.Text = sharedutils.EnvOrDefault(ztn.EnvServerPort, "9999")
+	serverPortEntry.Text = loadEnvPreference(ztn.EnvServerPort, "9999")
 
 	verifyServerEntry := widget.NewCheck("Verify server identity", func(bool) {})
-	verifyServerEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvServerVerifyTLS, "true") == "true")
+	verifyServerEntry.Checked = (loadEnvPreference(ztn.EnvServerVerifyTLS, "true") == "true")
 
 	usernameEntry := widget.NewEntry()
 	usernameEntry.PlaceHolder = spacePlaceholder
-	usernameEntry.Text = sharedutils.EnvOrDefault(ztn.EnvUsername, "")
+	usernameEntry.Text = loadEnvPreference(ztn.EnvUsername, "")
 
 	formError := widget.NewLabelWithStyle("", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	formError.Hide()
@@ -127,7 +168,7 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 	passwordEntry.PlaceHolder = spacePlaceholder
 
 	installRoutesFromServerEntry := widget.NewCheck("Install routes from server", func(bool) {})
-	installRoutesFromServerEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvHonorRoutes, "true") == "true")
+	installRoutesFromServerEntry.Checked = (loadEnvPreference(ztn.EnvHonorRoutes, "true") == "true")
 
 	preferedBindTechniqueEntry := widget.NewSelect([]string{
 		string(ztn.BindNATPMP),
@@ -135,15 +176,16 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 		string(ztn.BindThroughPeer),
 		string(ztn.BindUPNPIGD),
 	}, func(string) {})
-	preferedBindTechniqueEntry.SetSelected(sharedutils.EnvOrDefault(ztn.EnvBindTechnique, string(ztn.BindAutomatic)))
+	preferedBindTechniqueEntry.SetSelected(loadEnvPreference(ztn.EnvBindTechnique, string(ztn.BindAutomatic)))
 
 	failoverBindTechniqueEntry := widget.NewCheck("Automatically switch bind technique on failure", func(bool) {})
-	failoverBindTechniqueEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvStaticBindTechnique, "false") == "false")
+	failoverBindTechniqueEntry.Checked = (loadEnvPreference(ztn.EnvStaticBindTechnique, "false") == "false")
 
 	setupDNSEntry := widget.NewCheck("Setup DNS on this system", func(bool) {})
-	setupDNSEntry.Checked = (sharedutils.EnvOrDefault(ztn.EnvSetupDNS, "true") == "true")
+	setupDNSEntry.Checked = (loadEnvPreference(ztn.EnvSetupDNS, "true") == "true")
 
 	connect := func() {
+		save := true
 
 		showFormError := func(msg string) {
 			formError.SetText(msg)
@@ -165,40 +207,45 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 			return
 		}
 
-		binutils.Setenv(ztn.EnvUsername, usernameEntry.Text)
+		setEnv(ztn.EnvUsername, usernameEntry.Text, save)
 		binutils.Setenv(ztn.EnvPassword, base64.StdEncoding.EncodeToString([]byte(passwordEntry.Text)))
-		binutils.Setenv(ztn.EnvServer, serverEntry.Text)
-		binutils.Setenv(ztn.EnvServerPort, serverPortEntry.Text)
+		setEnv(ztn.EnvServer, serverEntry.Text, save)
+		setEnv(ztn.EnvServerPort, serverPortEntry.Text, save)
 		verifySslStr := "y"
 		if !verifyServerEntry.Checked {
 			verifySslStr = "n"
 		}
-		binutils.Setenv(ztn.EnvServerVerifyTLS, verifySslStr)
+		setEnv(ztn.EnvServerVerifyTLS, verifySslStr, save)
 
 		honorRoutesStr := "true"
 		if !installRoutesFromServerEntry.Checked {
 			honorRoutesStr = "false"
 		}
-		binutils.Setenv(ztn.EnvHonorRoutes, honorRoutesStr)
+		setEnv(ztn.EnvHonorRoutes, honorRoutesStr, save)
 
 		if preferedBindTechniqueEntry.Selected != string(ztn.BindAutomatic) {
-			binutils.Setenv(ztn.EnvBindTechnique, preferedBindTechniqueEntry.Selected)
+			setEnv(ztn.EnvBindTechnique, preferedBindTechniqueEntry.Selected, save)
 		}
 
 		staticBindTechniqueStr := "false"
 		if !failoverBindTechniqueEntry.Checked {
 			staticBindTechniqueStr = "true"
 		}
-		binutils.Setenv(ztn.EnvStaticBindTechnique, staticBindTechniqueStr)
+		setEnv(ztn.EnvStaticBindTechnique, staticBindTechniqueStr, save)
 
 		setupDNSStr := "true"
 		if !setupDNSEntry.Checked {
 			setupDNSStr = "false"
 		}
-		binutils.Setenv(ztn.EnvSetupDNS, setupDNSStr)
+		setEnv(ztn.EnvSetupDNS, setupDNSStr, save)
 
 		PostConnect(tabs)
 		callback(true)
+	}
+
+	reset := func() {
+		resetEnvPreferences()
+		PromptCredentials(tabs, callback)
 	}
 
 	passwordEntry.onEnter = connect
@@ -224,7 +271,10 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 			widget.NewLabel("Password"),
 			passwordEntry,
 		),
-		widget.NewButton("Connect", connect),
+		widget.NewHBox(
+			widget.NewButton("Reset", reset),
+			widget.NewButton("Connect", connect),
+		),
 	)
 
 	settingsTab.Content = widget.NewVBox(
