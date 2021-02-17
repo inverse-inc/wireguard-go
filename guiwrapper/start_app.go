@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
@@ -250,30 +251,34 @@ func PromptCredentials(tabs *container.AppTabs, callback func(bool)) {
 
 	passwordEntry.onEnter = connect
 
-	connectionTab.Content = widget.NewVBox(
-		formError,
-		widget.NewHBox(
-			widget.NewLabel("Server"),
-			serverEntry,
-		),
-		widget.NewHBox(
-			widget.NewLabel("Server port"),
-			serverPortEntry,
-		),
-		widget.NewHBox(
-			verifyServerEntry,
-		),
-		widget.NewHBox(
-			widget.NewLabel("Username"),
-			usernameEntry,
-		),
-		widget.NewHBox(
-			widget.NewLabel("Password"),
-			passwordEntry,
-		),
-		widget.NewHBox(
-			widget.NewButton("Reset", reset),
-			widget.NewButton("Connect", connect),
+	connectionTab.Content = fyne.NewContainerWithLayout(
+		layout.NewCenterLayout(),
+		widget.NewVBox(
+			formError,
+			widget.NewHBox(
+				widget.NewLabel("Server"),
+				serverEntry,
+			),
+			widget.NewHBox(
+				widget.NewLabel("Server port"),
+				serverPortEntry,
+			),
+			widget.NewHBox(
+				verifyServerEntry,
+			),
+			widget.NewHBox(
+				widget.NewLabel("Username"),
+				usernameEntry,
+			),
+			widget.NewHBox(
+				widget.NewLabel("Password"),
+				passwordEntry,
+			),
+			fyne.NewContainerWithLayout(
+				layout.NewGridLayout(2),
+				widget.NewButton("Reset", reset),
+				widget.NewButton("Connect", connect),
+			),
 		),
 	)
 
