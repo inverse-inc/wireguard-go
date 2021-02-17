@@ -83,6 +83,7 @@ func setEnv(name, val string, recordPreference bool) {
 			a.Preferences().SetString(envPreferenceTrackKey, strings.Join(keys, ","))
 		}
 	}
+	os.Setenv(name, val)
 	binutils.Setenv(name, val)
 }
 
