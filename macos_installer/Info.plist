@@ -24,6 +24,10 @@
   <integer>1</integer>
   <key>LSUIElement</key>
   <string>1</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>10.10</string>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
 </dict>
 </plist>
 
