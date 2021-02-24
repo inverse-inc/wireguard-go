@@ -102,7 +102,7 @@ func TestIpv4NetworkMask(t *testing.T) {
 func TestPermitSrcIpRule(t *testing.T) {
 	rule := PermitSrcIpRule(toIpv4(192, 168, 69, 0), toIpv4(255, 255, 255, 0))
 	if rule(rulePackets[0]) != Permit {
-		t.Error("Packet was not allowed")
+		t.Error("Packet was not permited")
 	}
 }
 
@@ -123,6 +123,117 @@ func TestDenyDstIpRule(t *testing.T) {
 func TestPermitDstIpRule(t *testing.T) {
 	rule := PermitDstIpRule(toIpv4(192, 168, 68, 0), toIpv4(255, 255, 255, 0))
 	if rule(rulePackets[0]) != Permit {
-		t.Error("Packet was not denied")
+		t.Error("Packet was not permited")
+	}
+}
+
+func TestPermitAny(t *testing.T) {
+	rules := AclsToRules("permit any")
+	if !rules.PassDefaultDeny(rulePackets[0]) {
+		t.Error("permit any failed")
+	}
+
+	rules = AclsToRules("permit 0.0.0.0 255.255.255.255")
+	if !rules.PassDefaultDeny(rulePackets[0]) {
+		t.Error("permit any failed")
+	}
+}
+
+func TestPermitHost(t *testing.T) {
+	rules := AclsToRules("permit host 192.168.69.3")
+	if !rules.PassDefaultDeny(rulePackets[0]) {
+		t.Error("permit host 192.169.68.3 failed")
+	}
+}
+
+func TestDenyAny(t *testing.T) {
+	rules := AclsToRules("deny any")
+	if rules.PassDefaultPermit(rulePackets[0]) {
+		t.Error("deny any failed")
+	}
+}
+
+func TestPermitSrcDstPortProto(t *testing.T) {
+	rules := AclsToRules("permit tcp any any eq 80")
+	if rules.PassDefaultDeny(rulePackets[0]) {
+		t.Error("permit tcp any any eq 80 failed")
+	}
+}
+
+func TestSimpleHost(t *testing.T) {
+	acls := []string{
+		"permit host 192.168.69.3",
+		"permit 192.168.69.3 0.0.0.0",
+		"permit ip 192.168.69.3 0.0.0.0 any",
+	}
+
+	for _, acl := range acls {
+		rules := AclsToRules(acl)
+		if !rules.PassDefaultDeny(rulePackets[0]) {
+			t.Errorf("acl '%s' failed", acl)
+		}
+	}
+}
+
+func TestIcmpPermitAny(t *testing.T) {
+	acls := []string{
+		"permit icmp any any",
+	}
+
+	for _, acl := range acls {
+		rules := AclsToRules(acl)
+		if !rules.PassDefaultDeny(icmpPacket1) {
+			t.Errorf("acl '%s' failed", acl)
+		}
+
+		if rules.PassDefaultDeny(rulePackets[0]) {
+			t.Errorf("acl '%s' passed", acl)
+		}
+	}
+}
+
+func TestIcmpPermit(t *testing.T) {
+	acls := []string{
+		"permit icmp any any echo",
+		"permit icmp any any echo 0",
+	}
+
+	for _, acl := range acls {
+		rules := AclsToRules(acl)
+		if !rules.PassDefaultDeny(icmpPacket1) {
+			t.Errorf("acl '%s' failed", acl)
+		}
+
+	}
+
+	for _, acl := range acls {
+		rules := AclsToRules(acl)
+		if rules.PassDefaultDeny(icmpPacket2) {
+			t.Errorf("acl '%s' passed", acl)
+		}
+
+	}
+}
+
+func TestIcmpDeny(t *testing.T) {
+	acls := []string{
+		"deny icmp any any echo",
+		"deny icmp any any echo 0",
+	}
+
+	for _, acl := range acls {
+		rules := AclsToRules(acl)
+		if rules.PassDefaultDeny(icmpPacket1) {
+			t.Errorf("acl '%s' passed", acl)
+		}
+
+	}
+
+	for _, acl := range acls {
+		rules := AclsToRules(acl)
+		if !rules.PassDefaultPermit(icmpPacket2) {
+			t.Errorf("acl '%s' deny", acl)
+		}
+
 	}
 }
