@@ -150,7 +150,7 @@ func startInverse(interfaceName string, device *device.Device) {
 
 	go networkConnection.Start()
 
-	filter := filter.NewFilterFromAcls(profile.ACLs)
+	filter := filter.AclsToRulesFilter(profile.ACLs, nil, nil)
 	device.SetReceiveFilter(filter)
 
 	for _, peerID := range profile.AllowedPeers {
