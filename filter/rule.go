@@ -43,6 +43,10 @@ func (rules Rules) PassDefaultPermit(p []byte) bool {
 }
 
 func (rules Rules) Filter(p []byte) error {
+    if len(p) == 0 {
+        return nil
+    }
+
     if rules.PassDefaultDeny(p) {
         return nil
     }
