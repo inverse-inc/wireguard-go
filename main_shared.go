@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/inverse-inc/packetfence/go/remoteclients"
 	"github.com/inverse-inc/packetfence/go/sharedutils"
 	"github.com/inverse-inc/wireguard-go/binutils"
@@ -150,7 +151,8 @@ func startInverse(interfaceName string, device *device.Device) {
 
 	go networkConnection.Start()
 
-	filter := filter.AclsToRulesFilter(profile.ACLs, nil, nil)
+	filter := filter.AclsToRulesFilter(profile.ACLs, filter.BuildRBACFilter(ztn.APIClient), nil)
+	spew.Dump(filter)
 	device.SetReceiveFilter(filter)
 
 	for _, peerID := range profile.AllowedPeers {

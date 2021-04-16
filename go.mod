@@ -14,7 +14,7 @@ require (
 	github.com/getlantern/systray v1.0.4
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/protobuf v1.4.3
-	github.com/google/gopacket v1.1.19 // indirect
+	github.com/google/gopacket v1.1.19
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
 	github.com/inverse-inc/coredns-caddy v1.1.1-0.20201218123235-18d2d15a1452
