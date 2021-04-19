@@ -155,7 +155,7 @@ func startInverse(interfaceName string, device *device.Device) {
 		enableRBACFilter = 1
 	}
 
-	filter := filter.AclsToRulesFilter(profile.ACLs, filter.BuildRBACFilter(ztn.APIClientCtx, ztn.APIClient, &enableRBACFilter), nil)
+	filter := filter.AclsToRulesFilter(profile.ACLs, filter.BuildRBACFilter(ztn.APIClientCtx, ztn.APIClient, logger, &enableRBACFilter), nil)
 	device.SetReceiveFilter(filter)
 
 	for _, peerID := range profile.AllowedPeers {
