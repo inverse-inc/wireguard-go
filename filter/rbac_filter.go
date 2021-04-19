@@ -3,6 +3,7 @@ package filter
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/gopacket"
@@ -30,9 +31,9 @@ func init() {
 
 func BuildRBACFilter(apiClientCtx context.Context, apiClient *unifiedapiclient.Client, logger *device.Logger, mode *uint32) RuleFunc {
 	return func(data []byte) RuleCmd {
-		//if atomic.LoadUint32(mode) == 0 {
-		//	return Permit
-		//}
+		if atomic.LoadUint32(mode) == 0 {
+			return Permit
+		}
 		packet := gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default)
 		if ip4Layer := packet.Layer(layers.LayerTypeIPv4); ip4Layer != nil {
 			ip4 := ip4Layer.(*layers.IPv4)
