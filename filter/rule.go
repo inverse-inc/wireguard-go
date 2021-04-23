@@ -1,7 +1,5 @@
 package filter
 
-import ()
-
 type RuleCmd int
 
 const (
@@ -13,9 +11,9 @@ const (
 type Rules []RuleFunc
 
 func (rules Rules) PassDefaultDeny(p []byte) bool {
-    if len(rules) == 0 {
-        return true
-    }
+	if len(rules) == 0 {
+		return true
+	}
 
 	for _, rule := range rules {
 		cmd := rule(p)
@@ -28,9 +26,9 @@ func (rules Rules) PassDefaultDeny(p []byte) bool {
 }
 
 func (rules Rules) PassDefaultPermit(p []byte) bool {
-    if len(rules) == 0 {
-        return true
-    }
+	if len(rules) == 0 {
+		return true
+	}
 
 	for _, rule := range rules {
 		cmd := rule(p)
@@ -43,15 +41,15 @@ func (rules Rules) PassDefaultPermit(p []byte) bool {
 }
 
 func (rules Rules) Filter(p []byte) error {
-    if len(p) == 0 {
-        return nil
-    }
+	if len(p) == 0 {
+		return nil
+	}
 
-    if rules.PassDefaultDeny(p) {
-        return nil
-    }
+	if rules.PassDefaultDeny(p) {
+		return nil
+	}
 
-    return ErrDenyAll
+	return ErrDenyAll
 }
 
 type RuleFunc func([]byte) RuleCmd
@@ -370,4 +368,3 @@ func (nm Ipv4NetworkMask) MatchDst(p []byte) bool {
 func (nm Ipv4NetworkMask) Match(ip uint32) bool {
 	return (ip & nm.Mask) == nm.Network
 }
-
