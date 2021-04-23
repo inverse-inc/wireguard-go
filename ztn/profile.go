@@ -180,6 +180,8 @@ func (p *Profile) findClientMAC() (net.HardwareAddr, error) {
 		return net.HardwareAddr{}, err
 	}
 
+	var firstMAC net.HardwareAddr
+	var foundValidMAC bool
 	for _, i := range ifaces {
 		addrs, err := i.Addrs()
 		if err != nil {
@@ -192,12 +194,20 @@ func (p *Profile) findClientMAC() (net.HardwareAddr, error) {
 				if ipnet.Contains(gwIP) {
 					p.logger.Info.Println("Found MAC address", i.HardwareAddr, "on interface", ipnet, "("+i.Name+")")
 					return i.HardwareAddr, nil
+				} else if i.HardwareAddr.String() != "00:00:00:00:00:00" {
+					firstMAC = i.HardwareAddr
+					foundValidMAC = true
 				}
 			}
 		}
 	}
 
-	return net.HardwareAddr{}, errors.New("Unable to find MAC address")
+	if foundValidMAC {
+		p.logger.Info.Println("Failed to find the MAC address that talks to the default gateway but found MAC address", firstMAC)
+		return firstMAC, nil
+	} else {
+		return net.HardwareAddr{}, errors.New("Unable to find MAC address")
+	}
 }
 
 type RouteInfo struct {
