@@ -27,6 +27,10 @@ func AclsToRulesFilter(acls []string, pre, post RuleFunc) func([]byte) error {
 		rules = append(rules, post)
 	}
 
+	if len(acls) == 0 {
+		rules = append(rules, RulePermit)
+	}
+
 	return rules.Filter
 }
 
