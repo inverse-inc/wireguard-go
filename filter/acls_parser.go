@@ -18,16 +18,16 @@ func AclsToRules(acls ...string) Rules {
 }
 
 func AclsToRulesFilter(acls []string, pre, post RuleFunc) func([]byte) error {
-    rules := Rules([]RuleFunc{})
-    if pre != nil {
-        rules = append(rules, pre)
-    }
-    rules = append(rules, AclsToRules(acls...)...)
-    if post != nil {
-        rules = append(rules, pre)
-    }
+	rules := Rules([]RuleFunc{})
+	if pre != nil {
+		rules = append(rules, pre)
+	}
+	rules = append(rules, AclsToRules(acls...)...)
+	if post != nil {
+		rules = append(rules, post)
+	}
 
-    return rules.Filter
+	return rules.Filter
 }
 
 const SRC_IP_OFFSET = 12
