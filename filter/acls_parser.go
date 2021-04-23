@@ -22,12 +22,14 @@ func AclsToRulesFilter(acls []string, pre, post RuleFunc) func([]byte) error {
 	if pre != nil {
 		rules = append(rules, pre)
 	}
-	rules = append(rules, AclsToRules(acls...)...)
+
+	aclRules := AclsToRules(acls...)
+	rules = append(rules, aclRules...)
 	if post != nil {
 		rules = append(rules, post)
 	}
 
-	if len(acls) == 0 {
+	if len(aclRules) == 0 {
 		rules = append(rules, RulePermit)
 	}
 
