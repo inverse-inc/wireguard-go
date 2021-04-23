@@ -58,6 +58,10 @@ func RulePermit([]byte) RuleCmd {
 	return Permit
 }
 
+func RuleSkip([]byte) RuleCmd {
+	return Skip
+}
+
 func RuleDeny([]byte) RuleCmd {
 	return Deny
 }
