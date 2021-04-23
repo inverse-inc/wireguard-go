@@ -2,9 +2,10 @@ package filter
 
 import (
 	"errors"
-	"github.com/inverse-inc/wireguard-go/services"
 	"strconv"
 	"strings"
+
+	"github.com/inverse-inc/wireguard-go/services"
 )
 
 const (
