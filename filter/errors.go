@@ -1,7 +1,7 @@
 package filter
 
 import (
-    "errors"
+	"errors"
 )
 
 var ErrDenyAll = errors.New("Deny All")

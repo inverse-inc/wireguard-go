@@ -1,14 +1,20 @@
 package filter
 
 import (
+	"fmt"
+	"github.com/inverse-inc/wireguard-go/device"
 	"strconv"
 	"strings"
 )
 
-func AclsToRules(acls ...string) Rules {
+func AclsToRules(logger *device.Logger, acls ...string) Rules {
 	rules := []RuleFunc{}
 	for _, acl := range acls {
-		rule := AclToRule(acl)
+		rule, err := AclToRule(acl)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+
 		if rule != nil {
 			rules = append(rules, rule)
 		}
@@ -17,19 +23,17 @@ func AclsToRules(acls ...string) Rules {
 	return rules
 }
 
-func AclsToRulesFilter(acls []string, pre, post RuleFunc) func([]byte) error {
+func AclsToRulesFilter(logger *device.Logger, acls []string, pre, post RuleFunc) func([]byte) error {
 	rules := Rules([]RuleFunc{})
 	if pre != nil {
 		rules = append(rules, pre)
 	}
 
-	aclRules := AclsToRules(acls...)
+	aclRules := AclsToRules(logger, acls...)
 	rules = append(rules, aclRules...)
 	if post != nil {
 		rules = append(rules, post)
-	}
-
-	if len(aclRules) == 0 {
+	} else if len(aclRules) == 0 {
 		rules = append(rules, RulePermit)
 	}
 
@@ -104,14 +108,14 @@ func (r *Ipv4RuleData) AnyProto() bool {
 	return r.protocol == allProtocols
 }
 
-func AclToRule(acl string) RuleFunc {
+func AclToRule(acl string) (RuleFunc, error) {
 	tokens := strings.Fields(acl)
 	if len(tokens) < 2 {
-		return nil
+		return nil, fmt.Errorf("Acl to short: '%s'", acl)
 	}
 
 	if len(tokens) == 2 {
-		return twoPartAcl(tokens)
+		return twoPartAcl(acl, tokens)
 	}
 
 	rule := NewIpv4RuleData()
@@ -124,22 +128,22 @@ func AclToRule(acl string) RuleFunc {
 	case "deny":
 		rule.cmd = Deny
 	default:
-		return nil
+		return nil, invalidAcl(acl)
 	}
 
 	rule.src.Network, rule.src.Mask, tokens, ok = getSource(tokens)
 	if ok {
-		return singleIpRule(rule.src, rule.cmd, SRC_IP_OFFSET)
+		return singleIpRule(rule.src, rule.cmd, SRC_IP_OFFSET), nil
 	}
 
 	rule.protocol, tokens, ok = getProtocol(tokens)
 	if !ok {
-		return nil
+		return nil, invalidAcl(acl)
 	}
 
 	rule.src.Network, rule.src.Mask, tokens, ok = getSource(tokens)
 	if !ok {
-		return nil
+		return nil, invalidAcl(acl)
 	}
 
 	if rule.protocol == 6 || rule.protocol == 17 {
@@ -148,7 +152,7 @@ func AclToRule(acl string) RuleFunc {
 
 	rule.dst.Network, rule.dst.Mask, tokens, ok = getSource(tokens)
 	if !ok {
-		return nil
+		return nil, invalidAcl(acl)
 	}
 
 	switch rule.protocol {
@@ -161,47 +165,47 @@ func AclToRule(acl string) RuleFunc {
 	if rule.AnyIp() {
 		if rule.AnyProto() {
 			if rule.cmd == Permit {
-				return PermitAllRule()
+				return PermitAllRule(), nil
 			}
 
-			return DenyAllRule()
+			return DenyAllRule(), nil
 		}
 
 		if rule.protocol == 1 {
-			return icmpRuleRule(rule.icmpRule, rule.cmd)
+			return icmpRuleRule(rule.icmpRule, rule.cmd), nil
 		}
 
 		if rule.AnyPort() {
-			return protoRule(byte(rule.protocol), rule.cmd)
+			return protoRule(byte(rule.protocol), rule.cmd), nil
 		}
 
 		if rule.AnySrcPort() && !rule.AnyDstPort() {
-			return portProtoRule(rule.dstPort, byte(rule.protocol), rule.cmd, 2)
+			return portProtoRule(rule.dstPort, byte(rule.protocol), rule.cmd, 2), nil
 		}
 
 		if !rule.AnySrcPort() && rule.AnyDstPort() {
-			return portProtoRule(rule.srcPort, byte(rule.protocol), rule.cmd, 0)
+			return portProtoRule(rule.srcPort, byte(rule.protocol), rule.cmd, 0), nil
 		}
 
 	}
 
 	if rule.AnyProto() {
 		if rule.AnySrcIP() && !rule.AnyDstIP() {
-			return singleIpRule(rule.dst, rule.cmd, DST_IP_OFFSET)
+			return singleIpRule(rule.dst, rule.cmd, DST_IP_OFFSET), nil
 		}
 
 		if !rule.AnySrcIP() && rule.AnyDstIP() {
-			return singleIpRule(rule.src, rule.cmd, SRC_IP_OFFSET)
+			return singleIpRule(rule.src, rule.cmd, SRC_IP_OFFSET), nil
 		}
 
-		return srcDstRule(rule.src, rule.dst, rule.cmd)
+		return srcDstRule(rule.src, rule.dst, rule.cmd), nil
 	}
 
 	if rule.AnyPort() {
-		return srcDstProtoRule(rule.src, rule.dst, byte(rule.protocol), rule.cmd)
+		return srcDstProtoRule(rule.src, rule.dst, byte(rule.protocol), rule.cmd), nil
 	}
 
-	return srcDstProtoSrcPortDstPort(rule.src, rule.dst, byte(rule.protocol), rule.srcPort, rule.dstPort, rule.cmd)
+	return srcDstProtoSrcPortDstPort(rule.src, rule.dst, byte(rule.protocol), rule.srcPort, rule.dstPort, rule.cmd), nil
 }
 
 func getProtocol(oTokens []string) (int16, []string, bool) {
@@ -461,15 +465,19 @@ func dtoi(s string) (n int, i int, ok bool) {
 	return n, i, true
 }
 
-func twoPartAcl(tokens []string) RuleFunc {
+func invalidAcl(acl string) error {
+	return fmt.Errorf("Invalid Acl: '%s'", acl)
+}
+
+func twoPartAcl(acl string, tokens []string) (RuleFunc, error) {
 	if tokens[1] == "any" {
 		switch tokens[0] {
 		case "permit":
-			return RulePermit
+			return RulePermit, nil
 		case "deny":
-			return RuleDeny
+			return RuleDeny, nil
 		}
 	}
 
-	return nil
+	return nil, invalidAcl(acl)
 }

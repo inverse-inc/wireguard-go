@@ -1,7 +1,13 @@
 package filter
 
 import (
+	"github.com/inverse-inc/wireguard-go/device"
 	"testing"
+)
+
+var logger = device.NewLogger(
+	device.LogLevelSilent,
+	"(Testing)",
 )
 
 var rulePackets = [][]byte{
@@ -128,33 +134,33 @@ func TestPermitDstIpRule(t *testing.T) {
 }
 
 func TestPermitAny(t *testing.T) {
-	rules := AclsToRules("permit any")
+	rules := AclsToRules(logger, "permit any")
 	if !rules.PassDefaultDeny(rulePackets[0]) {
 		t.Error("permit any failed")
 	}
 
-	rules = AclsToRules("permit 0.0.0.0 255.255.255.255")
+	rules = AclsToRules(logger, "permit 0.0.0.0 255.255.255.255")
 	if !rules.PassDefaultDeny(rulePackets[0]) {
 		t.Error("permit any failed")
 	}
 }
 
 func TestPermitHost(t *testing.T) {
-	rules := AclsToRules("permit host 192.168.69.3")
+	rules := AclsToRules(logger, "permit host 192.168.69.3")
 	if !rules.PassDefaultDeny(rulePackets[0]) {
 		t.Error("permit host 192.169.68.3 failed")
 	}
 }
 
 func TestDenyAny(t *testing.T) {
-	rules := AclsToRules("deny any")
+	rules := AclsToRules(logger, "deny any")
 	if rules.PassDefaultPermit(rulePackets[0]) {
 		t.Error("deny any failed")
 	}
 }
 
 func TestPermitSrcDstPortProto(t *testing.T) {
-	rules := AclsToRules("permit tcp any any eq 80")
+	rules := AclsToRules(logger, "permit tcp any any eq 80")
 	if rules.PassDefaultDeny(rulePackets[0]) {
 		t.Error("permit tcp any any eq 80 failed")
 	}
@@ -168,7 +174,7 @@ func TestSimpleHost(t *testing.T) {
 	}
 
 	for _, acl := range acls {
-		rules := AclsToRules(acl)
+		rules := AclsToRules(logger, acl)
 		if !rules.PassDefaultDeny(rulePackets[0]) {
 			t.Errorf("acl '%s' failed", acl)
 		}
@@ -181,7 +187,7 @@ func TestIcmpPermitAny(t *testing.T) {
 	}
 
 	for _, acl := range acls {
-		rules := AclsToRules(acl)
+		rules := AclsToRules(logger, acl)
 		if !rules.PassDefaultDeny(icmpPacket1) {
 			t.Errorf("acl '%s' failed", acl)
 		}
@@ -199,7 +205,7 @@ func TestIcmpPermit(t *testing.T) {
 	}
 
 	for _, acl := range acls {
-		rules := AclsToRules(acl)
+		rules := AclsToRules(logger, acl)
 		if !rules.PassDefaultDeny(icmpPacket1) {
 			t.Errorf("acl '%s' failed", acl)
 		}
@@ -207,7 +213,7 @@ func TestIcmpPermit(t *testing.T) {
 	}
 
 	for _, acl := range acls {
-		rules := AclsToRules(acl)
+		rules := AclsToRules(logger, acl)
 		if rules.PassDefaultDeny(icmpPacket2) {
 			t.Errorf("acl '%s' passed", acl)
 		}
@@ -222,7 +228,7 @@ func TestIcmpDeny(t *testing.T) {
 	}
 
 	for _, acl := range acls {
-		rules := AclsToRules(acl)
+		rules := AclsToRules(logger, acl)
 		if rules.PassDefaultDeny(icmpPacket1) {
 			t.Errorf("acl '%s' passed", acl)
 		}
@@ -230,7 +236,7 @@ func TestIcmpDeny(t *testing.T) {
 	}
 
 	for _, acl := range acls {
-		rules := AclsToRules(acl)
+		rules := AclsToRules(logger, acl)
 		if !rules.PassDefaultPermit(icmpPacket2) {
 			t.Errorf("acl '%s' deny", acl)
 		}
