@@ -49,6 +49,8 @@ type PeerConnection struct {
 	ConnectionType string
 
 	networkConnection *NetworkConnection
+
+	peerWGConnection net.Conn
 }
 
 func NewPeerConnection(d *device.Device, logger *device.Logger, myProfile Profile, peerProfile PeerProfile, networkConnection *NetworkConnection) *PeerConnection {
@@ -96,6 +98,8 @@ func (pc *PeerConnection) reset() {
 	if pc.stunPeerConn != nil {
 		pc.stunPeerConn.Close()
 	}
+
+	pc.peerWGConnection = nil
 
 	pc.lastTX = 0
 	pc.lastRX = 0
@@ -179,6 +183,7 @@ func (pc *PeerConnection) run() {
 					// Decrement try so that next time its used it will use the same technique that just worked
 					pc.connectedOnce = true
 					pc.Status = fmt.Sprintf("%s (%s)", PEER_STATUS_CONNECTED, pc.ConnectionType)
+					pc.pingWGInterface()
 				} else if pc.started && time.Since(pc.lastKeepalive) > pc.ConnectionLivenessTolerance() {
 					pc.logger.Error.Println("No packet or keepalive received for too long. Connection to", pc.peerID, "is dead")
 					return false
@@ -527,4 +532,15 @@ func (pc *PeerConnection) connectionTypeWan2(nee *NetworkEndpointEvent) string {
 	} else {
 		return ConnectionTypeWANIN
 	}
+}
+
+func (pc *PeerConnection) pingWGInterface() {
+	var err error
+	if pc.peerWGConnection == nil {
+		//TODO: perhaps use another port since this is gratuitous pinging and we don't want a reply
+		pc.peerWGConnection, err = net.Dial("udp", fmt.Sprintf("%s:%d", pc.PeerProfile.WireguardIP, localWGPort))
+		sharedutils.CheckError(err)
+	}
+	_, err = pc.peerWGConnection.Write([]byte(pingMsg))
+	sharedutils.CheckError(err)
 }
