@@ -404,6 +404,8 @@ func (pc *PeerConnection) setupPeerConnection(peerStr string, peerAddr *net.UDPA
 	} else {
 		conf += fmt.Sprintf("allowed_ip=%s/32\n", pc.PeerProfile.WireguardIP.String())
 	}
+	//TODO: we don't really need this anymore because we have pingWGInterface
+	//			its a small packet but still
 	conf += "persistent_keepalive_interval=1"
 
 	pc.Status += fmt.Sprintf(" (%s)", pc.ConnectionType)
