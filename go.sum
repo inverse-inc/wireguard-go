@@ -604,6 +604,8 @@ github.com/inverse-inc/go-dnschange v0.0.0-20201218191838-1bbc3ec26235 h1:DGpRDk
 github.com/inverse-inc/go-dnschange v0.0.0-20201218191838-1bbc3ec26235/go.mod h1:0hNxuIPU2BP+zWVRMBNnXL78Gz/aqbeiU+2kzIvyde0=
 github.com/inverse-inc/go-dnschange v0.0.0-20201218192432-07f49f466e1b h1:4+q5dI05CaYfexkWOQxBMJlI5pfOVG5f8b7q3Iv/3gQ=
 github.com/inverse-inc/go-dnschange v0.0.0-20201218192432-07f49f466e1b/go.mod h1:0hNxuIPU2BP+zWVRMBNnXL78Gz/aqbeiU+2kzIvyde0=
+github.com/inverse-inc/go-dnschange v0.0.0-20210426140614-f23e42334797 h1:o55vyWSnSgvxmcRocNUqj50M+oJ77Eaz0lmSC//Ultk=
+github.com/inverse-inc/go-dnschange v0.0.0-20210426140614-f23e42334797/go.mod h1:0hNxuIPU2BP+zWVRMBNnXL78Gz/aqbeiU+2kzIvyde0=
 github.com/inverse-inc/go-ipset v0.0.0-20190925174109-4d5749cc4aa6/go.mod h1:unv1cVDLrlwXyLhg2b+QkK6rZ0GQ6DGbZOkGCfl10/M=
 github.com/inverse-inc/go-radius v0.0.0-20200310093817-85565fe93aa5/go.mod h1:IQmy9DslBZ9lU4/y/MphJ9oY//4r9A9wQwqOjjLmBso=
 github.com/inverse-inc/go-radius v0.0.0-20201019132414-82756e2d8d47/go.mod h1:IQmy9DslBZ9lU4/y/MphJ9oY//4r9A9wQwqOjjLmBso=

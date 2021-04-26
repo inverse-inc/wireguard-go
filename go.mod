@@ -18,7 +18,7 @@ require (
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/infobloxopen/go-trees v0.0.0-20190313150506-2af4e13f9062
 	github.com/inverse-inc/coredns-caddy v1.1.1-0.20201218123235-18d2d15a1452
-	github.com/inverse-inc/go-dnschange v0.0.0-20201218192432-07f49f466e1b
+	github.com/inverse-inc/go-dnschange v0.0.0-20210426140614-f23e42334797
 	github.com/inverse-inc/packetfence v10.2.1-0.20210121141640-49103b1c822f+incompatible
 	github.com/inverse-inc/packetfence/go v0.0.0-20210121141640-49103b1c822f
 	github.com/inverse-inc/upnp v0.0.0-20201222212413-bcc73e2a6122
