@@ -26,4 +26,6 @@ const (
 	EnvGUIPID = "WG_GUI_PID"
 
 	EnvSetupDNS = "WG_SETUP_DNS"
+
+	EnvRBACIPFilteringCacheTime = "WG_RBAC_IP_FILTERING_CACHE_TIME"
 )

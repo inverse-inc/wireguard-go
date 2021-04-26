@@ -87,28 +87,28 @@ func GenerateCoreDNSConfig(myDNSInfo *godnschange.DNSInfo, profile ztn.Profile, 
 bind 127.0.0.69
 reload
 #debug
+
+dnsredir {{$.InternalDomain}} {
+    to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
+}
 {{ range .Domains }}{{ if ne . "" }}{{$domain := .}}
 dnsredir {{.}} {
    to ietf-doh://{{ $.API }}:{{$.Port}}/dns-query
 }
 {{ end }}{{ end }}
-dnsredir {{$.InternalDomain}} {
-	to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
-}
-
 {{ range .ZTNPeers }}{{ if ne . "" }}{{$ztnpeer := .}}
 {{ range $.SearchDomain }}{{ if ne . "" }}
 dnsredir {{$ztnpeer}}.{{.}} {
-	to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
+    to ietf-doh://{{ $.API }}:{{$.Port}}/dns-ztn-query
 }
 {{ end }}{{ end }}{{ end }}{{ end }}
 {{ if .ZTNServer }}
 forward {{ .API }} {{ .Nameservers }} {
-	prefer_udp
+    prefer_udp
 }
 {{ end }}
 forward . {{ .Nameservers }} {
-	prefer_udp
+    prefer_udp
 }
 }`)
 
